@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "lib": ["dom", "es6", "scripthost"],
+    "module": "es6",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noImplicitAny": false,
+    "outDir": "./dist",
+    "removeComments": false,
+    "sourceMap": false,
+    "target": "es6"
+  },
+  "files": ["./core/domain.ts", "./core/sketchPlatform.ts"]
+}
