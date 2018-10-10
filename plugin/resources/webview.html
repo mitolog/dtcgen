@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Sketch Linter</title>
+</head>
+
+<body>
+  <div id='root'></div>
+  <!-- notice the "../" here. It's because webview.js will be compiled in a different folder -->
+  <script src="../webview.js"></script>
+  <button onClick="window.lint()">Lint Current Page</button>
+</body>
+
+</html>

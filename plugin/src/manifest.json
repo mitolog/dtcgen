@@ -1,0 +1,21 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "icon": "icon.png",
+  "identifier": "co.mitolab.sketch.linter",
+  "commands": [
+    {
+      "name": "Linter",
+      "identifier": "linter.id",
+      "script": "./my-command.js",
+      "handlers": {
+        "run": "getSymbols",
+        "actions": {}
+      }
+    }
+  ],
+  "menu": {
+    "title": "sketchLinter",
+    "items": ["linter.id"]
+  }
+}
