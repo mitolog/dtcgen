@@ -1,0 +1,23 @@
+{
+  "sketch": {
+    "sketchToolPath": "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool",
+    "targetSketchFilePath": "/Users/mito/Downloads/BID\\ 2.sketch",
+    "outFilePath": "/Users/mito/Downloads/artboards.json",
+    "namingRule": {
+      "page": {
+        "pattern": "%s",
+        "upperCamelCase": false,
+        "englishOnly": true,
+        "unique": true,
+        "maxLength": 20
+      },
+      "artboard": {
+        "pattern": "%p - %s - %s",
+        "lowerCamelCase": true,
+        "englishOnly": true,
+        "unique": true,
+        "maxLength": 50
+      }
+    }
+  }
+}

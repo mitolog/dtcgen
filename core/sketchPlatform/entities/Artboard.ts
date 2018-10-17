@@ -9,6 +9,5 @@ export class Artboard {
 
   public id: String;
   public name: String;
-  public bounds: String; // CANBEFIX: to some appropreate type
-  public rect: Rect;
+  //public rect: Rect;
 }

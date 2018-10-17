@@ -7,6 +7,12 @@ export class Name {
     return 'linter-core-domain.Name';
   }
 
+  constructor(json: any, type: SketchElementType) {
+    this.id = json.id;
+    this.name = json.name;
+    this.type = type;
+  }
+
   public id: String; // unique id derived from original desigin resource
   public name: String; // name derived from original design resource
   public isValid: Boolean; // indicates if it passed naming convention
