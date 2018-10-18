@@ -2,7 +2,7 @@
   "sketch": {
     "sketchToolPath": "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool",
     "targetSketchFilePath": "/Users/mito/Downloads/BID\\ 2.sketch",
-    "outFilePath": "/Users/mito/Downloads/artboards.json",
+    "outFilePath": "/Users/mito/Downloads/layers.json",
     "namingRule": {
       "page": {
         "pattern": "%s",
@@ -12,7 +12,7 @@
         "maxLength": 20
       },
       "artboard": {
-        "pattern": "%p - %s - %s",
+        "pattern": "%s - %s - %s",
         "lowerCamelCase": true,
         "englishOnly": true,
         "unique": true,

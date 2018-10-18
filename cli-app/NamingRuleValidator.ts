@@ -7,13 +7,12 @@ import { Name } from '../core/domain/entities/Name';
 export interface NamingRuleValidator {
   config: any; // todo: make type for config object
   validate(layers: any[]): { type: string; names: Name[] }[];
-  isMatchedPattern(names: Name, str: string): [boolean, string?];
-  isInitialCapitalized(): [boolean, string?];
-  isUpperCamelCase(names: Name): [boolean, string?];
-  isLowerCamelCase(names: Name): [boolean, string?];
-  isUnique(names: Name): [boolean, string?];
-  isAlphabetOnly(names: Name): [boolean, string?];
-  isExceedingMaxLength(names: Name, count: number): [boolean, string?];
+  isMatchedPattern(name: Name, str: string): [boolean, string?];
+  isUpperCamelCase(name: Name): [boolean, string?];
+  isLowerCamelCase(name: Name): [boolean, string?];
+  isUnique(names: Name[]): [boolean, Name[]?];
+  isAlphabetOnly(name: Name): [boolean, string?];
+  isLessThanMaxLength(name: Name, count: number): [boolean, string?];
 }
 
 export class SketchNamingRuleValidator implements NamingRuleValidator {
@@ -45,7 +44,11 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     const results = [];
     for (const typeStr of Object.keys(rules)) {
       const resultForType = {};
-      resultForType[typeStr] = this.scan(layers, typeStr, rules[typeStr]);
+      resultForType[typeStr] = this.scan(
+        layers,
+        typeStr,
+        rules[typeStr],
+      ).filter(name => !name.isValid); // extract only violated names
       results.push(resultForType);
     }
 
@@ -80,68 +83,113 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     const ruleNames = Object.keys(validRules);
     for (const ruleName of ruleNames) {
       const ruleValue = validRules[ruleName];
-      // namesは参照渡しなので同じものが共有されるはず?
-      for (const name of names) {
-        let result: [boolean, string?] = [false, ''];
-        // todo: rule名一覧はどこかに定義しておかねば...
-        switch (ruleName) {
-          case 'pattern':
-            result = this.isMatchedPattern(name, ruleValue);
-            break;
-          case 'uppserCamelCase':
-            result = this.isUpperCamelCase(name);
-            break;
-          case 'lowerCamelCase':
-            result = this.isLowerCamelCase(name);
-            break;
-          case 'englishOnly':
-            result = this.isAlphabetOnly(name);
-            break;
-          case 'unique':
-            result = this.isUnique(name);
-            break;
-          case 'maxLength':
-            result = this.isExceedingMaxLength(name, ruleValue);
-            break;
-        }
-        name.isValid = result[0];
-        if (!name.isValid) name.hint = result[1];
-      }
+      // namesを参照で渡して中身を更新
+      this.update(names, ruleName, ruleValue);
     }
     return names;
   }
 
-  isMatchedPattern(names: Name, str: string): [boolean, string] {
+  update(names: Name[], ruleName: string, ruleValue: any) {
+    for (const name of names) {
+      let result: [boolean, string?] = [true, ''];
+      // todo: rule名一覧はどこかに定義しておかねば...
+      switch (ruleName) {
+        case 'pattern':
+          result = this.isMatchedPattern(name, ruleValue);
+          break;
+        case 'uppserCamelCase':
+          result = this.isUpperCamelCase(name);
+          break;
+        case 'lowerCamelCase':
+          result = this.isLowerCamelCase(name);
+          break;
+        case 'englishOnly':
+          result = this.isAlphabetOnly(name);
+          break;
+        case 'maxLength':
+          result = this.isLessThanMaxLength(name, ruleValue);
+          break;
+        default:
+          break;
+      }
+      name.isValid = result[0];
+      if (!name.isValid) name.hints.push(result[1]);
+    }
+    if (ruleName === 'unique') {
+      const result = this.isUnique(names);
+      if (!result[0] && result[1] && result[1].length > 0) {
+        // nameを更新
+        result[1].forEach(name => {
+          name.isValid = false;
+          name.hints.push('is duplicating.');
+        });
+      }
+    }
+  }
+
+  isMatchedPattern(name: Name, pattern: string): [boolean, string?] {
+    // patternからきたフォーマット文字列を正規表現に変換しないといけない？
+    // %s -> [A-Za-z]+
     return [true, ''];
   }
 
-  isLowerCamelCase(names: Name): [boolean, string?] {
+  isLowerCamelCase(name: Name): [boolean, string?] {
     //  - 文字列に_が入っていない
     //  - 全部大文字ではない
-    return [true, ''];
+    //  - 先頭が小文字
+    const nameString = name.name;
+    const isLowerCamelCase =
+      this.isCamelCase(nameString) && !this.isInitialCapitalized(nameString);
+    const hint = isLowerCamelCase ? undefined : 'is not lowerCamelCase';
+    return [isLowerCamelCase, hint];
   }
 
-  isUpperCamelCase(names: Name): [boolean, string?] {
+  isUpperCamelCase(name: Name): [boolean, string?] {
     //  - 文字列の先頭の1文字が大文字
     //  - 文字列に_が入っていない
     //  - 全部大文字ではない
-    return [true, ''];
+    const nameString = name.name;
+    const isUpperCamelCase =
+      this.isCamelCase(nameString) && this.isInitialCapitalized(nameString);
+    const hint = isUpperCamelCase ? undefined : 'is not upperCamelCase';
+    return [isUpperCamelCase, hint];
   }
 
-  isUnique(names: Name): [boolean, string?] {
-    return [true, ''];
+  isUnique(names: Name[]): [boolean, Name[]?] {
+    const duplicates = names.filter((val, idx, self) => {
+      return self.indexOf(val) !== self.lastIndexOf(val);
+    });
+    return [!duplicates && duplicates.length <= 0, duplicates];
   }
 
-  isAlphabetOnly(names: Name): [boolean, string?] {
-    return [true, ''];
+  isAlphabetOnly(name: Name): [boolean, string?] {
+    const nameString = name.name;
+    const regExp = new RegExp('^[A-Za-z]+$');
+    const results = regExp.exec(nameString);
+    const isAlphabetOnly = results && results.length > 0;
+    const hint = isAlphabetOnly ? undefined : 'is not alphabet only';
+    return [isAlphabetOnly, hint];
   }
 
-  isExceedingMaxLength(names: Name, count: number): [boolean, string?] {
-    return [true, ''];
+  isLessThanMaxLength(name: Name, count: number): [boolean, string?] {
+    const nameString = name.name;
+    const isLess = nameString.length <= count;
+    const hint = isLess ? undefined : `is exceeding max length: \(${count})`;
+    return [isLess, hint];
   }
 
-  isInitialCapitalized(): [boolean, string?] {
-    return [true, ''];
+  /**
+   * ------------------------------------------------------
+   * Utilities below
+   * ------------------------------------------------------
+   */
+
+  isCamelCase(string: string): boolean {
+    return string.indexOf('_') > -1 && string !== string.toUpperCase();
+  }
+
+  isInitialCapitalized(string: string): boolean {
+    return string.slice(0, 1) === string.slice(0, 1).toUpperCase();
   }
 
   /**

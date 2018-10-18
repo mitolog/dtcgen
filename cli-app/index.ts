@@ -41,7 +41,8 @@ cli.command(
     const result = linter.lint(sketchJson);
     console.log('finished linting.');
     console.log('--------------------');
-    console.log(result);
+    console.log(result.names[0].Page);
+    console.log(result.names[1].Artboard);
   },
 );
 
