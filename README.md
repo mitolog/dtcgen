@@ -1,21 +1,23 @@
 [![TypeScript version][ts-badge]][typescript-31]
 [![Node.js version][nodejs-badge]][nodejs]
-[![APLv2][license-badge]][license]
-[![Build Status][travis-badge]][travis-ci]
-[![PRs Welcome][prs-badge]][prs]
-[![Donate][donate-badge]][donate]
 
-[![Watch on GitHub][github-watch-badge]][github-watch]
-[![Star on GitHub][github-star-badge]][github-star]
-[![Tweet][twitter-badge]][twitter]
+# sketch-linter
 
-# node-typescript-boilerplate
+## to run (under development phase)
 
-## to run
+### preparation
 
-`tsc --target es5 -w cli-app/*.ts`
+1. [Install sketch](https://www.sketchapp.com/) first.
+2. fill `sketchToolPath` and `targetSketchFilePath` within `linter.config.json`.
+3. run `npm install` on project root directory.
 
-Minimalistic boilerplate to jump-start a [Node.js][nodejs] project in [TypeScript][typescript] [3.1][typescript-31].
+## iteration
+
+1. run `tsc --target es5 -w cli-app/*.ts` .
+2. `cd cli-app/` .
+3. run `node index.js lint` .
+
+## node-typescript-boilerplate
 
 What's included:
 
