@@ -44,11 +44,8 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     const results = [];
     for (const typeStr of Object.keys(rules)) {
       const resultForType = {};
-      resultForType[typeStr] = this.scan(
-        layers,
-        typeStr,
-        rules[typeStr],
-      ).filter(name => !name.isValid); // extract only violated names
+      resultForType[typeStr] = this.scan(layers, typeStr, rules[typeStr]);
+      //.filter(name => !name.isValid); // extract only violated names
       results.push(resultForType);
     }
 
@@ -112,7 +109,12 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
         default:
           break;
       }
-      name.isValid = result[0];
+      // デフォでtrue、今回値がfalseのときだけ値を更新
+      console.log(result[0]);
+      if (result[0] === null) {
+        console.log(ruleName);
+      }
+      name.isValid = name.isValid && !result[0] ? false : true;
       if (!name.isValid) name.hints.push(result[1]);
     }
     if (ruleName === 'unique') {
@@ -121,7 +123,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
         // nameを更新
         result[1].forEach(name => {
           name.isValid = false;
-          name.hints.push('is duplicating.');
+          name.hints.push('is duplicating');
         });
       }
     }
@@ -129,8 +131,21 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
 
   isMatchedPattern(name: Name, pattern: string): [boolean, string?] {
     // patternからきたフォーマット文字列を正規表現に変換しないといけない？
-    // %s -> [A-Za-z]+
-    return [true, ''];
+    // %s -> [A-Za-z]+ に置換
+    // 残りはそのまま
+    // matchした文字列と元の文字列が同じであれば、マッチしたとみなす
+    const nameString = name.name;
+    let replacedPattern = pattern.replace(/%s/g, '[A-Za-z]+');
+
+    let regExp = new RegExp(replacedPattern);
+    const expResults = regExp.exec(nameString);
+    let isMatched = false;
+    if (expResults && expResults.length === 1 && expResults[0] === nameString) {
+      isMatched = true;
+    }
+
+    const hint = isMatched ? undefined : 'is not match pattern string';
+    return [isMatched, hint];
   }
 
   isLowerCamelCase(name: Name): [boolean, string?] {
@@ -139,7 +154,9 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     //  - 先頭が小文字
     const nameString = name.name;
     const isLowerCamelCase =
-      this.isCamelCase(nameString) && !this.isInitialCapitalized(nameString);
+      this.isCamelCase(nameString) && !this.isInitialCapitalized(nameString)
+        ? true
+        : false;
     const hint = isLowerCamelCase ? undefined : 'is not lowerCamelCase';
     return [isLowerCamelCase, hint];
   }
@@ -150,7 +167,9 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     //  - 全部大文字ではない
     const nameString = name.name;
     const isUpperCamelCase =
-      this.isCamelCase(nameString) && this.isInitialCapitalized(nameString);
+      this.isCamelCase(nameString) && this.isInitialCapitalized(nameString)
+        ? true
+        : false;
     const hint = isUpperCamelCase ? undefined : 'is not upperCamelCase';
     return [isUpperCamelCase, hint];
   }
@@ -159,21 +178,22 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     const duplicates = names.filter((val, idx, self) => {
       return self.indexOf(val) !== self.lastIndexOf(val);
     });
-    return [!duplicates && duplicates.length <= 0, duplicates];
+    const isUnique = !duplicates && duplicates.length <= 0 ? true : false;
+    return [isUnique, duplicates];
   }
 
   isAlphabetOnly(name: Name): [boolean, string?] {
     const nameString = name.name;
     const regExp = new RegExp('^[A-Za-z]+$');
     const results = regExp.exec(nameString);
-    const isAlphabetOnly = results && results.length > 0;
+    const isAlphabetOnly = results && results.length > 0 ? true : false;
     const hint = isAlphabetOnly ? undefined : 'is not alphabet only';
     return [isAlphabetOnly, hint];
   }
 
   isLessThanMaxLength(name: Name, count: number): [boolean, string?] {
     const nameString = name.name;
-    const isLess = nameString.length <= count;
+    const isLess = nameString.length <= count ? true : false;
     const hint = isLess ? undefined : `is exceeding max length: \(${count})`;
     return [isLess, hint];
   }
@@ -185,11 +205,15 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
    */
 
   isCamelCase(string: string): boolean {
-    return string.indexOf('_') > -1 && string !== string.toUpperCase();
+    return string.indexOf('_') === -1 && string !== string.toUpperCase()
+      ? true
+      : false;
   }
 
   isInitialCapitalized(string: string): boolean {
-    return string.slice(0, 1) === string.slice(0, 1).toUpperCase();
+    return string.slice(0, 1) === string.slice(0, 1).toUpperCase()
+      ? true
+      : false;
   }
 
   /**
