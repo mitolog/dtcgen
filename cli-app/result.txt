@@ -1,0 +1,1948 @@
+executing...  /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool list artboards /Users/mito/Downloads/BID\ 2.sketch > /Users/mito/Downloads/layers.json
+retrieved sketch json.
+now start linting...
+rules:  { Page: { pattern: '%s', englishOnly: true, unique: true, maxLength: 20 },
+  Artboard: 
+   { pattern: '%s - %s - %s',
+     lowerCamelCase: true,
+     englishOnly: true,
+     unique: true,
+     maxLength: 50 } }
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+true
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+false
+true
+false
+false
+false
+false
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+false
+true
+true
+true
+true
+true
+true
+true
+false
+true
+true
+true
+false
+true
+true
+false
+false
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+false
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+finished linting.
+--------------------
+[ Name {
+    id: '7AC5AC81-8184-48D7-907C-1C8A9D95AF1C',
+    name: 'Error',
+    type: 0,
+    hints: [],
+    isValid: true },
+  Name {
+    id: 'D026445C-F07F-44BF-A319-26A943D60EB9',
+    name: 'Booking_TentativeFinalDesign0626',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '61AE02E9-F260-4AE6-9FB1-4361F96DD3BA',
+    name: 'Customer_0523ver_update0524',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: 'D4FC1618-A6FF-4A3C-8F72-4AD96C6C5A57',
+    name: 'Message_TentativeFinalDesign0626',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '8425EDCD-6180-49C4-A226-E89C80006F74',
+    name: 'MyPage_TentativeFinalDesign0626',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '06AF4156-F383-40F1-93F3-6889595A8220',
+    name: 'Post_0525ver_update0525',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '59FC8B5E-6489-477E-88F3-083567034E27',
+    name: 'Drawer_0523ver_update0529',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '764B6F3C-28D6-4049-8FC0-16F729224506',
+    name: 'QRcode_TentativeFinalDesign0628',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: 'B06CFDD1-5A66-464A-B015-E5124ED1287E',
+    name: 'Notification_TentativeFinalDesign0626',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: 'FA570053-0360-4890-A682-8C0176E59189',
+    name: 'Login_0620ver_update0620',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '386A2ECA-9B22-402B-8DCF-9AAD9AA8780C',
+    name: 'SpecNote',
+    type: 0,
+    hints: [],
+    isValid: true },
+  Name {
+    id: 'B81C0334-5B98-4211-BD6D-4D9135C52C96',
+    name: 'DesignGuideline_0531ver',
+    type: 0,
+    hints: 
+     [ 'is not match pattern string',
+       'is exceeding max length: (20)' ],
+    isValid: false },
+  Name {
+    id: '08179407-3F6D-4435-8F27-C83C1D89B957',
+    name: 'Symbols',
+    type: 0,
+    hints: [],
+    isValid: true } ]
+[ Name {
+    id: '2031137A-A268-4A45-A241-256C46A6C807',
+    name: 'Booking_Error',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'DF80B278-A67B-4C8A-AA49-FF6819F7C37C',
+    name: 'Customer_Error',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '81F37E24-3D85-41BB-8DAF-54660A928885',
+    name: 'Message_05_ErrorMessageList',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'CF4AA35C-15B3-4FE7-9415-EB49FA65A4C0',
+    name: 'Notification_01_Follower_Error',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '7F047C3F-82A8-4EE0-B120-B2E9C31812B8',
+    name: 'Home_Error',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '1B2B91A5-F684-449B-A450-04866B7DE453',
+    name: 'Booking_05_TreatmentPhoto_Preview',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '983555D7-F796-4C85-8733-B7D6EFB02E75',
+    name: 'Booking_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B621CA94-94EB-438B-A39D-ED207F3CA7C1',
+    name: 'Booking_01_table',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '202E35DE-E5E9-44B6-8FD3-14116AD9CB6E',
+    name: 'Booking_01_table_notToday',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '0209DDDC-3C72-4C8E-8513-945B32B0AA7F',
+    name: 'Booking_02_table_addnew1',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B5F74B70-E0CE-427F-B6EE-6D95686D9D03',
+    name: 'Booking_06_table_SwitchShop',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '827A4EF5-A93E-42F9-8595-89599AFA3394',
+    name: 'Booking_03_SelectDateCalendar',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '3A4690BD-82DE-414E-A03B-01FE72C4D005',
+    name: 'Booking_03_SelectDateCalendar_NotToday',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '24554571-C665-488D-96E8-2A115D86BB2B',
+    name: 'Booking_07_PlanDetail',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'D6F12FC3-3579-4F4B-8B7F-BE61362D6FC7',
+    name: 'Booking_04_Booking_Detail_connectedRecord',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '715BF73A-16D6-48D6-BA7B-F1D5F7F3D3B5',
+    name: 'Booking_04_Booking_Detail_BeforeconnectRecord',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '710EF26B-7832-4273-ADD9-E4C18C5796B7',
+    name: 'Booking_04_Booking_Detail_new',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'ACCB7017-2D68-4224-915A-A691AB5467BB',
+    name: 'Customer01_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '2967D6BA-3323-4355-8A5C-73F172586F07',
+    name: 'Customer03_CustomerRecord_BookingHistory_NobookingToday',
+    type: 1,
+    hints: 
+     [ 'is not match pattern string',
+       'is not alphabet only',
+       'is exceeding max length: (50)' ],
+    isValid: false },
+  Name {
+    id: '51086EE6-2CC4-40CD-955F-410ADE536A38',
+    name: 'Customer06_Alert-NotConnectedRecord',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '73008FAD-C222-48BF-991B-09EC44F818FA',
+    name: 'Customer02_CustomerRecord_Basic',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '4589026A-14B6-4AD6-AFAF-505E4480DC35',
+    name: 'Customer04_CustomerRecord_BookingDetail',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '28CC0C83-14F2-4724-B5CF-D01A014FF616',
+    name: 'Customer01',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '8E5AE1AD-8DDF-4C65-99E1-2CA226062160',
+    name: 'Customer03_CustomerRecord_BookingHistory',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '716B0E18-839D-4087-88D3-DC86BAF83B55',
+    name: 'Customer05_CustomerRecord_TreatmentPhoto',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B9A84B30-CD51-4755-A601-CB6822E1EB5E',
+    name: 'Customer05_CustomerRecord_TreatmentPhoto_Preview',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '65B89E8B-0347-4BCC-A182-F0AEBA545A6C',
+    name: 'Customer02_CustomerRecord_Basic_ProfPhotoSelect_Trim',
+    type: 1,
+    hints: 
+     [ 'is not match pattern string',
+       'is not alphabet only',
+       'is exceeding max length: (50)' ],
+    isValid: false },
+  Name {
+    id: '2DC4A645-AEAE-4CD1-A034-1C52C53D8334',
+    name: 'Customer09_PrivateNote',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'C0592BEF-3444-4C47-ACF1-79809109A6FA',
+    name: 'Customer07_CustomerNote',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '86032431-72DB-41B6-B785-2CB25EE0EC6E',
+    name: 'Customer02_CustomerRecord_Basic_ProfPhotoSelect',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B848DF2F-2513-4044-B5A4-702E99C8C44A',
+    name: 'Customer02_CustomerRecord_Basic_ProfPhotoSelect_null',
+    type: 1,
+    hints: 
+     [ 'is not match pattern string',
+       'is not alphabet only',
+       'is exceeding max length: (50)' ],
+    isValid: false },
+  Name {
+    id: '06583BA5-E2D1-4C40-B73D-47E40769649B',
+    name: 'Customer02_CustomerRecord_Basic_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '8E571522-3903-4A8D-B0B7-99950CE72296',
+    name: 'Customer04_CustomerRecord_BookingDetail_1stBooking',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '66DB085C-B500-4E1A-A733-06B4AFA2EF25',
+    name: 'Customer03_CustomerRecord_BookingHistory_1stBookingPattern',
+    type: 1,
+    hints: 
+     [ 'is not match pattern string',
+       'is not alphabet only',
+       'is exceeding max length: (50)' ],
+    isValid: false },
+  Name {
+    id: '7909F77C-6AC0-42BF-A832-64312CB9405B',
+    name: 'Customer05_CustomerRecord_TreatmentPhoto_1stBookingPattern',
+    type: 1,
+    hints: 
+     [ 'is not match pattern string',
+       'is not alphabet only',
+       'is exceeding max length: (50)' ],
+    isValid: false },
+  Name {
+    id: 'C01E61A2-AA93-4140-896D-8152F6120AD2',
+    name: 'Customer05_CustomerRecord_TreatmentPhoto_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '02A8EE71-CCCA-4A63-B05F-A92148C3EDF9',
+    name: 'Artboard',
+    type: 1,
+    hints: [ 'is not match pattern string' ],
+    isValid: true },
+  Name {
+    id: '2157C5BF-FFC7-4F4C-B630-14358D03E258',
+    name: 'Message_11_Thread_sendPhoto_Preview',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '284FEA44-E75C-419E-85CC-99B82B57195B',
+    name: 'Message_06_Thread_Customername_Pattern',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '52F2C7C5-88B9-4654-9D7A-831D779D7BAE',
+    name: 'Message_06_Thread',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '075169FA-395C-4DD9-A083-6EAC7EB1800C',
+    name: 'Message_09_Thread_menu',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'D438E2FA-F48D-492E-95FA-DC70624DBC71',
+    name: 'Message_07_Thread_sendURL_single',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '497AD424-9AB8-40FB-AFE6-F2117C5BF00E',
+    name: 'Message_08_Thread_sendURL_Multi',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '79AAD055-E77B-43CE-829F-849B0660445C',
+    name: 'Message_06_Thread_Block',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '8B49E2D0-79BB-4193-8EA2-F92A6D2DA7A2',
+    name: 'Message_06_Thread_Quit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '67A4592A-E169-4DBA-A9E3-3495E2AB815F',
+    name: 'Message_18_Thread_RenameDisplay_afterinput',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'C632588C-9900-4DB9-9169-BCC825C0386F',
+    name: 'Message_17_Thread_RenameDisplay_input﻿',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B2FCBD33-0614-4D87-B0F1-C8AB2D4B4696',
+    name: 'Message_20_Report_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'BD2E534F-2498-4A60-A6F4-E0CAA7B884DB',
+    name: 'Message_21_Report_AfterInputText',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'DC4FEB4D-4A65-4A92-895D-6C0DF42B7CA5',
+    name: 'Message_21_Report_confirm',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '603A4E64-6E36-45A1-A21B-A635FD8A84C7',
+    name: 'Message_22_Report_done',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '7F80C11A-08B0-4468-B86B-EF029DBEE287',
+    name: 'Message_02_Alert-SystemDialog1',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '8D6D52BB-84E2-421E-96A5-26700C0B5C0E',
+    name: 'Message_02_Alert-SystemDialog2',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '09395EC7-7464-4A78-A786-A43445F13826',
+    name: 'Message_11_Thread_sendPhoto_Preview_ErrorRetention',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'C1330E21-F8B7-4D23-97B0-BB5A262B8FEE',
+    name: 'Message_01_MessageList_ios',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'E567C411-C32D-4FF4-9EC5-79CB8CA019E2',
+    name: 'Message_01_MessageList_Android',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '76B68032-F115-4EF7-AA14-094816C60102',
+    name: 'Message_02_Alert-DeleteThread_ios',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '439C83A4-6756-418B-BFD0-6C2CA5363E94',
+    name: 'Message_04_NoMessage',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '1CB5A89D-34DF-419D-9901-B3CF24974DC6',
+    name: 'Message_08_Thread_Cameraroll_alert',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '7F1949B5-47D8-4C72-9354-C10D891CE898',
+    name: 'Mypage_PhotoList_PhotoPost_Detail',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '88991F1D-2D21-4BE2-B781-1B26CBD405B9',
+    name: 'Mypage_Profile08_cameraroll_Trim',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '79765F55-D6CE-4550-B3E5-B7857788A9E5',
+    name: 'Mypage_Profile04_Picker_Birthday_Android01',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'D133E8DC-3ACB-4CB6-88E5-3DC13BCC22DE',
+    name: 'Mypage_Profile04_Picker_Birthday_Android02',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '5C69DC3B-CB1B-409F-ACC2-D2655BD778DE',
+    name: 'Mypage_Profile04_Picker_Bloodtype_Android',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'E4DB6630-3CE1-4AA1-B921-F46B3ADBBC6F',
+    name: 'Mypage_Profile04_Picker_Career_Android',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '2B011690-DF6B-4698-82EB-D4D580E5A526',
+    name: 'Mypage_MyProfile_Preview',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'E7E2F2F8-997A-4CBE-96A2-3B0C196F9085',
+    name: 'Mypage_MyProfile_Preview_Viewmore',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'B08099C6-EE82-4540-BA95-5D13F6B02AFE',
+    name: 'MyPage_Myfeed_PostedArticle_Detail03',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'E2EF0292-3D90-4CFB-BD1B-340FBB602336',
+    name: 'Mypage_MyFeed01_PostGuide',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '49BA0D1F-2690-4F5A-A82A-30B91A0E6595',
+    name: 'MyPage_Myfeed',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'DFEC075E-84FB-4F01-BCBE-555BC549CEB5',
+    name: 'Mypage_PhotoList',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '64A055CC-45CD-4ABC-9EC4-025A6A14EE7B',
+    name: 'Mypage_LikedPost',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'F5595BCA-8BE7-431D-A98E-99C86A56B025',
+    name: 'Mypage_MyFeed01_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '18A2345B-7787-4E26-B7C9-AA9DF53BFEA3',
+    name: 'Mypage_LikedPost_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '83B3D3C1-A890-4E6E-88B3-064E2A3D22A6',
+    name: 'Mypage_PhotoList_null',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'D1674EDB-FAC4-43F1-88A5-6B1105841C9C',
+    name: 'Mypage_Profile03_AllEntered',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '85A1E069-02FC-4D7A-8DC9-5C67E0C2954C',
+    name: 'Mypage_Profile08_cameraroll_select',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '07CD5BDB-896C-4478-97BC-570A9A67552F',
+    name: 'Mypage_Profile08_cameraroll',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'E5C5D0B1-DA62-4B9A-9D1F-CEF3B60ED30A',
+    name: 'Mypage_Profile08_cameraroll_cover',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'FE228116-65ED-4F90-BFA9-CF27119136A5',
+    name: 'Mypage_Profile08_cameraroll_cover_Trim',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '53EB690D-CE6F-4883-9D0A-A608F20E1F9D',
+    name: 'Mypage_Profile04_BasicInfo_Edited',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '28C959B8-E024-4310-9676-065040871EA3',
+    name: 'Mypage_Profile04_BasicInfo_Edit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'CC83A278-64E9-4775-AB6D-12554FA61E62',
+    name: 'Mypage_Profile04_BasicInfo_GenderCustomEdit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'F17480D3-DB0C-483E-9D94-1CE62350A535',
+    name: 'Mypage_Profile04_BasicInfo_GenderCustomEdited',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '8024B7C9-4448-4B7B-A4D7-F1EF12C7C829',
+    name: 'Mypage_Profile04_Picker_Birthday',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '651DA343-3140-47B4-9FA5-0894A7AB4FAD',
+    name: 'Mypage_Profile04_Picker_Bloodtype',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '7033D068-C6CA-4CC8-9895-96A76568E60F',
+    name: 'Mypage_Profile04_Picker_Career',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '11C4F149-3CA1-481B-83A9-719471B31EEB',
+    name: 'Mypage_Profile_AlertSaved',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '69D1EFE5-A8B2-495A-803C-BE27C46186E2',
+    name: 'Mypage_Profile_AlertSaved',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '62B61DA2-3804-4CBA-808A-70B4B96B1732',
+    name: 'Mypage_Profile05_Self-introduction_Edit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '7CDBFFB0-F67C-47D9-A5E3-32DCDABC1BA9',
+    name: 'Mypage_Profile05_Self-introduction_Edited',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '4BE517BC-50EA-4E2A-AF41-465E4925A658',
+    name: 'Mypage_Profile06_Specialty_Edit_Hair',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '4334AF1A-1F49-4FB2-A6BB-A7CD3F8B3479',
+    name: 'Mypage_Profile06_Specialty_Edit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '5EA2D1D7-4505-4E2C-A5C8-F4644EDE7212',
+    name: 'Mypage_Profile06_Specialty_Edit_Nail',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '68743629-BC2D-4052-8860-3F8980E5ADD6',
+    name: 'Mypage_Profile06_Specialty_Edit_Esthetic',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'FD93827B-B233-41B0-9408-F41D09A8A838',
+    name: 'Mypage_Profile07_Personality_Edit',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '1B61AB46-CD8C-4EB1-B7D4-9362D2DDA46B',
+    name: 'Mypage_Profile07_Personality_Edited',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'AEEB84A0-CAE4-4054-9D22-04E19F4FA29A',
+    name: 'Mypage_Profile09_ExternalLink',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: '6F4F7428-E826-45D3-8DC6-E19277E03EB1',
+    name: 'Mypage_Profile09_ExternalLink_Edited',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  Name {
+    id: 'C2917A66-4E53-4154-9262-23C8AC15DCA3',
+    name: 'Mypage_Profile10_BelongingShop',
+    type: 1,
+    hints: [ 'is not match pattern string', 'is not alphabet only' ],
+    isValid: true },
+  ... 134 more items ]

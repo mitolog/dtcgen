@@ -25,7 +25,7 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
-    "test": "jest --coverage --rootDir \"./core\"",
+    "test": "jest --coverage",
     "test:watch": "jest --watch --rootDir \"./core\""
   },
   "author": "mito_log <hkyhm5l@gmail.com>",
