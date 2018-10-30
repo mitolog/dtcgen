@@ -2,7 +2,7 @@ import {
   sketchElementTypes,
   SketchElementType,
 } from '../core/domain/entities/SketchElementType';
-import { Name } from '../core/domain/entities/Name';
+import { Name, NameInterface } from '../core/domain/entities/Name';
 
 export interface NamingRuleValidator {
   config: any; // todo: make type for config object
@@ -110,10 +110,6 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
           break;
       }
       // デフォでtrue、今回値がfalseのときだけ値を更新
-      console.log(result[0]);
-      if (result[0] === null) {
-        console.log(ruleName);
-      }
       name.isValid = name.isValid && !result[0] ? false : true;
       if (!name.isValid) name.hints.push(result[1]);
     }
@@ -129,7 +125,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     }
   }
 
-  isMatchedPattern(name: Name, pattern: string): [boolean, string?] {
+  isMatchedPattern(name: NameInterface, pattern: string): [boolean, string?] {
     // patternからきたフォーマット文字列を正規表現に変換しないといけない？
     // %s -> [A-Za-z]+ に置換
     // 残りはそのまま

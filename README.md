@@ -11,11 +11,16 @@
 2. fill `sketchToolPath` and `targetSketchFilePath` within `linter.config.json`.
 3. run `npm install` on project root directory.
 
-## iteration
+## development iteration
 
-1. run `tsc --target es5 -w cli-app/*.ts` .
-2. `cd cli-app/` .
-3. run `node index.js lint` .
+1. run `tsc --target es5 -w cli-app/*.ts --outDir dist/` .
+2. `node dist/cli-app/index.js lint` .
+
+## test with jest
+
+1. run `npn test` .
+
+by doing this, you can run tests of specs depends on `jest.config.js` .
 
 ## node-typescript-boilerplate
 
