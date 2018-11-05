@@ -5,11 +5,11 @@
   "identifier": "co.mitolab.sketch.linter",
   "commands": [
     {
-      "name": "Linter",
+      "name": "Lint",
       "identifier": "linter.id",
       "script": "./my-command.js",
       "handlers": {
-        "run": "getSymbols",
+        "run": "onRun",
         "actions": {}
       }
     }

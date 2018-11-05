@@ -2,6 +2,9 @@
   "defaultSeverity": "error",
   "extends": ["tslint:recommended"],
   "jsRules": {},
+  "linterOptions": {
+    "exclude": ["node_modules/**"]
+  },
   "rules": {
     "quotemark": [true, "single"],
     "trailing-comma": false,

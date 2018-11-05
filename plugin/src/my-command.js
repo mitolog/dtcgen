@@ -1,6 +1,5 @@
-import BrowserWindow from 'sketch-module-web-view'
-import sketch from 'sketch'
-//const fs = require('file-system')
+import BrowserWindow from 'sketch-module-web-view';
+import sketch from 'sketch';
 
 // documentation: https://developer.sketchapp.com/reference/api/
 
@@ -12,39 +11,40 @@ const options = {
   show: false,
   loaded: false,
   alwaysOnTop: true,
-}
+};
 
-let browserWindow = new BrowserWindow(options)
-let webContents = browserWindow.webContents
+let browserWindow = new BrowserWindow(options);
+let webContents = browserWindow.webContents;
 
 export default function onRun(contect) {
-  log('onRun executed')
-  getSymbols()
+  log('onRun executed.');
 
   browserWindow.once('ready-to-show', () => {
-    browserWindow.show()
-  })
+    browserWindow.show();
+  });
 
   /// called when executing js on webUI
   webContents.on('lint', page => {
-    getSymbols(context, page)
-  })
+    getSymbols(context, page);
+  });
 
+  /// load on-demand
   webContents.on('loadList', s => {
-    browserWindow.loadURL(require('../resources/webview.html'))
-  })
+    browserWindow.loadURL(require('../resources/webview.html'));
+  });
 
-  browserWindow.loadURL(require('../resources/webview.html'))
+  /// initial load
+  browserWindow.loadURL(require('../resources/webview.html'));
 }
 
-export function getSymbols(context) {
-  log('aaaaa')
-  const document = require('sketch/dom').getSelectedDocument()
-  const symbols = document.getSymbols()
-  // skpm logで閲覧可能
-  log(symbols.length)
-  log(symbols[0])
-  for (symbol of symbols) {
-    log(symbol.name)
+function getSymbols(context) {
+  log('cccc');
+  const document = require('sketch/dom').getSelectedDocument();
+  const symbols = document.getSymbols();
+  log(symbols.length);
+  log(typeof symbols);
+  for (const key of Object.keys(symbols)) {
+    log(symbols[key]);
+    break;
   }
 }
