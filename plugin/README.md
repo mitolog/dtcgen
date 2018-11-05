@@ -52,7 +52,7 @@ To customize webpack create `webpack.skpm.config.js` file which exports function
  **/
 module.exports = function(config, isPluginCommand) {
   /** you can change config here **/
-}
+};
 ```
 
 ## Debugging
@@ -92,17 +92,49 @@ You will need to specify a `repository` in the `package.json`:
 ...
 ```
 
-## mito memo
+## sketch データの取得方法
 
-### cli での json 書き出し
+### sketchtool を使う
 
-```
-/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool list artboards /Users/mito/Downloads/BID\ 2.sketch > ~/Downloads/hoge.json
-```
+- sketch にデフォルトで入っている cli
+- スクショの export や plugin の実行、json スタイルでのレイヤの出力などを行える
+- 今回の sketch linter でのデータ取得は、これに依存する形になる
 
-- sketchtool は常に最新のものを利用するため、上記パスを常に指定(他のディレクトリに移動させない)
+### sketchtool の守備範囲
 
-### sketch plugin デバッグの手順
+- pages, artboards, symbols の名前は`sketchtool`で json 取得 ok
+- layers, groups は `list layers` で json 取得可能だが、sketch ファイルの大きさによっては json 取得にだいぶ時間がかかる
+
+### プラグインの場合....
+
+- 全取得: sketchtool の `list layers` で取得
+- ページ単位: sketch javascript API の getSelectedPage で取得
+
+### cli の場合...
+
+- 全取得: sketchtool の `list layers` で取得
+- ページ単位: sketchtool からパース
+
+### 用途
+
+全取得：sketch を例えば CI に組み込む場合や、時間かけてもいい場合、ページ数が少ない場合 (lit 項目が多くなりがちなので遅い)
+ページ単位：細かく lint したい場合(lint 項目を減らせるので早い)
+
+#### list layers のパース
+
+`list layers`で取得した配列にて、
+
+- pages[]: ページ一覧
+- pages[].layers[]: アートボード一覧
+- pages[].layers[].layers[]: アートボード配下のレイヤー一覧
+- pages[].layers[].layers[].layers[]: レイヤー配下のグループ一覧
+- pages[last].layers[]: symbol 一覧(pages[last].name が`Symbols`になっていること)
+
+ただ、テキストや shape、画像といった layer のタイプまでは取得できないため、semantic な lint については sketch api が必要。
+
+※ `list layers` は massive な sketch ファイルだとだいぶ重いので注意
+
+## sketch plugin デバッグの手順
 
 1.  cd /path/to/the/sketchLinter
 2.  npm run watch
@@ -110,3 +142,14 @@ You will need to specify a `repository` in the `package.json`:
 4.  skpm log -f
 
 ※ 3,4 は別 console で実施 ※ 必要に応じて browsersync
+
+## 実現したい機能
+
+1. sketch ファイルを定期的に(ボタンをユーザが押したら)一括 lint
+2. sketch で何かしら名前を更新するたびに、自動的に lint
+
+今の所 1 にフォーカス。
+
+## メモ
+
+- tsconfig.json, tslint.json は vue-cli の create で作成したもの。設定は[こちら](https://qiita.com/nrslib/items/be90cc19fa3122266fd7)をベースに
