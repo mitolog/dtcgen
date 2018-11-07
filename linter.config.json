@@ -3,6 +3,10 @@
     "sketchToolPath": "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool",
     "targetSketchFilePath": "/Users/mito/Downloads/BID\\ 2.sketch",
     "outFilePath": "/Users/mito/Downloads/layers.json",
+    "semantics": {
+      "artboard": ["%d Splash", "%d Onboard %d", "%d Login %d"],
+      "symbol": ["Button", "InputText"]
+    },
     "namingRule": {
       "page": {
         "pattern": "%s",
