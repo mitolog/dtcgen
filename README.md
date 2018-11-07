@@ -16,6 +16,14 @@
 1. run `tsc --target es5 -w cli-app/*.ts --outDir dist/` .
 2. `node dist/cli-app/index.js lint` .
 
+## to test node-sketch module (tentative)
+
+```
+$ tsc --target es5 -w test-node-sketch.ts
+$ cd cli-app
+$ node test-node-sketch.js > result.js
+```
+
 ## test with jest
 
 1. run `npn test` .

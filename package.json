@@ -31,6 +31,7 @@
   "author": "mito_log <hkyhm5l@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "node-sketch": "^0.10.0",
     "tslib": "~1.9.3"
   },
   "types": [
