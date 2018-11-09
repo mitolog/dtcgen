@@ -3,6 +3,19 @@
 
 # sketch-linter
 
+## 当面の目標
+
+1.  `%d Demo %d` にマッチする artboard を見つけ
+2.  当該 artboard に含まれる `Button` と `InputText` のシンボルを抽出
+3.  まずは iOS 向けにクラス名や、アサインするメタデータ(とりあえずは画面上の位置, ボタン名やプレースホルダなど)を確定
+4.  sourcery で作ったテンプレートの当該箇所に 3 の結果を入力
+
+[todo]
+
+- sourcery でテンプレートを作成する必要がある
+- semantic ワードと OS 別クラス名の変換
+-
+
 ## to run (under development phase)
 
 ### preparation

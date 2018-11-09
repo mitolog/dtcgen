@@ -31,12 +31,10 @@
   "author": "mito_log <hkyhm5l@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "dotenv": "^6.1.0",
+    "inversify": "^5.0.1",
     "node-sketch": "^0.10.0",
+    "reflect-metadata": "^0.1.12",
     "tslib": "~1.9.3"
-  },
-  "types": [
-    "./dist/boundaries.d.ts",
-    "./dist/domain.d.ts",
-    "./dist/usecases.d.ts"
-  ]
+  }
 }
