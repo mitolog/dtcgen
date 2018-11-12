@@ -1,30 +1,78 @@
-import { EventEmitter } from 'events';
-import * as cp from 'child_process';
+import * as fs from 'fs';
+import * as ns from 'node-sketch';
+import { SketchLayerType } from '../entities/SketchLayerType';
+import { injectable } from 'inversify';
 
-'use strict';
+export interface ISketchRepository {
+  getAll(type: SketchLayerType): Promise<Node[]>;
+}
 
-export class SketchRepository extends EventEmitter {
-  private json: JSON;
-
-  constructor(path: String) {
-    super();
+@injectable()
+export class SketchRepository implements ISketchRepository {
+  private retrieveConfig(): Object {
+    // linter.configからパスを取得
+    const coreDir = process.env.CORE_DIR;
+    console.log(coreDir);
+    const config = JSON.parse(
+      fs.readFileSync(
+        '/Users/mito/Documents/Proj/innova/sketchLinter/sketchLinter/linter.config.json',
+        'utf8',
+      ),
+    );
+    // todo: configファイルの探索
+    if (!config || !config.sketch) return;
+    return config.sketch;
   }
 
-  getJson() {
-    // nodejs cli実行してjsonを抽出 (これ多少時間かかる)
-    cp.exec('ls -la ./', (err, stdout, stderr) => {
-      if (err) console.log();
-      console.log(stdout);
-    });
-    // /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool list pages /Users/mito/Downloads/BID\ 2.sketch > ~/Downloads/pages.json
+  private retrieveSketchFilePath(): string {
+    const config = this.retrieveConfig();
+    if (!config || !config['targetSketchFilePath']) return;
+    return config['targetSketchFilePath'];
   }
 
-  convertJsonToObject() {
-    // これはdomain > usecaseのtranslatorでやる？
-    // それをオブジェクトに変換
-  }
+  // type should be string 'artboard' currently.
+  async getAll(type: SketchLayerType): Promise<Node[]> {
+    const fp = this.retrieveSketchFilePath();
+    const sketch = await ns.read(fp);
 
-  save() {
-    // どっかに保存する？
+    const pages = sketch.pages;
+    const nodes = [];
+    for (const page of pages) {
+      const artboards = page.getAll(type);
+      if (!artboards) continue;
+      nodes.push(artboards);
+    }
+    const result = [].concat(...nodes); // lessen dimension
+    return result;
+
+    // const artBoardNamesPerPages: { [s: string]: any }[] = pages.map(page => {
+    //   const artBoards = page.getAll('artboard');
+    // });
+    // console.log(artBoardNamesPerPages);
+
+    // .then(sketch => {
+    //   // type別にnodeを取得
+    //   // 現状は page, artboard, symbolに対応
+    // const pages = sketch.pages;
+    // const artBoardNamesPerPages: { [s: string]: any }[] = pages.map(
+    //   page => {
+    //     const artBoardNames = page.layers
+    //       .filter(layer => layer._class === 'artboard')
+    //       .map(layer => layer.name);
+    //     const result: { [s: string]: any } = {};
+    //     result[page.name] = artBoardNames;
+    //     return result;
+    //   },
+    // );
+    // console.log(artBoardNamesPerPages);
+
+    //   // const symbols = sketch.symbols;
+    //   // const symbolNames = symbols.map(symbol => symbol.name);
+    //   // console.log(symbolNames);
+    // })
+    // .catch(err => {
+    //   console.error('Error reading the sketch file');
+    //   console.error(err);
+    // });
   }
 }
