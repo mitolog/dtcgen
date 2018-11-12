@@ -1,23 +1,33 @@
-'use strict';
+import { ILintNamingUseCase } from '../../domain/usecases/ILintNamingUseCase';
+import { INamingLinter } from '../../domain/applications/INamingLinter';
+import { LayerName } from '../../domain/entities/LayerName';
+import { ISketchRepository } from '../repositories/SketchRepository';
+import { ISketchPresenter } from '../presenters/SketchPresenter';
+import { SketchLayerType } from '../entities/SketchLayerType';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../types';
 
-import { CoreDomain } from '../../domain/usecases/LintNamingUseCase';
-import { Name } from '../../domain/entities/Name';
-import { SketchRepository } from '../repositories/SketchRepository';
+@injectable()
+export class LintNamingUseCase implements ILintNamingUseCase {
+  private repository: ISketchRepository;
+  private presenter: ISketchPresenter;
+  private linter: INamingLinter;
 
-export class LintNamingUseCase implements CoreDomain.LintNamingUseCase {
-  private repository: SketchRepository;
-
-  constructor(repository: SketchRepository) {
+  constructor(
+    @inject(TYPES.ISketchRepository) repository: ISketchRepository,
+    @inject(TYPES.ISketchPresenter) presenter: ISketchPresenter,
+    @inject(TYPES.INamingLinter) linter: INamingLinter,
+  ) {
     this.repository = repository;
+    this.presenter = presenter;
+    this.linter = linter;
   }
 
-  lintNaming(): Promise<Name[]> {
-    throw new Error('Method not implemented.');
-    /**
-     * 1. プラットフォーム層から元になるjson一覧を取得し、entityオブジェクトの配列(1')に変換
-     * 2. Lint用のjsonを取得しentityオブジェクト配列(2')に変換
-     * 3. 1'と2'を比較し、各命名規則ごとにマッチした配列(3')と、どの命名規則にもマッチしない配列(3'')を作成
-     * 4. 3の結果を出力
-     */
+  async handle(): Promise<LayerName[]> {
+    // 取り合えず artboardのみ
+    const nodes = await this.repository.getAll(SketchLayerType.Artboard);
+    const layers = this.presenter.translate(nodes);
+    this.linter.lint(layers, SketchLayerType.Artboard);
+    return layers;
   }
 }

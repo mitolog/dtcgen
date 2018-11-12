@@ -1,8 +1,11 @@
 {
   "sketch": {
-    "sketchToolPath": "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool",
-    "targetSketchFilePath": "/Users/mito/Downloads/BID\\ 2.sketch",
+    "targetSketchFilePath": "/Users/mito/Downloads/BID2.sketch",
     "outFilePath": "/Users/mito/Downloads/layers.json",
+    "semantics": {
+      "artboard": ["%d Demo %d"],
+      "symbol": ["Button", "InputText"]
+    },
     "namingRule": {
       "page": {
         "pattern": "%s",

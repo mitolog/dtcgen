@@ -1,25 +1,23 @@
-import {
-  sketchElementTypes,
-  SketchElementType,
-} from '../core/domain/entities/SketchElementType';
-import { Name, NameInterface } from '../core/domain/entities/Name';
+import { SketchLayerTypes } from '../entities/SketchLayerType';
+import { LayerName } from '../../domain/entities/LayerName';
+import { INamingLinter } from '../../domain/applications/INamingLinter';
+import * as fs from 'fs';
+import { injectable } from 'inversify';
 
-export interface NamingRuleValidator {
-  config: any; // todo: make type for config object
-  validate(layers: any[]): { type: string; names: Name[] }[];
-  isMatchedPattern(name: Name, str: string): [boolean, string?];
-  isUpperCamelCase(name: Name): [boolean, string?];
-  isLowerCamelCase(name: Name): [boolean, string?];
-  isUnique(names: Name[]): [boolean, Name[]?];
-  isAlphabetOnly(name: Name): [boolean, string?];
-  isLessThanMaxLength(name: Name, count: number): [boolean, string?];
-}
+@injectable()
+export class SketchNamingLinter implements INamingLinter {
+  config: any; // object taken from "linter.config.json"
 
-export class SketchNamingRuleValidator implements NamingRuleValidator {
-  config: any;
-
-  constructor(config: any) {
-    this.config = config;
+  constructor() {
+    // linter.configからパスを取得
+    // todo: linter.configの探索
+    const config = JSON.parse(
+      fs.readFileSync(
+        '/Users/mito/Documents/Proj/innova/sketchLinter/sketchLinter/linter.config.json',
+        'utf8',
+      ),
+    );
+    this.config = config.sketch;
   }
 
   /**
@@ -27,66 +25,27 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
    * @param layers SketchElementType毎に分割する前のlayer配列
    * @returns 検証結果オブジェクトの配列
    */
-  validate(layers: any[]): { type: string; names: Name[] }[] {
-    // 有効なruleの抽出
-    const rules = {};
-    for (const typeStr of sketchElementTypes) {
-      const lowerTypeName = typeStr.toLowerCase();
-      const namingRules = this.config.namingRule[lowerTypeName];
-      // excludes unnoted type on json config or which is not object
-      if (typeof namingRules !== 'object') continue;
-
-      const validRules = this.retrieveValidConfig(namingRules);
-      rules[typeStr] = validRules;
+  lint(layers: LayerName[], type: string) {
+    const lowerTypeName = type.toLowerCase();
+    const namingRules = this.config.namingRule[lowerTypeName];
+    if (typeof namingRules !== 'object') {
+      // todo: throw an error
+      return;
     }
-
-    console.log('rules: ', rules);
-    const results = [];
-    for (const typeStr of Object.keys(rules)) {
-      const resultForType = {};
-      resultForType[typeStr] = this.scan(layers, typeStr, rules[typeStr]);
-      //.filter(name => !name.isValid); // extract only violated names
-      results.push(resultForType);
-    }
-
-    return results;
-  }
-
-  /**
-   * 対象となるlayer(sketchの最小要素単位)をtype別にNameオブジェクトに置換
-   * @param layers sketchの最小要素単位オブジェクトの配列
-   * @param typeString SketchElementTypeの型名
-   * @param validRules typeStringに属する、有効になっている命名規則一覧
-   */
-  scan(layers: any[], typeString: string, validRules: any): Name[] {
-    let names: Name[];
-    switch (typeString) {
-      case SketchElementType[SketchElementType.Page]:
-        names = layers.map(page => {
-          return new Name(page, SketchElementType.Page);
-        });
-        break;
-      case SketchElementType[SketchElementType.Artboard]:
-        names = layers
-          .map(page => page.artboards)
-          .reduce((previousValue, currentValue) => {
-            return previousValue.concat(currentValue);
-          })
-          .map(artboard => new Name(artboard, SketchElementType.Artboard));
-        break;
-    }
+    const validRules = this.retrieveValidConfig(namingRules);
 
     // ルール毎にそれぞれのnamesを更新
     const ruleNames = Object.keys(validRules);
     for (const ruleName of ruleNames) {
       const ruleValue = validRules[ruleName];
       // namesを参照で渡して中身を更新
-      this.update(names, ruleName, ruleValue);
+      this.update(layers, ruleName, ruleValue);
     }
-    return names;
+
+    //.filter(name => !name.isValid); // extract only violated names
   }
 
-  update(names: Name[], ruleName: string, ruleValue: any) {
+  update(names: LayerName[], ruleName: string, ruleValue: any) {
     for (const name of names) {
       let result: [boolean, string?] = [true, ''];
       // todo: rule名一覧はどこかに定義しておかねば...
@@ -110,22 +69,20 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
           break;
       }
       // デフォでtrue、今回値がfalseのときだけ値を更新
-      name.isValid = name.isValid && !result[0] ? false : true;
-      if (!name.isValid) name.hints.push(result[1]);
+      name.hints.push(result[1]);
     }
     if (ruleName === 'unique') {
       const result = this.isUnique(names);
       if (!result[0] && result[1] && result[1].length > 0) {
         // nameを更新
         result[1].forEach(name => {
-          name.isValid = false;
           name.hints.push('is duplicating');
         });
       }
     }
   }
 
-  isMatchedPattern(name: NameInterface, pattern: string): [boolean, string?] {
+  isMatchedPattern(name: LayerName, pattern: string): [boolean, string?] {
     // patternからきたフォーマット文字列を正規表現に変換しないといけない？
     // %s -> [A-Za-z]+ に置換
     // 残りはそのまま
@@ -144,7 +101,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     return [isMatched, hint];
   }
 
-  isLowerCamelCase(name: Name): [boolean, string?] {
+  isLowerCamelCase(name: LayerName): [boolean, string?] {
     //  - 文字列に_が入っていない
     //  - 全部大文字ではない
     //  - 先頭が小文字
@@ -157,7 +114,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     return [isLowerCamelCase, hint];
   }
 
-  isUpperCamelCase(name: Name): [boolean, string?] {
+  isUpperCamelCase(name: LayerName): [boolean, string?] {
     //  - 文字列の先頭の1文字が大文字
     //  - 文字列に_が入っていない
     //  - 全部大文字ではない
@@ -170,7 +127,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     return [isUpperCamelCase, hint];
   }
 
-  isUnique(names: Name[]): [boolean, Name[]?] {
+  isUnique(names: LayerName[]): [boolean, LayerName[]?] {
     const duplicates = names.filter((val, idx, self) => {
       return self.indexOf(val) !== self.lastIndexOf(val);
     });
@@ -178,7 +135,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     return [isUnique, duplicates];
   }
 
-  isAlphabetOnly(name: Name): [boolean, string?] {
+  isAlphabetOnly(name: LayerName): [boolean, string?] {
     const nameString = name.name;
     const regExp = new RegExp('^[A-Za-z]+$');
     const results = regExp.exec(nameString);
@@ -187,7 +144,7 @@ export class SketchNamingRuleValidator implements NamingRuleValidator {
     return [isAlphabetOnly, hint];
   }
 
-  isLessThanMaxLength(name: Name, count: number): [boolean, string?] {
+  isLessThanMaxLength(name: LayerName, count: number): [boolean, string?] {
     const nameString = name.name;
     const isLess = nameString.length <= count ? true : false;
     const hint = isLess ? undefined : `is exceeding max length: \(${count})`;
