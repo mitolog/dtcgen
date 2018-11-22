@@ -76,6 +76,7 @@ const recurciveGetLayers = (node, hierarchy, sketch) => {
     // }
     //console.log(node);
     /*
+
       今回は、ボタンのセマンティクスを取得するということで。
       /Users/mito/Downloads/linterSample.sketch の Travel / Guide の "Book Trip" ボタンを取得するとして
       
@@ -85,7 +86,7 @@ const recurciveGetLayers = (node, hierarchy, sketch) => {
         -> "Book Trip" の元になるシンボルを取得
       3. 2で取得したsymbolMasterオブジェクトから、メタデータを取得、取得するものは...
         - symbol.layers[](ただし、_class=shapeGroupのオブジェクトは膨大なパス情報を含むので一旦除外)
-        - 今回はボタンを取得するものとし、名前(.name)が以下のものに絞る:
+        - 今回はボタンを取得するものとし、名前(.name)とclass(._class)が以下のものに絞る:
           - Label(_class=text)
           - Background(_class=rectangle)
       4. Label, Backgroundそれぞれ overrideValuesがある場合とない場合があるので、以下の手順でたどる

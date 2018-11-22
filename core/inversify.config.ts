@@ -17,5 +17,8 @@ cliContainer
 cliContainer
   .bind<Domain.ILintNamingUseCase>(TYPES.ILintNamingUseCase)
   .to(SketchPlatform.LintNamingUseCase);
+cliContainer
+  .bind<Domain.IExtractElementUseCase>(TYPES.IExtractElementUseCase)
+  .to(SketchPlatform.ExtractElementUseCase);
 
 export { cliContainer };
