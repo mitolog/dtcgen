@@ -2,9 +2,14 @@
   "sketch": {
     "targetSketchFilePath": "/Users/mito/Downloads/linterSample.sketch",
     "outFilePath": "/Users/mito/Downloads/layers.json",
-    "semantics": {
-      "artboard": ["%d Demo %d"],
-      "symbol": ["Button", "InputText"]
+    "extraction": {
+      "keywords": ["Button"],
+      "maxHierarchy": 3,
+      "followOverrides": false,
+      "button": {
+        "label": "text",
+        "background": "rectangle"
+      }
     },
     "namingRule": {
       "page": {
@@ -15,7 +20,7 @@
         "maxLength": 20
       },
       "artboard": {
-        "pattern": "%s - %s - %s",
+        "pattern": "%s / %s",
         "lowerCamelCase": true,
         "englishOnly": true,
         "unique": true,

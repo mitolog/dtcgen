@@ -1,6 +1,9 @@
 import Cac from "Cac";
 import { cliContainer } from "../dist/inversify.config";
-import { ILintNamingUseCase } from "../dist/domain/Domain";
+import {
+  ILintNamingUseCase,
+  IExtractElementUseCase
+} from "../dist/domain/Domain";
 import { TYPES } from "../dist/types";
 
 const cli = Cac();
@@ -43,13 +46,13 @@ cli.command(
     // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
     console.log("now start extracting...");
     // prettier-ignore
-    const lintNamingUseCase = cliContainer.get<ILintNamingUseCase>(TYPES.ILintNamingUseCase);
-    lintNamingUseCase
+    const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(TYPES.IExtractElementUseCase);
+    extractElementUseCase
       .handle()
-      .then(layers => {
-        console.log("finished linting.");
+      .then(outputs => {
+        console.log("finished extracting.");
         console.log("--------------------");
-        console.log(layers);
+        console.log(outputs);
       })
       .catch(error => {
         console.log(error);
