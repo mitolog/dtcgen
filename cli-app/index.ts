@@ -44,15 +44,12 @@ cli.command(
   },
   (input, flag) => {
     // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
-    console.log("now start extracting...");
     // prettier-ignore
     const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(TYPES.IExtractElementUseCase);
     extractElementUseCase
       .handle()
       .then(outputs => {
-        console.log("finished extracting.");
-        console.log("--------------------");
-        console.log(outputs);
+        console.log(JSON.stringify(outputs));
       })
       .catch(error => {
         console.log(error);

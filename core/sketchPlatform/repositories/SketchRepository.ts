@@ -244,10 +244,16 @@ export class SketchRepository implements ISketchRepository {
     // 再帰的にkeywordsにマッチする要素と中間要素を抽出
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
-      const artboardName = artboard['name'];
+      let artboardName = artboard['name'];
+
+      // todo: パターンマッチによる名前の抽出
+      artboardName = artboardName
+        .split('/')
+        .map(str => str.trim())
+        .join('');
 
       const containerObj = { type: 'Container', id: artboard['do_objectID'] };
-      containerObj['name'] = artboard['name'];
+      containerObj['name'] = artboardName; //artboard['name'];
       outputs.push(containerObj);
 
       artboard['layers'].forEach(node => {
