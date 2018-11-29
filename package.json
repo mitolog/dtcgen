@@ -32,7 +32,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "dotenv": "^6.1.0",
+    "handlebars": "^4.0.12",
     "inversify": "^5.0.1",
+    "mustache": "^3.0.1",
     "node-sketch": "^0.10.0",
     "reflect-metadata": "^0.1.12",
     "tslib": "~1.9.3"
