@@ -1,11 +1,38 @@
 import * as fs from "fs";
-import * as mustache from "mustache";
+import * as handlebars from "handlebars";
+
+handlebars.registerHelper("myIf", (val1: any, operator, val2: any, options) => {
+  let cond = false;
+  if (operator === "===") {
+    cond = val1 === val2;
+  } else if (operator === "!==") {
+    cond = val1 !== val2;
+  } else if (operator === "==") {
+    cond = val1 == val2;
+  } else if (operator === "!=") {
+    cond = val1 != val2;
+  } else if (operator === ">") {
+    cond = val1 > val2;
+  } else if (operator === ">=") {
+    cond = val1 >= val2;
+  } else if (operator === "<") {
+    cond = val1 < val2;
+  } else if (operator === "<=") {
+    cond = val1 <= val2;
+  }
+
+  if (cond) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
+});
 
 convert();
 
 function convert() {
   const sketchData: any[] = JSON.parse(String(read("result.json")));
-  const template: string = String(read("viewController.mustache"));
+  const templateStr: string = String(read("viewController.mustache"));
 
   // viewController毎に分割
   const containers: any[] = sketchData.filter(
@@ -21,7 +48,8 @@ function convert() {
       container: container,
       views: views
     };
-    const output = mustache.render(template, containerObj);
+    let template = handlebars.compile(templateStr);
+    const output = template(containerObj);
     const filePath = "outputs/" + container.name + "ViewController.swift";
     outputs.push({ filePath: filePath, content: output });
   }

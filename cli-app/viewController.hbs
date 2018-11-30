@@ -15,16 +15,19 @@ class {{container.name}}ViewController: UIViewController {
         // parentIdがなければ、viewControllerのviewにaddSubView
 
         // Do any additional setup after loading the view.
-        {{#views}}
         self.view.backgroundColor = UIColor.white
-        let btn = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        btn.setTitle("test", for: .normal)
+
+        {{#views}}
+        {{#myIf type "===" "Button" }}
+        let view = ContainedButton(frame: CGRect(x: {{../rect.x}}, y: {{../rect.y}}, width: {{../rect.width}}, height: {{../rect.height}}))
+        view.setTitle("{{../name}}", for: .normal)
+        // parentIdがあれば、当該idのviewを探し出し、それにaddSubView
         self.view.addSubview(btn)
         btn.snp.makeConstraints { (make) -> Void in
             make.width.height.equalTo(50)
             make.center.equalTo(self.view)
         }
-
+        {{/myIf}}
         {{/views}}
     }
 }
