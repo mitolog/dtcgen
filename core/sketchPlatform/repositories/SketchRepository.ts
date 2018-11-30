@@ -134,42 +134,65 @@ export class SketchRepository implements ISketchRepository {
       'symbolMaster',
       instance => instance.symbolID === node.symbolID,
     );
-    if (targetSymbol && targetSymbol.layers) {
-      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
-      const layers = targetSymbol.layers.filter(
-        layer => layer._class !== 'shapeGroup',
+    if (
+      !targetSymbol ||
+      !targetSymbol.layers ||
+      targetSymbol.layers.length <= 0
+    )
+      return;
+
+    // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    const layers = targetSymbol.layers.filter(
+      layer => layer._class !== 'shapeGroup',
+    );
+    // ここでパースするelement毎に異なる取得情報
+    const parseElements = this.config.extraction[viewObj.type.toLowerCase()];
+    const shouldFollowOverrides = this.config.extraction.followOverrides;
+
+    for (const key of Object.keys(parseElements)) {
+      // TBD: 命名規則で大文字小文字を指定したものをここでも踏襲したほうがいいのではと
+      const nameKey = key.charAt(0).toUpperCase() + key.slice(1); // とりあえず頭文字だけ大文字
+      const matchedElements = layers.filter(
+        layer => layer.name === nameKey && layer._class === parseElements[key],
       );
-      // ここでパースするelement毎に異なる取得情報
-      const elements = this.config.extraction[viewObj.type.toLowerCase()];
-      const followOverrides = this.config.extraction.followOverrides;
+      const aElement = matchedElements[0];
+      if (!aElement) continue;
 
-      for (const key of Object.keys(elements)) {
-        // TBD: 命名規則で大文字小文字を指定したものをここでも踏襲したほうがいいのではと
-        const nameKey = key.charAt(0).toUpperCase() + key.slice(1); // とりあえず頭文字だけ大文字
-        const matchedElements = layers.filter(layer => {
-          return layer.name === nameKey && layer._class === elements[key];
-        });
-        const aElement = matchedElements[0];
-
-        // ボタンの場合
-        switch (key) {
-          case 'background':
-            viewObj['radius'] = aElement.fixedRadius;
-            const fillObj = aElement.style.fills[0];
-            viewObj['backgroundColor'] = fillObj.color.toJson();
-            if (followOverrides) {
-              const parsedObj = this.parseOverride(
-                node,
-                sketch.layerStyles,
-                'layerStyle',
-              );
-              if (!parsedObj) break;
-              viewObj['backgroundColor'] = parsedObj['backgroundColor'];
-            }
+      // ボタンの場合
+      switch (key) {
+        case 'background':
+          viewObj['radius'] = aElement.fixedRadius;
+          const fillObj = aElement.style.fills[0];
+          viewObj['backgroundColor'] = fillObj.color.toJson();
+          if (shouldFollowOverrides) {
+            const parsedObj = this.parseOverride(
+              node,
+              sketch.layerStyles,
+              'layerStyle',
+            );
+            if (!parsedObj) break;
+            viewObj['backgroundColor'] = parsedObj['backgroundColor'];
+          }
+          break;
+        case 'label':
+          // prettier-ignore
+          if (
+            !aElement.style ||
+            !aElement.style.textStyle ||
+            !aElement.style.textStyle.encodedAttributes ||
+            !aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute
+          )
             break;
-          default:
-            break;
-        }
+          const textAttribute = aElement.style.textStyle.encodedAttributes;
+          // prettier-ignore
+          const fontObj = aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute;
+          viewObj['fontName'] = fontObj.attributes.name;
+          viewObj['fontSize'] = fontObj.attributes.size;
+          if (!textAttribute.MSAttributedStringColorAttribute) break;
+          viewObj['color'] = textAttribute.MSAttributedStringColorAttribute;
+          break;
+        default:
+          break;
       }
     }
   }
@@ -204,6 +227,9 @@ export class SketchRepository implements ISketchRepository {
         if (!targetStyles || targetStyles.length <= 0) return null;
         const fill = targetStyles[0]['value']['fills'][0];
         resultObj['backgroundColor'] = fill.color.toJson();
+        break;
+      case 'stringValue':
+        const title = targetOverride['value'];
         break;
       default:
         break;
