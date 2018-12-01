@@ -48,6 +48,9 @@ export class SketchRepository implements ISketchRepository {
       maxHierarchy = 3; // default
     }
 
+    const viewObj = { type: 'View', hierarchy: hierarchy };
+    this.parseConstraint(node.resizingConstraint, viewObj);
+
     // 'group' should be translated into container views which includes various elements
     if (
       node._class === 'group' &&
@@ -55,8 +58,6 @@ export class SketchRepository implements ISketchRepository {
       node.layers.length > 0 &&
       hierarchy <= maxHierarchy - 1
     ) {
-      const viewObj = { type: 'View', hierarchy: hierarchy };
-
       const includedArtboard = node.getParent('artboard');
       if (includedArtboard) {
         viewObj['containerId'] = includedArtboard.do_objectID;
@@ -67,7 +68,6 @@ export class SketchRepository implements ISketchRepository {
       }
       viewObj['name'] = node.name;
       viewObj['id'] = node.do_objectID;
-      viewObj['constraint'] = node.resizingConstraint;
       viewObj['isVisible'] = node.isVisible;
       if (node.frame._class === 'rect') {
         const frame = node.frame;
@@ -111,7 +111,6 @@ export class SketchRepository implements ISketchRepository {
       }
       viewObj['name'] = node.name;
       viewObj['id'] = node.do_objectID;
-      viewObj['constraint'] = node.resizingConstraint;
       viewObj['isVisible'] = node.isVisible;
       if (node.frame._class === 'rect') {
         const frame = node.frame;
@@ -195,6 +194,22 @@ export class SketchRepository implements ISketchRepository {
           break;
       }
     }
+  }
+
+  private parseConstraint(value: number, viewObj: object) {
+    // https://medium.com/zendesk-engineering/reverse-engineering-sketchs-resizing-functionality-23f6aae2da1a
+    const bitWiseAnd = parseInt(value.toString(2));
+    const bitWiseAndPadded = ('0000000000' + bitWiseAnd).slice(-6);
+    const constraints = {
+      none: bitWiseAndPadded === '111111' ? true : false,
+      top: bitWiseAndPadded.substr(0, 1) === '0' ? true : false,
+      right: bitWiseAndPadded.substr(5, 1) === '0' ? true : false,
+      bottom: bitWiseAndPadded.substr(2, 1) === '0' ? true : false,
+      left: bitWiseAndPadded.substr(3, 1) === '0' ? true : false,
+      width: bitWiseAndPadded.substr(4, 1) === '0' ? true : false,
+      height: bitWiseAndPadded.substr(1, 1) === '0' ? true : false,
+    };
+    viewObj['constraints'] = constraints;
   }
 
   private parseOverride(node, sharedStyles, styleType): Object {
