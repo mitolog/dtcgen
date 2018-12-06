@@ -1,0 +1,107 @@
+import UIKit
+import SnapKit
+
+class {{container.name}}ViewController: UIViewController {
+
+    // each element should be UIView or subclasses
+    var views: [UIView] = []
+    var constraints: [Constraint?] = []
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        self.view.backgroundColor = UIColor.white
+
+        self.configureViews()
+        for view in views {
+            self.addView(view)
+        }
+        self.layoutViews()
+    }
+
+    private func layoutViews() {
+        guard views.count == constraints.count else { return }
+        for idx in 0..<views.count {
+            guard let constraint = constraints[idx] else { continue }
+            let view = views[idx]
+            print(constraint)
+            let superview = view.superview ?? self.view!
+            view.snp.makeConstraints { (make) in
+                if let top = constraint.top {
+                    make.top.equalTo(superview).offset(top)
+                }
+                if let right = constraint.right {
+                    make.right.equalTo(superview).offset(right)
+                }
+                if let bottom = constraint.bottom {
+                    make.bottom.equalTo(superview).offset(bottom)
+                }
+                if let left = constraint.left {
+                    make.left.equalTo(superview).offset(left)
+                }
+                if let width = constraint.width {
+                    make.width.equalTo(width)
+                }
+                if let height = constraint.height {
+                    make.height.equalTo(height)
+                }
+            }
+        }
+    }
+
+    private func configureViews() {
+        // viewsに値を入れていく
+        self.views = []
+        self.constraints = []
+        var view: UIView? = nil
+
+        {{#views}}
+        {{#if isView }}
+        view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        {{else if isButton }}
+        view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! ContainedButton).setTitle("{{name}}", for: .normal)
+        
+        {{/if}}
+        {{#if parentId }}
+        view!.parentId = "{{parentId}}"
+        {{/if}}
+        view!.restorationIdentifier = "{{id}}"
+        views.append(view!)
+        {{#if constraints }}
+        constraints.append(Constraint(
+            top:{{#if constraints.top }}{{constraints.top}}{{else}}nil{{/if}},
+            right:{{#if constraints.right }}{{constraints.right}}{{else}}nil{{/if}},
+            bottom:{{#if constraints.bottom }}{{constraints.bottom}}{{else}}nil{{/if}}, 
+            left:{{#if constraints.left }}{{constraints.left}}{{else}}nil{{/if}}, 
+            width:{{#if constraints.width }}{{constraints.width}}{{else}}nil{{/if}}, 
+            height:{{#if constraints.height }}{{constraints.height}}{{else}}nil{{/if}}))
+        {{else}}
+        constraints.append(nil)
+        {{/if}}
+
+        {{!-- リバイズ案 --}}
+        {{!-- 1. result.jsonにあったcodableを生成 --}}
+        {{!-- 2. とりまviewController内で当該codableの配列を作成 --}}
+        {{!-- view.snp.makeConstraints { (make) -> Void in
+            make.width.height.equalTo(50)
+            make.center.equalTo(self.view)
+        } --}}
+        {{/views}}
+    }
+
+    private func addView(_ targetView:UIView) {
+        var hasParentView = false
+        for view in views {
+            guard let viewId = view.restorationIdentifier else { continue }
+            if targetView.parentId == viewId {
+                view.addSubview(targetView)
+                hasParentView = true
+                break
+            }
+        }
+        if !hasParentView {
+            self.view.addSubview(targetView)
+        }
+    }
+}

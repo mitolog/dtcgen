@@ -1,38 +1,15 @@
 import * as fs from "fs";
 import * as handlebars from "handlebars";
 
-handlebars.registerHelper("myIf", (val1: any, operator, val2: any, options) => {
-  let cond = false;
-  if (operator === "===") {
-    cond = val1 === val2;
-  } else if (operator === "!==") {
-    cond = val1 !== val2;
-  } else if (operator === "==") {
-    cond = val1 == val2;
-  } else if (operator === "!=") {
-    cond = val1 != val2;
-  } else if (operator === ">") {
-    cond = val1 > val2;
-  } else if (operator === ">=") {
-    cond = val1 >= val2;
-  } else if (operator === "<") {
-    cond = val1 < val2;
-  } else if (operator === "<=") {
-    cond = val1 <= val2;
-  }
-
-  if (cond) {
-    return options.fn(this);
-  } else {
-    return options.inverse(this);
-  }
+handlebars.registerHelper("addSubView", (context, options) => {
+  return options.fn(this);
 });
 
 convert();
 
 function convert() {
   const sketchData: any[] = JSON.parse(String(read("result.json")));
-  const templateStr: string = String(read("viewController.mustache"));
+  const templateStr: string = String(read("viewController_static.hbs"));
 
   // viewController毎に分割
   const containers: any[] = sketchData.filter(
@@ -44,6 +21,17 @@ function convert() {
     const views = sketchData.filter(
       element => element.containerId && element.containerId === container.id
     );
+    // add flag to distinguish view type
+    views.forEach(view => {
+      switch (view.type) {
+        case "View":
+          view.isView = true;
+          break;
+        case "Button":
+          view.isButton = true;
+          break;
+      }
+    });
     let containerObj = {
       container: container,
       views: views
