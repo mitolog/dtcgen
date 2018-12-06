@@ -212,6 +212,38 @@ export class SketchRepository implements ISketchRepository {
     viewObj['constraints'] = constraints;
   }
 
+  // 出力前にconstraintの値を付与
+  private addConstraintValues(outputs) {
+    if (!outputs) return;
+
+    for (const output of outputs) {
+      if (!output.constraints) continue;
+      const baseViews = outputs.filter(
+        view =>
+          output.parentId
+            ? view.id === output.parentId
+            : view.id === output.containerId,
+      );
+      if (!baseViews || baseViews.length <= 0) continue;
+      // TODO: shuold be taken from "iPhone X Frame" symbol
+      let baseRect = output.parentId
+        ? baseViews[0].rect
+        : { x: 0, y: 0, width: 375, height: 812 };
+      // calculate margins from each sides
+      let newConstraints = {};
+      if (output.constraints.top) newConstraints['top'] = output.rect.y;
+      // prettier-ignore
+      if (output.constraints.right) newConstraints["right"] = baseRect.width - (output.rect.x + output.rect.width);
+      // prettier-ignore
+      if (output.constraints.bottom) newConstraints["bottom"] = baseRect.height - (output.rect.y + output.rect.height);
+      if (output.constraints.left) newConstraints['left'] = output.rect.x;
+      if (output.constraints.width) newConstraints['width'] = output.rect.width;
+      if (output.constraints.height)
+        newConstraints['height'] = output.rect.height;
+      output.constraints = newConstraints;
+    }
+  }
+
   private parseOverride(node, sharedStyles, styleType): Object {
     // const textLayerStyles = sketch.textLayerStyles;
     if (!node.overrideValues) return null;
@@ -301,6 +333,8 @@ export class SketchRepository implements ISketchRepository {
         this.recurciveGetLayers(node, 1, sketch, outputs);
       });
     });
+
+    this.addConstraintValues(outputs);
     return outputs;
   }
 }
