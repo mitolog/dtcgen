@@ -1,10 +1,6 @@
 import * as fs from "fs";
 import * as handlebars from "handlebars";
 
-handlebars.registerHelper("addSubView", (context, options) => {
-  return options.fn(this);
-});
-
 convert();
 
 function convert() {

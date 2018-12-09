@@ -88,7 +88,6 @@ export class SketchRepository implements ISketchRepository {
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
     else if (node._class === 'symbolInstance') {
       const keywords = this.config.extraction.keywords;
-      const viewObj = { type: 'View' };
       if (keywords && keywords.length > 0) {
         const matched = keywords.filter(keyword => {
           const results = node.name.match(new RegExp(keyword, 'g'));
@@ -231,16 +230,31 @@ export class SketchRepository implements ISketchRepository {
         : { x: 0, y: 0, width: 375, height: 812 };
       // calculate margins from each sides
       let newConstraints = {};
-      if (output.constraints.top) newConstraints['top'] = output.rect.y;
-      // prettier-ignore
-      if (output.constraints.right) newConstraints["right"] = baseRect.width - (output.rect.x + output.rect.width);
-      // prettier-ignore
-      if (output.constraints.bottom) newConstraints["bottom"] = baseRect.height - (output.rect.y + output.rect.height);
-      if (output.constraints.left) newConstraints['left'] = output.rect.x;
-      if (output.constraints.width) newConstraints['width'] = output.rect.width;
-      if (output.constraints.height)
-        newConstraints['height'] = output.rect.height;
-      output.constraints = newConstraints;
+      if (output.constraints.top) {
+        newConstraints['top'] = output.rect.y.toString();
+      }
+      if (output.constraints.right) {
+        newConstraints['right'] = (
+          baseRect.width -
+          (output.rect.x + output.rect.width)
+        ).toString();
+      }
+      if (output.constraints.bottom) {
+        newConstraints['bottom'] = (
+          baseRect.height -
+          (output.rect.y + output.rect.height)
+        ).toString();
+      }
+      if (output.constraints.left) {
+        newConstraints['left'] = output.rect.x.toString();
+      }
+      if (output.constraints.width) {
+        newConstraints['width'] = output.rect.width.toString();
+      }
+      if (output.constraints.height) {
+        newConstraints['height'] = output.rect.height.toString();
+        output.constraints = newConstraints;
+      }
     }
   }
 
