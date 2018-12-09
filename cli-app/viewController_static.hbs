@@ -61,7 +61,6 @@ class {{container.name}}ViewController: UIViewController {
         {{else if isButton }}
         view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         (view as! ContainedButton).setTitle("{{name}}", for: .normal)
-        
         {{/if}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
