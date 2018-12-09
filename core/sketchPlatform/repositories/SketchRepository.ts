@@ -42,7 +42,6 @@ export class SketchRepository implements ISketchRepository {
   }
 
   private recurciveGetLayers(node, hierarchy, sketch, outputs) {
-    //const space = Array(hierarchy).join(' ');
     let maxHierarchy = this.config.extraction.maxHierarchy;
     if (!maxHierarchy) {
       maxHierarchy = 3; // default
@@ -94,7 +93,11 @@ export class SketchRepository implements ISketchRepository {
           return results && results.length > 0 ? true : false;
         });
         if (matched && matched.length > 0) {
-          viewObj.type = matched[0];
+          // matchedは最後にマッチしたものを採用する。例えば keywordsに `Button`, `View`があったとして
+          // filterをかける、node.nameが `Final View Button` とかだと、複数マッチする。
+          // この時、文法的にこのnodeはボタンと想定されるので、matchedの最後の要素を viewObjのtype
+          // とするほうが自然では。
+          viewObj.type = matched[matched.length - 1];
         } else {
           return;
         }
@@ -161,7 +164,7 @@ export class SketchRepository implements ISketchRepository {
         case 'background':
           viewObj['radius'] = aElement.fixedRadius;
           const fillObj = aElement.style.fills[0];
-          viewObj['backgroundColor'] = fillObj.color.toJson();
+          viewObj['containerColor'] = { fill: fillObj.color };
           if (shouldFollowOverrides) {
             const parsedObj = this.parseOverride(
               node,
@@ -169,7 +172,7 @@ export class SketchRepository implements ISketchRepository {
               'layerStyle',
             );
             if (!parsedObj) break;
-            viewObj['backgroundColor'] = parsedObj['backgroundColor'];
+            viewObj['containerColor'] = parsedObj['containerColor'];
           }
           break;
         case 'label':
@@ -263,12 +266,15 @@ export class SketchRepository implements ISketchRepository {
     if (!node.overrideValues) return null;
 
     // extract targetOverride
-    const targetOverride = node.overrideValues.filter(overrideValue => {
-      const results = overrideValue.overrideName.match(
-        new RegExp(styleType, 'g'),
-      );
-      return results && results.length > 0;
-    });
+    // TODO: node.overrideValuesには、対象となるstyleType(例えば `layerStyle` )のoverrideは常に1つであるという前提にたっている
+    const targetOverride = node.overrideValues
+      .filter(overrideValue => {
+        const results = overrideValue.overrideName.match(
+          new RegExp(styleType, 'g'),
+        );
+        return results && results.length > 0;
+      })
+      .reduce((acc, current) => current, 0);
     if (!targetOverride || targetOverride.length <= 0) return null;
 
     /**
@@ -282,12 +288,16 @@ export class SketchRepository implements ISketchRepository {
     switch (styleType) {
       case 'layerStyle':
         const sharedStyleId = targetOverride['value'];
-        const targetStyles = sharedStyles.filter(
-          style => style.do_objectID === sharedStyleId,
-        );
-        if (!targetStyles || targetStyles.length <= 0) return null;
-        const fill = targetStyles[0]['value']['fills'][0];
-        resultObj['backgroundColor'] = fill.color.toJson();
+        const targetStyle = sharedStyles
+          .filter(style => style.do_objectID === sharedStyleId)
+          .reduce((acc, current) => current, 0);
+        if (!targetStyle) return null;
+        const fill = targetStyle['value']['fills'][0];
+        const bgColorObj = {
+          fill: fill['color'],
+          name: targetStyle['name'],
+        };
+        resultObj['containerColor'] = bgColorObj;
         break;
       case 'stringValue':
         const title = targetOverride['value'];
