@@ -12,6 +12,10 @@ coverage
 # Transpiled files
 build/
 dist/
+outputs/
+cli-app/*.js
+cli-app/*.d.ts
+cli-app/*.json
 
 # VS Code
 .vscode

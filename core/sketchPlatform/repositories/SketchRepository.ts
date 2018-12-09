@@ -48,6 +48,9 @@ export class SketchRepository implements ISketchRepository {
       maxHierarchy = 3; // default
     }
 
+    const viewObj = { type: 'View', hierarchy: hierarchy };
+    this.parseConstraint(node.resizingConstraint, viewObj);
+
     // 'group' should be translated into container views which includes various elements
     if (
       node._class === 'group' &&
@@ -55,8 +58,6 @@ export class SketchRepository implements ISketchRepository {
       node.layers.length > 0 &&
       hierarchy <= maxHierarchy - 1
     ) {
-      const viewObj = { type: 'View', hierarchy: hierarchy };
-
       const includedArtboard = node.getParent('artboard');
       if (includedArtboard) {
         viewObj['containerId'] = includedArtboard.do_objectID;
@@ -67,7 +68,6 @@ export class SketchRepository implements ISketchRepository {
       }
       viewObj['name'] = node.name;
       viewObj['id'] = node.do_objectID;
-      viewObj['constraint'] = node.resizingConstraint;
       viewObj['isVisible'] = node.isVisible;
       if (node.frame._class === 'rect') {
         const frame = node.frame;
@@ -88,7 +88,6 @@ export class SketchRepository implements ISketchRepository {
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
     else if (node._class === 'symbolInstance') {
       const keywords = this.config.extraction.keywords;
-      const viewObj = { type: 'View' };
       if (keywords && keywords.length > 0) {
         const matched = keywords.filter(keyword => {
           const results = node.name.match(new RegExp(keyword, 'g'));
@@ -111,7 +110,6 @@ export class SketchRepository implements ISketchRepository {
       }
       viewObj['name'] = node.name;
       viewObj['id'] = node.do_objectID;
-      viewObj['constraint'] = node.resizingConstraint;
       viewObj['isVisible'] = node.isVisible;
       if (node.frame._class === 'rect') {
         const frame = node.frame;
@@ -134,42 +132,128 @@ export class SketchRepository implements ISketchRepository {
       'symbolMaster',
       instance => instance.symbolID === node.symbolID,
     );
-    if (targetSymbol && targetSymbol.layers) {
-      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
-      const layers = targetSymbol.layers.filter(
-        layer => layer._class !== 'shapeGroup',
+    if (
+      !targetSymbol ||
+      !targetSymbol.layers ||
+      targetSymbol.layers.length <= 0
+    )
+      return;
+
+    // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    const layers = targetSymbol.layers.filter(
+      layer => layer._class !== 'shapeGroup',
+    );
+    // ここでパースするelement毎に異なる取得情報
+    const parseElements = this.config.extraction[viewObj.type.toLowerCase()];
+    const shouldFollowOverrides = this.config.extraction.followOverrides;
+
+    for (const key of Object.keys(parseElements)) {
+      // TBD: 命名規則で大文字小文字を指定したものをここでも踏襲したほうがいいのではと
+      const nameKey = key.charAt(0).toUpperCase() + key.slice(1); // とりあえず頭文字だけ大文字
+      const matchedElements = layers.filter(
+        layer => layer.name === nameKey && layer._class === parseElements[key],
       );
-      // ここでパースするelement毎に異なる取得情報
-      const elements = this.config.extraction[viewObj.type.toLowerCase()];
-      const followOverrides = this.config.extraction.followOverrides;
+      const aElement = matchedElements[0];
+      if (!aElement) continue;
 
-      for (const key of Object.keys(elements)) {
-        // TBD: 命名規則で大文字小文字を指定したものをここでも踏襲したほうがいいのではと
-        const nameKey = key.charAt(0).toUpperCase() + key.slice(1); // とりあえず頭文字だけ大文字
-        const matchedElements = layers.filter(layer => {
-          return layer.name === nameKey && layer._class === elements[key];
-        });
-        const aElement = matchedElements[0];
+      // ボタンの場合
+      switch (key) {
+        case 'background':
+          viewObj['radius'] = aElement.fixedRadius;
+          const fillObj = aElement.style.fills[0];
+          viewObj['backgroundColor'] = fillObj.color.toJson();
+          if (shouldFollowOverrides) {
+            const parsedObj = this.parseOverride(
+              node,
+              sketch.layerStyles,
+              'layerStyle',
+            );
+            if (!parsedObj) break;
+            viewObj['backgroundColor'] = parsedObj['backgroundColor'];
+          }
+          break;
+        case 'label':
+          // prettier-ignore
+          if (
+            !aElement.style ||
+            !aElement.style.textStyle ||
+            !aElement.style.textStyle.encodedAttributes ||
+            !aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute
+          )
+            break;
+          const textAttribute = aElement.style.textStyle.encodedAttributes;
+          // prettier-ignore
+          const fontObj = aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute;
+          viewObj['fontName'] = fontObj.attributes.name;
+          viewObj['fontSize'] = fontObj.attributes.size;
+          if (!textAttribute.MSAttributedStringColorAttribute) break;
+          viewObj['color'] = textAttribute.MSAttributedStringColorAttribute;
+          break;
+        default:
+          break;
+      }
+    }
+  }
 
-        // ボタンの場合
-        switch (key) {
-          case 'background':
-            viewObj['radius'] = aElement.fixedRadius;
-            const fillObj = aElement.style.fills[0];
-            viewObj['backgroundColor'] = fillObj.color.toJson();
-            if (followOverrides) {
-              const parsedObj = this.parseOverride(
-                node,
-                sketch.layerStyles,
-                'layerStyle',
-              );
-              if (!parsedObj) break;
-              viewObj['backgroundColor'] = parsedObj['backgroundColor'];
-            }
-            break;
-          default:
-            break;
-        }
+  private parseConstraint(value: number, viewObj: object) {
+    // https://medium.com/zendesk-engineering/reverse-engineering-sketchs-resizing-functionality-23f6aae2da1a
+    const bitWiseAnd = parseInt(value.toString(2));
+    const bitWiseAndPadded = ('0000000000' + bitWiseAnd).slice(-6);
+    const constraints = {
+      none: bitWiseAndPadded === '111111' ? true : false,
+      top: bitWiseAndPadded.substr(0, 1) === '0' ? true : false,
+      right: bitWiseAndPadded.substr(5, 1) === '0' ? true : false,
+      bottom: bitWiseAndPadded.substr(2, 1) === '0' ? true : false,
+      left: bitWiseAndPadded.substr(3, 1) === '0' ? true : false,
+      width: bitWiseAndPadded.substr(4, 1) === '0' ? true : false,
+      height: bitWiseAndPadded.substr(1, 1) === '0' ? true : false,
+    };
+    viewObj['constraints'] = constraints;
+  }
+
+  // 出力前にconstraintの値を付与
+  private addConstraintValues(outputs) {
+    if (!outputs) return;
+
+    for (const output of outputs) {
+      if (!output.constraints) continue;
+      const baseViews = outputs.filter(
+        view =>
+          output.parentId
+            ? view.id === output.parentId
+            : view.id === output.containerId,
+      );
+      if (!baseViews || baseViews.length <= 0) continue;
+      // TODO: shuold be taken from "iPhone X Frame" symbol
+      let baseRect = output.parentId
+        ? baseViews[0].rect
+        : { x: 0, y: 0, width: 375, height: 812 };
+      // calculate margins from each sides
+      let newConstraints = {};
+      if (output.constraints.top) {
+        newConstraints['top'] = output.rect.y.toString();
+      }
+      if (output.constraints.right) {
+        newConstraints['right'] = (
+          baseRect.width -
+          (output.rect.x + output.rect.width)
+        ).toString();
+      }
+      if (output.constraints.bottom) {
+        newConstraints['bottom'] = (
+          baseRect.height -
+          (output.rect.y + output.rect.height)
+        ).toString();
+      }
+      if (output.constraints.left) {
+        newConstraints['left'] = output.rect.x.toString();
+      }
+      if (output.constraints.width) {
+        newConstraints['width'] = output.rect.width.toString();
+      }
+      if (output.constraints.height) {
+        newConstraints['height'] = output.rect.height.toString();
+        output.constraints = newConstraints;
       }
     }
   }
@@ -204,6 +288,9 @@ export class SketchRepository implements ISketchRepository {
         if (!targetStyles || targetStyles.length <= 0) return null;
         const fill = targetStyles[0]['value']['fills'][0];
         resultObj['backgroundColor'] = fill.color.toJson();
+        break;
+      case 'stringValue':
+        const title = targetOverride['value'];
         break;
       default:
         break;
@@ -244,16 +331,24 @@ export class SketchRepository implements ISketchRepository {
     // 再帰的にkeywordsにマッチする要素と中間要素を抽出
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
-      const artboardName = artboard['name'];
+      let artboardName = artboard['name'];
+
+      // todo: パターンマッチによる名前の抽出
+      artboardName = artboardName
+        .split('/')
+        .map(str => str.trim())
+        .join('');
 
       const containerObj = { type: 'Container', id: artboard['do_objectID'] };
-      containerObj['name'] = artboard['name'];
+      containerObj['name'] = artboardName; //artboard['name'];
       outputs.push(containerObj);
 
       artboard['layers'].forEach(node => {
         this.recurciveGetLayers(node, 1, sketch, outputs);
       });
     });
+
+    this.addConstraintValues(outputs);
     return outputs;
   }
 }
