@@ -180,6 +180,14 @@ export class SketchRepository implements ISketchRepository {
             !aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute
           )
             break;
+          if (shouldFollowOverrides) {
+            const parsedObj = this.parseOverride(
+              node,
+              sketch.layerStyles,
+              'stringValue',
+            );
+            viewObj['name'] = parsedObj['name'];
+          }
           const textAttribute = aElement.style.textStyle.encodedAttributes;
           // prettier-ignore
           const fontObj = aElement.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute;
@@ -271,7 +279,7 @@ export class SketchRepository implements ISketchRepository {
         return results && results.length > 0;
       })
       .reduce((acc, current) => current, 0);
-    if (!targetOverride || targetOverride.length <= 0) return null;
+    if (!targetOverride) return null;
 
     /**
      * 5-3. 3で取得したsymbolMasterオブジェクトのlayers[]を走査し、5-2で取得したID部分と、layers[].do_objectIDとが同じであればソレが対象レイヤ
@@ -296,7 +304,7 @@ export class SketchRepository implements ISketchRepository {
         resultObj['containerColor'] = bgColorObj;
         break;
       case 'stringValue':
-        const title = targetOverride['value'];
+        resultObj['name'] = targetOverride['value'];
         break;
       default:
         break;
