@@ -1,5 +1,4 @@
 import UIKit
-import SnapKit
 
 class {{container.name}}ViewController: UIViewController {
 
@@ -77,7 +76,7 @@ class {{container.name}}ViewController: UIViewController {
         constraints.append(Constraint(
             top: {{#if constraints.top }}CGFloat({{constraints.top}}){{else}}nil{{/if}},
             right: {{#if constraints.right }}CGFloat(-{{constraints.right}}){{else}}nil{{/if}},
-            bottom: {{#if constraints.bottom }}CGFloat(-{{constraints.bottom}} + 34){{else}}nil{{/if}},        // TODO: 34 is safearea for portrait
+            bottom: {{#if constraints.bottom }}CGFloat(-{{constraints.bottom}} + 34){{else}}nil{{/if}},
             left: {{#if constraints.left }}CGFloat({{constraints.left}}){{else}}nil{{/if}}, 
             width: {{#if constraints.width }}CGFloat({{constraints.width}}){{else}}nil{{/if}}, 
             height: {{#if constraints.height }}CGFloat({{constraints.height}}){{else}}nil{{/if}}))
