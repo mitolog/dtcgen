@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as ns from 'node-sketch';
+import * as _ from 'lodash';
 import { SketchLayerType } from '../entities/SketchLayerType';
 import { injectable } from 'inversify';
 
@@ -31,13 +32,8 @@ export class SketchRepository implements ISketchRepository {
    * Private methods
    */
 
-  private retrieveSketchFilePath(): string {
-    if (!this.config || !this.config['targetSketchFilePath']) return;
-    return this.config['targetSketchFilePath'];
-  }
-
   private async getSketch() {
-    const fp = this.retrieveSketchFilePath();
+    const fp = _.get(this.config, `targetSketchFilePath`);
     return await ns.read(fp);
   }
 
