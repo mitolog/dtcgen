@@ -5,7 +5,7 @@
     "extraction": {
       "keywords": ["Button"],
       "maxHierarchy": 3,
-      "followOverrides": false,
+      "followOverrides": true,
       "button": {
         "label": "text",
         "background": "rectangle"
