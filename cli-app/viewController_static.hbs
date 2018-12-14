@@ -1,5 +1,4 @@
 import UIKit
-import SnapKit
 
 class {{container.name}}ViewController: UIViewController {
 
@@ -12,7 +11,8 @@ class {{container.name}}ViewController: UIViewController {
 
         self.view.backgroundColor = UIColor.white
 
-        self.configureViews()
+        // TODO: within `configureViews()`, we should use safeAreaInsets, not hard coding (34).
+        configureViews()
         for view in views {
             self.addView(view)
         }
@@ -21,32 +21,33 @@ class {{container.name}}ViewController: UIViewController {
 
     private func layoutViews() {
         guard views.count == constraints.count else { return }
+        var anchors: [NSLayoutConstraint] = []
+
         for idx in 0..<views.count {
             guard let constraint = constraints[idx] else { continue }
             let view = views[idx]
-            print(constraint)
             let superview = view.superview ?? self.view!
-            view.snp.makeConstraints { (make) in
-                if let top = constraint.top {
-                    make.top.equalTo(superview).offset(top)
-                }
-                if let right = constraint.right {
-                    make.right.equalTo(superview).offset(right)
-                }
-                if let bottom = constraint.bottom {
-                    make.bottom.equalTo(superview).offset(bottom)
-                }
-                if let left = constraint.left {
-                    make.left.equalTo(superview).offset(left)
-                }
-                if let width = constraint.width {
-                    make.width.equalTo(width)
-                }
-                if let height = constraint.height {
-                    make.height.equalTo(height)
-                }
+
+            if let top = constraint.top {
+                anchors.append(view.topAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.topAnchor, constant: top))
+            }
+            if let right = constraint.right {
+                anchors.append(view.rightAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.rightAnchor, constant: right))
+            }
+            if let bottom = constraint.bottom {
+                anchors.append(view.bottomAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.bottomAnchor, constant: bottom))
+            }
+            if let left = constraint.left {
+                anchors.append(view.leftAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.leftAnchor, constant: left))
+            }
+            if let width = constraint.width {
+                anchors.append(view.widthAnchor.constraint(equalToConstant: width))
+            }
+            if let height = constraint.height {
+                anchors.append(view.heightAnchor.constraint(equalToConstant: height))
             }
         }
+        NSLayoutConstraint.activate(anchors)
     }
 
     private func configureViews() {
@@ -62,19 +63,23 @@ class {{container.name}}ViewController: UIViewController {
         view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         (view as! ContainedButton).setTitle("{{name}}", for: .normal)
         {{/if}}
+        {{#if containerColor }}
+        (view as! ContainedButton).containerColor = UIColor(red: {{containerColor.fill.red}}, green: {{containerColor.fill.green}}, blue: {{containerColor.fill.blue}}, alpha: {{containerColor.fill.alpha}})
+        {{/if}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
         {{/if}}
+        view!.translatesAutoresizingMaskIntoConstraints = false
         view!.restorationIdentifier = "{{id}}"
         views.append(view!)
         {{#if constraints }}
         constraints.append(Constraint(
-            top:{{#if constraints.top }}{{constraints.top}}{{else}}nil{{/if}},
-            right:{{#if constraints.right }}{{constraints.right}}{{else}}nil{{/if}},
-            bottom:{{#if constraints.bottom }}{{constraints.bottom}}{{else}}nil{{/if}}, 
-            left:{{#if constraints.left }}{{constraints.left}}{{else}}nil{{/if}}, 
-            width:{{#if constraints.width }}{{constraints.width}}{{else}}nil{{/if}}, 
-            height:{{#if constraints.height }}{{constraints.height}}{{else}}nil{{/if}}))
+            top: {{#if constraints.top }}CGFloat({{constraints.top}}){{else}}nil{{/if}},
+            right: {{#if constraints.right }}CGFloat(-{{constraints.right}}){{else}}nil{{/if}},
+            bottom: {{#if constraints.bottom }}CGFloat(-{{constraints.bottom}} + 34){{else}}nil{{/if}},
+            left: {{#if constraints.left }}CGFloat({{constraints.left}}){{else}}nil{{/if}}, 
+            width: {{#if constraints.width }}CGFloat({{constraints.width}}){{else}}nil{{/if}}, 
+            height: {{#if constraints.height }}CGFloat({{constraints.height}}){{else}}nil{{/if}}))
         {{else}}
         constraints.append(nil)
         {{/if}}
