@@ -21,6 +21,7 @@ export class ExtractElementUseCase implements IExtractElementUseCase {
   async handle(): Promise<Node[]> {
     // 取り合えず artboardのみ
     const nodes = await this.repository.extractAll();
+    this.repository.extractSlices();
     //const layers = this.presenter.translate(nodes);
     return nodes;
   }
