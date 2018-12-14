@@ -3,10 +3,18 @@ import * as ns from 'node-sketch';
 import * as _ from 'lodash';
 import { SketchLayerType } from '../entities/SketchLayerType';
 import { injectable } from 'inversify';
+import * as dotenv from 'dotenv';
+import * as cp from 'child_process';
+
+dotenv.config();
+if (dotenv.error) {
+  throw dotenv.error;
+}
 
 export interface ISketchRepository {
   getAll(type: SketchLayerType): Promise<Node[]>;
   extractAll(): Promise<any[]>;
+  extractSlices(): void;
 }
 
 @injectable()
@@ -14,15 +22,9 @@ export class SketchRepository implements ISketchRepository {
   private config: any = null;
 
   constructor() {
-    // todo: linter.configからパスを取得
-    const coreDir = process.env.CORE_DIR;
-    // todo: configファイルの探索
-    const jsonObj = JSON.parse(
-      fs.readFileSync(
-        '/Users/mito/Documents/Proj/innova/sketchLinter/sketchLinter/linter.config.json',
-        'utf8',
-      ),
-    );
+    // todo: config探索
+    const configDir = process.env.LINT_CONFIG_PATH;
+    const jsonObj = JSON.parse(fs.readFileSync(configDir, 'utf8'));
     if (jsonObj) {
       this.config = jsonObj.sketch;
     }
@@ -33,8 +35,7 @@ export class SketchRepository implements ISketchRepository {
    */
 
   private async getSketch() {
-    const fp = _.get(this.config, `targetSketchFilePath`);
-    return await ns.read(fp);
+    return await ns.read(process.env.SKETCH_PATH);
   }
 
   private recurciveGetLayers(node, hierarchy, sketch, outputs) {
@@ -364,5 +365,17 @@ export class SketchRepository implements ISketchRepository {
 
     this.addConstraintValues(outputs);
     return outputs;
+  }
+
+  extractSlices(): void {
+    const execSync = cp.execSync;
+    let command = process.env.SKETCH_TOOL_PATH;
+    command += ' export slices ';
+    command += process.env.SKETCH_PATH;
+    command += ' --formats=pdf'; //png,svg
+    // command += ' --scales=1,2,3';
+    command += ' --output=' + process.env.SKETCH_ASSET_OUTPUT_PATH;
+
+    execSync(command);
   }
 }
