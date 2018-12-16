@@ -121,10 +121,8 @@ async function generateSlicedNames() {
     // Contents.jsonの作成
     // 中間ディレクトリ
     // 最後のディレクトリ
-    
-
   });
-
+}
 
 // 再帰的にフォルダとファイルを作成
 function recursiveMakeDirFile(components: string[], isDir: boolean) {}
