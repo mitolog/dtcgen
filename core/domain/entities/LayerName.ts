@@ -1,4 +1,4 @@
-import { ElementType } from './ElementType';
+import { ElementType } from './OrigElementType';
 
 export interface ILayerName {
   id: string; // unique id derived from original desigin resource
