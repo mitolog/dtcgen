@@ -13,7 +13,9 @@ convert();
 
 function convert() {
   const sketchData: any[] = JSON.parse(String(read("result.json")));
-  const templateStr: string = String(read("viewController_static.hbs"));
+  const templateStr: string = String(
+    read("./templates/viewController_static.hbs")
+  );
 
   // viewController毎に分割
   const containers: any[] = sketchData.filter(
@@ -111,21 +113,46 @@ async function generateSlicedNames() {
       prependedPath +
       "Assets.xcassets/" +
       destComponents.join("/") +
-      ".imageset/";
+      ".imageset";
     mkdirIfNeeded(destDirPath);
 
     // `assetName` may include spaces, but no need to escape by myself. copySync will do.
     const origFilePath = prependedPath + assetName + extension;
-    fs.copySync(origFilePath, destDirPath + _.last(destComponents) + extension);
+    const lastPath = "/" + _.last(destComponents) + extension;
+    fs.copySync(origFilePath, destDirPath + lastPath);
 
     // Contents.jsonの作成
-    // 中間ディレクトリ
-    // 最後のディレクトリ
+    const startingDepth = 4;
+    console.log(destDirPath);
+    console.log(destDirPath.split("/"));
+    makeJsons(destDirPath.split("/"), startingDepth);
   });
 }
 
-// 再帰的にフォルダとファイルを作成
-function recursiveMakeDirFile(components: string[], isDir: boolean) {}
+function makeJsons(paths: string[], depth: number) {
+  const extension = ".pdf";
+
+  if (paths.length <= depth) {
+    // 各画像のContents.jsonを作成
+    const contents: any = JSON.parse(
+      String(read("./templates/lastDirContents.json"))
+    );
+    contents.images[0].filename = _.last(paths).split(".")[0] + extension;
+    const destPath = paths.join("/") + "/Contents.json";
+    console.log("destPath: ", destPath);
+    fs.writeJsonSync(destPath, contents);
+    return;
+  }
+  // 中間パスのContents.jsonを作成
+  const dirDepth = paths.length - depth;
+  console.log(dirDepth);
+  const midDir = paths.slice(0, -dirDepth).join("/") + "/Contents.json";
+  console.log("mid: ", midDir);
+  fs.copySync("./templates/midDirContents.json", midDir, { overwrite: true });
+
+  // もしまだ最終パスでなければほっていく
+  makeJsons(paths, ++depth);
+}
 
 async function mkdirIfNeeded(directory) {
   try {
