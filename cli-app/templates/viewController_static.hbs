@@ -60,8 +60,13 @@ class {{container.name}}ViewController: UIViewController {
         {{#if isView }}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         {{else if isButton }}
+        {{#if hasIcon }}
+        view = IconButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! IconButton).iconImage = UIImage(named: "Icon")
+        {{else}}
         view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         (view as! ContainedButton).setTitle("{{name}}", for: .normal)
+        {{/if}}
         {{/if}}
         {{#if backgroundColor }}
         (view as! ContainedButton).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
