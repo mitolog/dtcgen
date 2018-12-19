@@ -1,14 +1,13 @@
 {
   "sketch": {
-    "targetSketchFilePath": "/Users/mito/Downloads/linterSample.sketch",
-    "outFilePath": "/Users/mito/Downloads/layers.json",
     "extraction": {
       "keywords": ["Button"],
       "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
         "label": "text",
-        "background": "rectangle"
+        "background": "rectangle",
+        "icon": "symbolInstance"
       }
     },
     "namingRule": {
