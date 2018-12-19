@@ -43,6 +43,9 @@ export class ButtonParser implements IElementParser {
       if (!aElement) continue;
 
       switch (key) {
+        case 'icon':
+          button.hasIcon = true;
+          break;
         case 'background':
           button.radius = aElement.fixedRadius;
           const comps = new ColorComponents(<ColorComponents>(

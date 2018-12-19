@@ -6,7 +6,8 @@
       "followOverrides": true,
       "button": {
         "label": "text",
-        "background": "rectangle"
+        "background": "rectangle",
+        "icon": "symbolInstance"
       }
     },
     "namingRule": {

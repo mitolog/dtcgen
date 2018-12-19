@@ -7,4 +7,5 @@ export class Button extends View {
   fontColor: Color;
   backgroundColor?: Color;
   radius?: number;
+  hasIcon?: boolean;
 }

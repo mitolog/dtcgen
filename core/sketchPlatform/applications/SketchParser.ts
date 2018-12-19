@@ -47,20 +47,20 @@ export class SketchParser implements ISketchParser {
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
     else if (node._class === 'symbolInstance') {
       const keywords = this.config['extraction'].keywords;
-      if (keywords && keywords.length > 0) {
-        const matched = keywords.filter(keyword => {
-          const results = node.name.match(new RegExp(keyword, 'g'));
-          return results && results.length > 0 ? true : false;
-        });
-        if (matched && matched.length > 0) {
-          // matchedは最後にマッチしたものを採用する。例えば keywordsに `Button`, `View`があったとして
-          // filterをかける、node.nameが `Final View Button` とかだと、複数マッチする。
-          // この時、文法的にこのnodeはボタンと想定されるので、matchedの最後の要素を viewObjのtype
-          // とするほうが自然では。
-          view.type = matched[matched.length - 1];
-        } else {
-          return;
-        }
+      if (!keywords || keywords.length <= 0) return;
+
+      const matched = keywords.filter(keyword => {
+        const results = node.name.match(new RegExp(keyword, 'g'));
+        return results && results.length > 0 ? true : false;
+      });
+      if (matched && matched.length > 0) {
+        // matchedは最後にマッチしたものを採用する。例えば keywordsに `Button`, `View`があったとして
+        // filterをかける、node.nameが `Final View Button` とかだと、複数マッチする。
+        // この時、文法的にこのnodeはボタンと想定されるので、matchedの最後の要素を viewObjのtype
+        // とするほうが自然では。
+        view.type = matched[matched.length - 1];
+      } else {
+        return;
       }
 
       this.parseSymbol(node, view);
@@ -72,7 +72,6 @@ export class SketchParser implements ISketchParser {
     let parser: IElementParser;
     switch (view.type) {
       case ElementType.Button:
-        // console.log('sketch: ', this.sketch);
         parser = new ButtonParser(this.sketch, this.config);
         parser.parse(node, <Button>view);
         break;
