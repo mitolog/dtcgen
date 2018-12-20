@@ -88,6 +88,10 @@ export class ButtonParser implements IElementParser {
     }
   }
 
+  parseSharedStyle(node: any, styleType: string, button: Button) {
+    throw new Error('Method not implemented.');
+  }
+
   parseOverride(node: any, styleType: string, button: Button) {
     const sharedStyles: any[] = this.sketch['layerStyles'];
     // const textLayerStyles = sketch.textLayerStyles;

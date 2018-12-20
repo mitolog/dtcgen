@@ -84,8 +84,8 @@ export class SketchRepository implements ISketchRepository {
       }
       if (output.constraints.height) {
         newConstraints['height'] = output.rect.height.toString();
-        output.constraints = newConstraints;
       }
+      output.constraints = newConstraints;
     }
   }
 

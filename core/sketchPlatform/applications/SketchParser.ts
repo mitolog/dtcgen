@@ -5,10 +5,12 @@ import * as _ from 'lodash';
 import { ButtonParser } from './ElementParsers/ButtonParser';
 import { Button } from '../../domain/entities/Button';
 import { IElementParser } from './ElementParsers/IElementParser';
+import { TextViewParser } from './ElementParsers/TextViewParser';
+import { TextView } from '../../domain/entities/TextView';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
-  parseSymbol(node: any, view: View);
+  parseElement(node: any, view: View);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -45,7 +47,7 @@ export class SketchParser implements ISketchParser {
       });
     }
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
-    else if (node._class === 'symbolInstance') {
+    else if (node._class === 'symbolInstance' || node._class === 'text') {
       const keywords = this.config['extraction'].keywords;
       if (!keywords || keywords.length <= 0) return;
 
@@ -63,17 +65,21 @@ export class SketchParser implements ISketchParser {
         return;
       }
 
-      this.parseSymbol(node, view);
+      this.parseElement(node, view);
       outputs.push(view);
     }
   }
 
-  parseSymbol(node: any, view: View) {
+  parseElement(node: any, view: View) {
     let parser: IElementParser;
     switch (view.type) {
       case ElementType.Button:
         parser = new ButtonParser(this.sketch, this.config);
         parser.parse(node, <Button>view);
+        break;
+      case ElementType.TextView:
+        parser = new TextViewParser(this.sketch, this.config);
+        parser.parse(node, <TextView>view);
         break;
       default:
         break;
