@@ -36,6 +36,9 @@ function convert() {
         case "Button":
           view.isButton = true;
           break;
+        case "TextView":
+          view.isTextView = true;
+          break;
       }
     });
     let containerObj = {

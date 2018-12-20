@@ -1,7 +1,7 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button"],
+      "keywords": ["Button", "TextView"],
       "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
