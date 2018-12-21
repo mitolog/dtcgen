@@ -26,6 +26,14 @@
 - generate config の取得可否チェックと取得
 - generate 実行
 
+## 各種ルール
+
+### sketch
+
+- group は Container(View)とし、symbol は命名規則に従って各種要素に変換
+- シンボルのレイヤ構造は `linter.config.json` に記載
+-
+
 ## to run (under development phase)
 
 ### requirement

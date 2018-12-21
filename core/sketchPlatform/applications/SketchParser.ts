@@ -29,7 +29,7 @@ export class SketchParser implements ISketchParser {
       maxHierarchy = 3; // default
     }
 
-    // assign default values, but these may be override later procedure.
+    // assign default values, but these may be overridden latter procedure.
     const view: View = new View(node, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
 
@@ -47,23 +47,23 @@ export class SketchParser implements ISketchParser {
       });
     }
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
-    else if (node._class === 'symbolInstance' || node._class === 'text') {
-      const keywords = this.config['extraction'].keywords;
+    else if (node._class === 'symbolInstance') {
+      const keywords: string[] = this.config['extraction'].keywords;
       if (!keywords || keywords.length <= 0) return;
 
-      const matched = keywords.filter(keyword => {
+      const matches: string[] = keywords.filter(keyword => {
         const results = node.name.match(new RegExp(keyword, 'g'));
         return results && results.length > 0 ? true : false;
       });
-      if (matched && matched.length > 0) {
-        // matchedは最後にマッチしたものを採用する。例えば keywordsに `Button`, `View`があったとして
-        // filterをかける、node.nameが `Final View Button` とかだと、複数マッチする。
-        // この時、文法的にこのnodeはボタンと想定されるので、matchedの最後の要素を viewObjのtype
-        // とするほうが自然では。
-        view.type = matched[matched.length - 1];
-      } else {
+      if (!matches || matches.length <= 0) {
+        // the node is symbol but doesn't match any keywords, so just skip it.
         return;
       }
+
+      // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
+      // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
+      // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
+      view.type = <ElementType>matches[matches.length - 1];
 
       this.parseElement(node, view);
       outputs.push(view);

@@ -1,13 +1,17 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button", "TextView"],
+      "keywords": ["Button", "TextView", "TextInput"],
       "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
         "label": "text",
         "background": "rectangle",
         "icon": "symbolInstance"
+      },
+      "textview": {
+        "description": "text",
+        "background": "rectangle"
       }
     },
     "namingRule": {
