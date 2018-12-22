@@ -3,4 +3,6 @@ export enum ElementType {
   View = 'View',
   Button = 'Button',
   TextView = 'TextView',
+  TextInput = 'TextInput',
+  Image = 'Image',
 }

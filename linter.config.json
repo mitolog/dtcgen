@@ -1,7 +1,8 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button", "TextView", "TextInput"],
+      "keywords": ["Button", "TextView", "TextInput", "Image"],
+      "exceptions": ["iPhone X Frame"],
       "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
@@ -11,6 +12,14 @@
       },
       "textview": {
         "description": "text",
+        "background": "rectangle"
+      },
+      "textinput": {
+        "placeholder": "text",
+        "background": "rectangle"
+      },
+      "image": {
+        "image": "rectangle",
         "background": "rectangle"
       }
     },

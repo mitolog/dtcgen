@@ -112,6 +112,9 @@ export class SketchRepository implements ISketchRepository {
   /// Extract all elements which belongs to each artboards.
   async extractAll(): Promise<any[]> {
     const sketch = await this.getSketch();
+    sketch.use(
+      new ns.plugins.ExportImages(process.env.SKETCH_ASSET_OUTPUT_PATH),
+    );
     const artboards = await this.getAll();
 
     // 最終出力するjsonの雛形を用意

@@ -7,6 +7,9 @@ import { Button } from '../../domain/entities/Button';
 import { IElementParser } from './ElementParsers/IElementParser';
 import { TextViewParser } from './ElementParsers/TextViewParser';
 import { TextView } from '../../domain/entities/TextView';
+import { TextInputParser } from './ElementParsers/TextInputParser';
+import { TextInput } from '../../domain/entities/TextInput';
+import { ImageParser } from './ElementParsers/ImageParser';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
@@ -80,6 +83,14 @@ export class SketchParser implements ISketchParser {
       case ElementType.TextView:
         parser = new TextViewParser(this.sketch, this.config);
         parser.parse(node, <TextView>view);
+        break;
+      case ElementType.TextInput:
+        parser = new TextInputParser(this.sketch, this.config);
+        parser.parse(node, <TextInput>view);
+        break;
+      case ElementType.Image:
+        parser = new ImageParser(this.sketch, this.config);
+        parser.parse(node, <TextInput>view);
         break;
       default:
         break;

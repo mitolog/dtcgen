@@ -1,21 +1,27 @@
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { TextInput } from '../../../domain/entities/TextInput';
 import * as _ from 'lodash';
-import { TextAlignment } from '../../../domain/entities/TextAlignment';
+import * as ns from 'node-sketch';
 import { SymbolParser } from './SymbolParser';
 import { ElementType } from '../../../domain/entities/ElementType';
+import * as dotenv from 'dotenv';
+import { Image } from '../../../domain/entities/Image';
 
-export class TextInputParser extends SymbolParser {
-  parse(node: any, view: TextInput) {
+dotenv.config();
+if (dotenv.error) {
+  throw dotenv.error;
+}
+
+export class ImageParser extends SymbolParser {
+  parse(node: any, view: Image) {
     super.parse(node, view);
-    const elements = this.getSymbolElements(ElementType.TextInput);
+    const elements = this.getSymbolElements(ElementType.Image);
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
       switch (key) {
-        case 'placeholder':
-          this.parseInput(node, view, aLayer);
+        case 'image':
+          this.parseImage(node, view, aLayer);
           break;
         case 'background':
           this.parseBackground(node, view, aLayer);
@@ -24,14 +30,13 @@ export class TextInputParser extends SymbolParser {
     }
   }
 
-  parseSharedStyle(node: any, styleType: string, view: TextInput) {
+  parseSharedStyle(node: any, styleType: string, view: Image) {
     //throw new Error('Method not implemented.');
   }
 
-  parseOverride(node: any, styleType: string, view: TextInput) {
+  parseOverride(node: any, styleType: string, view: Image) {
     if (!node.overrideValues) return;
     const sharedStyles: any[] = this.layerStyles;
-    // const textLayerStyles = sketch.textLayerStyles;
 
     // extract targetOverride
     // TODO: node.overrideValuesには、対象となるstyleType(例えば `layerStyle` )のoverrideは常に1つであるという前提にたっている
@@ -68,10 +73,12 @@ export class TextInputParser extends SymbolParser {
         view.backgroundColor = new Color(<Color>bgColorObj);
         break;
 
-      case 'stringValue':
-        view.placeHolder = targetOverride['value'];
+      case 'image':
+        const imageRef = _.get(targetOverride, 'value._ref');
+        if (!imageRef) break;
+        const imageName = imageRef.split('/')[1];
+        view.imageName = imageName ? imageName : '';
         break;
-
       default:
         break;
     }
@@ -79,24 +86,28 @@ export class TextInputParser extends SymbolParser {
 
   /* Private methods below */
 
-  private parseInput(node: any, view: TextInput, aLayer: any) {
+  private parseImage(node: any, view: Image, aLayer: any) {
     // prettier-ignore
-    const fontAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
+    const fillObj = _.get(aLayer, 'style.fills[0]');
+    const fillType = _.get(fillObj, 'fillType');
 
-    if (!fontAttribute || !colorAttribute) return;
+    if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
     if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', view);
+      this.parseOverride(node, 'image', view);
+    } else {
+      // retrieve symbol’s default value
+      const imageRef = _.get(fillObj, 'image._ref');
+      const imageName = imageRef ? imageRef.split('/')[1] : '';
+      view.imageName = imageName ? imageName : '';
+      // we need to export the image if it's from symbols.
+      // because ExportImages plugin(which is used within SketchRepository)
+      // exports only images under pages.
+      const imageRefNode = fillObj.get('MSJSONFileReference');
+      imageRefNode.export(process.env.SKETCH_ASSET_OUTPUT_PATH);
     }
-    // prettier-ignore
-    view.fontName = fontAttribute.attributes.name;
-    view.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    view.fontColor = new Color(<Color>{ fill: comps });
   }
 
-  private parseBackground(node: any, view: TextInput, aLayer: any) {
+  private parseBackground(node: any, view: Image, aLayer: any) {
     view.radius = aLayer.fixedRadius;
     const comps = new ColorComponents(<ColorComponents>(
       aLayer.style.fills[0].color
