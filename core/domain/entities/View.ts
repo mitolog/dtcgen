@@ -2,6 +2,7 @@ import { ElementType } from './ElementType';
 import { Constraints } from './Constraints';
 import { Container } from './Container';
 import { Rect } from './Rect';
+import { Color } from './Color';
 
 export class View extends Container {
   isVisible: boolean;
@@ -10,6 +11,8 @@ export class View extends Container {
   containerId?: string;
   parentId?: string;
   constraints?: Constraints;
+  backgroundColor?: Color;
+  radius?: number;
 
   constructor(node: any, hierarchy: number) {
     super();

@@ -19,7 +19,7 @@ export class TextViewParser extends SymbolParser {
           this.parseDescription(node, textView, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, textView);
+          this.parseBackground(node, textView, aLayer);
           break;
       }
     }
@@ -70,7 +70,7 @@ export class TextViewParser extends SymbolParser {
         break;
 
       case 'stringValue':
-        view.name = targetOverride['value'];
+        view.text = targetOverride['value'];
         break;
 
       default:
@@ -95,46 +95,16 @@ export class TextViewParser extends SymbolParser {
     textView.fontSize = fontAttribute.attributes.size;
     const comps = new ColorComponents(<ColorComponents>colorAttribute);
     textView.fontColor = new Color(<Color>{ fill: comps });
-
-    // // todo: textStyleのパース
-    // const textStyle = null; //_.get(node, 'style.textStyle');
-    // const attributedString = _.get(node, 'attributedString');
-
-    // if (textStyle) {
-    // } else if (attributedString) {
-    //   // font descriptor
-    //   const fontDescriptor = _.get(
-    //     attributedString,
-    //     'attributes[0].attributes.MSAttributedStringFontAttribute.attributes',
-    //   );
-    //   if (fontDescriptor) {
-    //     textView.fontName = fontDescriptor.name;
-    //     textView.fontSize = fontDescriptor.size;
-    //   }
-
-    //   // fontColor
-    //   const fontColor = _.get(
-    //     attributedString,
-    //     'attributes[0].attributes.MSAttributedStringColorAttribute',
-    //   );
-    //   if (fontColor) {
-    //     const colorComp = new ColorComponents(<ColorComponents>fontColor);
-    //     textView.fontColor = new Color(<Color>{ fill: colorComp });
-    //   }
-
-    //   // text
-    //   textView.text = attributedString.string;
-
-    //   // text alignment
-    //   const paragraphStyle = _.get(
-    //     attributedString,
-    //     'attributes[0].attributes.paragraphStyle',
-    //   );
-    //   if (paragraphStyle) {
-    //     textView.alignment = <TextAlignment>paragraphStyle.alignment;
-    //   }
-    // }
   }
 
-  private parseBackground(node: any, textView: TextView) {}
+  private parseBackground(node: any, view: TextView, aLayer: any) {
+    view.radius = aLayer.fixedRadius;
+    const comps = new ColorComponents(<ColorComponents>(
+      aLayer.style.fills[0].color
+    ));
+    view.backgroundColor = new Color(<Color>{ fill: comps });
+    if (this.followOverrides) {
+      this.parseOverride(node, 'layerStyle', view);
+    }
+  }
 }
