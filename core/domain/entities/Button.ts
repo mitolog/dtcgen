@@ -5,7 +5,5 @@ export class Button extends View {
   fontName: string;
   fontSize: number;
   fontColor: Color;
-  backgroundColor?: Color;
-  radius?: number;
   hasIcon?: boolean;
 }
