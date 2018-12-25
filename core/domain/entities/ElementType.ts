@@ -5,4 +5,5 @@ export enum ElementType {
   TextView = 'TextView',
   TextInput = 'TextInput',
   Image = 'Image',
+  Card = 'Card',
 }
