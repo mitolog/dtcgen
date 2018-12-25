@@ -33,8 +33,8 @@ export class View extends Container {
     if (belongingArtboard) {
       this.containerId = belongingArtboard.do_objectID;
     }
-    const parent = node.getParent('group');
-    if (parent) {
+    const parent = node.getParent(); //node.getParent('group');
+    if (parent._class !== 'page') {
       this.parentId = parent.do_objectID;
     }
     this.hierarchy = hierarchy;

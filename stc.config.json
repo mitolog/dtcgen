@@ -2,7 +2,8 @@
   "sketch": {
     "extraction": {
       "keywords": ["Button", "TextView", "TextInput", "Image"],
-      "exceptions": ["iPhone X Frame"],
+      "exceptions": ["iPhone X Frame", "Color", "Overrides"],
+      "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
       "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
@@ -19,6 +20,12 @@
         "background": "rectangle"
       },
       "image": {
+        "image": "rectangle",
+        "background": "rectangle"
+      },
+      "card": {
+        "title": "text",
+        "description": "text",
         "image": "rectangle",
         "background": "rectangle"
       }

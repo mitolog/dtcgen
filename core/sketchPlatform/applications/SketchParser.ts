@@ -10,10 +10,12 @@ import { TextView } from '../../domain/entities/TextView';
 import { TextInputParser } from './ElementParsers/TextInputParser';
 import { TextInput } from '../../domain/entities/TextInput';
 import { ImageParser } from './ElementParsers/ImageParser';
+import { AutoParser } from './ElementParsers/AutoParser';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
   parseElement(node: any, view: View);
+  parseSymbol(node: any, hierarchy: number, outputs: any[]);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -26,6 +28,10 @@ export class SketchParser implements ISketchParser {
     this.config = config;
   }
 
+  /**
+   * Interface methods
+   */
+
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
     let maxHierarchy: number = this.config['extraction'].maxHierarchy;
     if (!maxHierarchy) {
@@ -36,11 +42,13 @@ export class SketchParser implements ISketchParser {
     const view: View = new View(node, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
 
-    // `group` translated into `container` which holds various views on it
+    if (this.shouldExclude(node.name)) return;
+
+    // `group` translated into `view` which holds various views on it
     if (
       node._class === 'group' &&
-      _.size(node.layers) &&
-      hierarchy <= maxHierarchy - 1
+      _.size(node.layers)
+      // hierarchy <= maxHierarchy - 1  // TBD: hierarchy shuoldn't be evaluated?
     ) {
       outputs.push(view);
       hierarchy++;
@@ -58,18 +66,18 @@ export class SketchParser implements ISketchParser {
         const results = node.name.match(new RegExp(keyword, 'g'));
         return results && results.length > 0 ? true : false;
       });
-      if (!matches || matches.length <= 0) {
-        // the node is symbol but doesn't match any keywords, so just skip it.
-        return;
+      if (matches && matches.length > 0) {
+        // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
+        // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
+        // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
+        view.type = <ElementType>matches[matches.length - 1];
+        this.parseElement(node, view);
+        outputs.push(view);
+      } else {
+        // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
+        // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
+        this.parseSymbol(node, hierarchy, outputs);
       }
-
-      // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
-      // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
-      // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
-      view.type = <ElementType>matches[matches.length - 1];
-
-      this.parseElement(node, view);
-      outputs.push(view);
     }
   }
 
@@ -97,6 +105,48 @@ export class SketchParser implements ISketchParser {
     }
   }
 
+  parseSymbol(node: any, hierarchy: number, outputs: any[]) {
+    if (!node._class || !node.name || this.shouldExclude(node.name)) return;
+    const symbolsPage = this.sketch['symbolsPage'];
+    let targetSymbol: any;
+    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
+      targetSymbol = symbolsPage.get(
+        'symbolMaster',
+        instance => instance.symbolID === node.symbolID,
+      );
+      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    } else if (node._class !== 'shapeGroup') {
+      targetSymbol = node;
+    }
+    if (!targetSymbol) {
+      // todo: symbolMaster, symbolInstanceでパースしたが、マッチするシンボルがない場合。
+      // またはshapeGroupの場合。イレギュラーケースもある? 要調査。
+      return;
+    }
+
+    if (this.shouldExclude(targetSymbol.name)) return;
+
+    const view: View = new View(targetSymbol, hierarchy);
+    this.parseConstraint(node.resizingConstraint, view);
+
+    const subLayers = _.get(targetSymbol, 'layers');
+    if (!subLayers || subLayers.length <= 0) {
+      // 最下層なので、ここで当該要素(node)をパース
+      // todo: parentIdを現状viewのコンストラクタでnode.parentが `group` の時のみにしてるが、
+      // この場合は、node.parentが symbolの場合もあるためそれも考慮しなければ。
+      const parser = new AutoParser(this.sketch, this.config);
+      parser.parse(targetSymbol, view);
+      outputs.push(view);
+      return;
+    }
+
+    outputs.push(view);
+    hierarchy++;
+    subLayers.forEach(layer => {
+      this.parseSymbol(layer, hierarchy, outputs);
+    });
+  }
+
   /**
    * Parse constraint value and output to view object.
    * Each constraints are re-assigned later considering related margins.
@@ -117,5 +167,18 @@ export class SketchParser implements ISketchParser {
       height: bitWiseAndPadded.substr(1, 1) === '0' ? 1 : 0,
     } as Constraints;
     view.constraints = constraints;
+  }
+
+  shouldExclude(targetName: string) {
+    // exclude node that is listed on setting config.
+    const excludeNames: string[] = _.get(this.config, 'extraction.exceptions');
+    if (excludeNames && excludeNames.length > 0) {
+      const found = excludeNames.find(name => {
+        const matched = targetName.match(new RegExp(name, 'g'));
+        return matched ? true : false;
+      });
+      return found ? true : false;
+    }
+    return false;
   }
 }

@@ -8,6 +8,8 @@ import * as cp from 'child_process';
 import { Container } from '../../domain/entities/Container';
 import { ElementType } from '../../domain/entities/ElementType';
 import { SketchParser } from '../applications/SketchParser';
+import { Rect } from '../../domain/entities/Rect';
+import { View } from '../../domain/entities/View';
 
 dotenv.config();
 if (dotenv.error) {
@@ -43,22 +45,25 @@ export class SketchRepository implements ISketchRepository {
   }
 
   // 出力前にconstraintの値を付与
-  private addConstraintValues(outputs) {
+  private addConstraintValues(outputs: View[]) {
     if (!outputs) return;
+
+    const baseFrame: Rect = _.get(this.config, 'extraction.baseFrame');
+    if (!baseFrame) return;
 
     for (const output of outputs) {
       if (!output.constraints) continue;
-      const baseViews = outputs.filter(
-        view =>
-          output.parentId
-            ? view.id === output.parentId
-            : view.id === output.containerId,
-      );
-      if (!baseViews || baseViews.length <= 0) continue;
-      // TODO: shuold be taken from "iPhone X Frame" symbol
-      let baseRect = output.parentId
-        ? baseViews[0].rect
-        : { x: 0, y: 0, width: 375, height: 812 };
+      const baseView: View = outputs
+        .filter(
+          view =>
+            output.parentId
+              ? view.id === output.parentId
+              : view.id === output.containerId,
+        )
+        .reduce((acc, current) => current, null);
+      if (!baseView) continue;
+      const baseRect: Rect =
+        baseView.type !== 'Container' ? baseView.rect : baseFrame;
       // calculate margins from each sides
       let newConstraints = {};
       if (output.constraints.top) {
