@@ -1,11 +1,11 @@
+import * as _ from 'lodash';
+import * as dotenv from 'dotenv';
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import * as _ from 'lodash';
-import * as ns from 'node-sketch';
 import { SymbolParser } from './SymbolParser';
 import { ElementType } from '../../../domain/entities/ElementType';
-import * as dotenv from 'dotenv';
 import { Image } from '../../../domain/entities/Image';
+import { PathManager, OutputType } from '../../../utilities/PathManager';
 
 dotenv.config();
 if (dotenv.error) {
@@ -90,7 +90,6 @@ export class ImageParser extends SymbolParser {
     // prettier-ignore
     const fillObj = _.get(aLayer, 'style.fills[0]');
     const fillType = _.get(fillObj, 'fillType');
-
     if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
     if (this.followOverrides) {
       this.parseOverride(node, 'image', view);
@@ -103,7 +102,8 @@ export class ImageParser extends SymbolParser {
       // because ExportImages plugin(which is used within SketchRepository)
       // exports only images under pages.
       const imageRefNode = fillObj.get('MSJSONFileReference');
-      imageRefNode.export(process.env.SKETCH_ASSET_OUTPUT_PATH);
+      const imagePathName = PathManager.getOutputPath(OutputType.images, true);
+      imageRefNode.export(imagePathName);
     }
   }
 

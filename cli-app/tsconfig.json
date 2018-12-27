@@ -13,5 +13,5 @@
     "sourceMap": false,
     "target": "es6"
   },
-  "files": ["index.ts", "converter.ts"]
+  "files": ["index.ts"]
 }
