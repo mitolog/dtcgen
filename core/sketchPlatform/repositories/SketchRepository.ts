@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as ns from 'node-sketch';
 import * as _ from 'lodash';
 import { SketchLayerType } from '../entities/SketchLayerType';
@@ -10,6 +10,10 @@ import { ElementType } from '../../domain/entities/ElementType';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
 import { View } from '../../domain/entities/View';
+import { OSType } from '../../domain/entities/OSType';
+import { IOSCodeGenerator } from '../applications/IOSCodeGenerator';
+import { ICodeGenerator } from '../../domain/applications/ICodeGenerator';
+import { PathManager, OutputType } from '../../utilities/PathManager';
 
 dotenv.config();
 if (dotenv.error) {
@@ -18,8 +22,9 @@ if (dotenv.error) {
 
 export interface ISketchRepository {
   getAll(type: SketchLayerType): Promise<Node[]>;
-  extractAll(): Promise<any[]>;
+  extractAll(): Promise<void>;
   extractSlices(): void;
+  generateAll(ostype: OSType): void;
 }
 
 @injectable()
@@ -40,12 +45,19 @@ export class SketchRepository implements ISketchRepository {
    * Private methods
    */
 
-  private async getSketch() {
-    return await ns.read(process.env.SKETCH_PATH);
+  /**
+   * get sketch file object from which extract metadata and asset files
+   * return {Promise<any>} node-sketch object which express sketch file.
+   */
+  private async getTargetSketch(): Promise<any> {
+    return await ns.read(process.env.SKETCH_FILE_PATH);
   }
 
-  // 出力前にconstraintの値を付与
-  private addConstraintValues(outputs: View[]) {
+  /**
+   * add constraint values(numbers) which represents relative position from parent view
+   * @param outputs {View[]} An array of View or subclass of View
+   */
+  private addConstraintValues(outputs: View[]): void {
     if (!outputs) return;
 
     const baseFrame: Rect = _.get(this.config, 'extraction.baseFrame');
@@ -100,7 +112,7 @@ export class SketchRepository implements ISketchRepository {
 
   /// retrieve all artboards the sketch file has.
   async getAll(): Promise<Node[]> {
-    const sketch = await this.getSketch();
+    const sketch = await this.getTargetSketch();
     const pages = sketch.pages;
     const nodes = [];
     for (const page of pages) {
@@ -113,20 +125,19 @@ export class SketchRepository implements ISketchRepository {
     return result;
   }
 
-  // No validation because we assume it's already linted.
-  /// Extract all elements which belongs to each artboards.
-  async extractAll(): Promise<any[]> {
-    const sketch = await this.getSketch();
-    sketch.use(
-      new ns.plugins.ExportImages(process.env.SKETCH_ASSET_OUTPUT_PATH),
-    );
+  /// Extract all elements which belongs to each artboards. No validation because we assume it's already linted.
+  async extractAll(): Promise<void> {
+    const sketch = await this.getTargetSketch();
+
+    // extract all images within 'Pages'(not in 'Symbols')
+    const imagesDirName = PathManager.getOutputPath(OutputType.images, true);
+    sketch.use(new ns.plugins.ExportImages(imagesDirName));
+
+    // extract all artboards
     const artboards = await this.getAll();
-
-    // 最終出力するjsonの雛形を用意
     const outputs: any[] = [];
-
-    // 再帰的にkeywordsにマッチする要素と中間要素を抽出
     const sketchParser = new SketchParser(sketch, this.config);
+
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
       let artboardName = artboard['name'];
@@ -149,18 +160,42 @@ export class SketchRepository implements ISketchRepository {
     });
 
     this.addConstraintValues(outputs);
-    return outputs;
+
+    const metadataPath = PathManager.getOutputPath(OutputType.metadata, true);
+    fs.writeFileSync(metadataPath, JSON.stringify(outputs));
   }
 
   extractSlices(): void {
     const execSync = cp.execSync;
+    const dirPath = PathManager.getOutputPath(OutputType.slices, true);
     let command = process.env.SKETCH_TOOL_PATH;
     command += ' export slices ';
-    command += process.env.SKETCH_PATH;
+    command += process.env.SKETCH_FILE_PATH;
     command += ' --formats=pdf'; //png,svg
     // command += ' --scales=1,2,3';
-    command += ' --output=' + process.env.SKETCH_ASSET_OUTPUT_PATH;
+    command += ' --output=' + dirPath;
 
     execSync(command);
+
+    // `export slices` command may make leading/trailing spaces, so remove these.
+    PathManager.removeWhiteSpaces(dirPath);
+  }
+
+  generateAll(ostype: OSType): void {
+    if (!ostype) return;
+    const metadataFilePath = PathManager.getOutputPath(OutputType.metadata);
+    let generator: ICodeGenerator;
+
+    switch (ostype) {
+      case OSType.ios:
+        generator = new IOSCodeGenerator();
+        generator.generate(metadataFilePath);
+        break;
+      case OSType.android:
+        /** TBA */
+        break;
+      default:
+        break;
+    }
   }
 }

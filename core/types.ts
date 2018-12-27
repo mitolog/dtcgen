@@ -4,6 +4,7 @@ const TYPES = {
   ISketchRepository: Symbol.for('ISketchRepository'),
   ILintNamingUseCase: Symbol.for('ILintNamingUseCase'),
   IExtractElementUseCase: Symbol.for('IExtractElementUseCase'),
+  IGenerateCodeUseCase: Symbol.for('IGenerateCodeUseCase'),
 };
 
 export { TYPES };

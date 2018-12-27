@@ -1,12 +1,15 @@
+import * as _ from 'lodash';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import * as _ from 'lodash';
 import { SymbolParser } from './SymbolParser';
-import * as dotenv from 'dotenv';
 import { View } from '../../../domain/entities/View';
 import { TextView } from '../../../domain/entities/TextView';
 import { Image } from '../../../domain/entities/Image';
 import { ElementType } from '../../../domain/entities/ElementType';
+import { PathManager, OutputType } from '../../../utilities/PathManager';
 
 dotenv.config();
 if (dotenv.error) {
@@ -150,7 +153,8 @@ export class AutoParser extends SymbolParser {
       // because ExportImages plugin(which is used within SketchRepository)
       // exports only images under pages.
       const imageRefNode = fillObj.get('MSJSONFileReference');
-      imageRefNode.export(process.env.SKETCH_ASSET_OUTPUT_PATH);
+      const imagePathName = PathManager.getOutputPath(OutputType.images, true);
+      imageRefNode.export(imagePathName);
     }
   }
 
