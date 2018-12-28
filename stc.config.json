@@ -2,7 +2,14 @@
   "sketch": {
     "extraction": {
       "keywords": ["Button", "TextView", "TextInput", "Image"],
-      "exceptions": ["iPhone X Frame", "Color", "Overrides", "Tint", "Mask"],
+      "exceptions": [
+        "iPhone X Frame",
+        "Color",
+        "Overrides",
+        "Tint",
+        "Mask",
+        "Pin"
+      ],
       "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
       "maxHierarchy": 3,
       "followOverrides": true,
