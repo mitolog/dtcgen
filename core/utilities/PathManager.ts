@@ -19,6 +19,7 @@ export enum OutputType {
   metadata,
   sourcecodes,
   assets,
+  appicons,
 }
 
 export class PathManager {
@@ -105,6 +106,27 @@ export class PathManager {
         outputPath = assetsPath;
         break;
 
+      case OutputType.appicons:
+        let appIconPath = '';
+        if (osType === OSType.ios) {
+          appIconPath = path.join(
+            process.env.OUTPUT_PATH,
+            OutputMidDirName.generated,
+            OSType.ios,
+            'Assets.xcassets/',
+            'AppIcon.appiconset',
+            'Contents.json',
+          );
+        } else if (osType === OSType.android) {
+          throw new Error(
+            'assets generation for android is not implemented yet',
+          );
+        }
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(path.dirname(appIconPath));
+        }
+        outputPath = appIconPath;
+        break;
       default:
         break;
     }

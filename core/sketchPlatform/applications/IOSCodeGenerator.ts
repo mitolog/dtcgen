@@ -69,6 +69,19 @@ export class IOSCodeGenerator {
     slices.forEach(basename => {
       this.generateAssets(path.join(slicesDir, basename), assetsDir);
     });
+
+    // appIconのコピー
+    const appIconTemplatePath: string = path.join(
+      process.env.TEMPLATE_DIR,
+      'appIcon.json',
+    );
+    const appIconJson = PathManager.read(appIconTemplatePath);
+    const appIconPath = PathManager.getOutputPath(
+      OutputType.appicons,
+      true,
+      OSType.ios,
+    );
+    fs.writeFileSync(appIconPath, appIconJson);
   }
 
   /**
