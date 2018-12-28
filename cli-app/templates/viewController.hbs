@@ -55,11 +55,15 @@ class {{container.name}}ViewController: UIViewController {
         self.views = []
         self.constraints = []
         var view: UIView? = nil
-
         {{#views}}
-        {{#if isView }}
+        {{#eq type 'View'}}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        {{else if isButton }}
+        (view as! Container).name = "{{name}}"
+        {{#if backgroundColor }}
+        (view as! Container).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        {{/if}} 
+        {{/eq}}
+        {{#eq type 'Button'}}
         {{#if hasIcon }}
         view = IconButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         (view as! IconButton).iconImage = UIImage(named: "Icon")
@@ -67,7 +71,11 @@ class {{container.name}}ViewController: UIViewController {
         view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         (view as! ContainedButton).setTitle("{{name}}", for: .normal)
         {{/if}}
-        {{else if isTextView }}
+        {{#if backgroundColor }}
+        (view as! ContainedButton).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        {{/if}} 
+        {{/eq}}
+        {{#eq type 'TextView'}}
         view = TextView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}),
                         textContainer: nil)
         view!.backgroundColor = UIColor.clear
@@ -75,10 +83,10 @@ class {{container.name}}ViewController: UIViewController {
         {{!-- (view as! TextView).textAlignment = {{alignment}} --}}
         (view as! TextView).font = UIFont(name: "{{fontName}}", size: {{fontSize}})
         (view as! TextView).textColor = UIColor(red: {{fontColor.fill.red}}, green: {{fontColor.fill.green}}, blue: {{fontColor.fill.blue}}, alpha: {{fontColor.fill.alpha}})
-        {{/if}}
         {{#if backgroundColor }}
-        (view as! ContainedButton).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        (view as! TextView).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/if}}
+        {{/eq}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
         {{/if}}

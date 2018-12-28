@@ -15,7 +15,12 @@ import { AutoParser } from './ElementParsers/AutoParser';
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
   parseElement(node: any, view: View);
-  parseSymbol(node: any, hierarchy: number, outputs: any[]);
+  parseSymbol(
+    node: any,
+    hierarchy: number,
+    outputs: any[],
+    containerId: string,
+  );
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -29,7 +34,7 @@ export class SketchParser implements ISketchParser {
   }
 
   /**
-   * Interface methods
+   * Interface methods below
    */
 
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
@@ -76,7 +81,10 @@ export class SketchParser implements ISketchParser {
       } else {
         // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
         // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
-        this.parseSymbol(node, hierarchy, outputs);
+        // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
+        // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
+        const containerId = this.containerId(node);
+        this.parseSymbol(node, hierarchy, outputs, containerId);
       }
     }
   }
@@ -105,7 +113,12 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(node: any, hierarchy: number, outputs: any[]) {
+  parseSymbol(
+    node: any,
+    hierarchy: number,
+    outputs: any[],
+    containerId: string,
+  ) {
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
     const symbolsPage = this.sketch['symbolsPage'];
     let targetSymbol: any;
@@ -125,8 +138,8 @@ export class SketchParser implements ISketchParser {
     }
 
     if (this.shouldExclude(targetSymbol.name)) return;
-
     const view: View = new View(targetSymbol, hierarchy);
+    view.containerId = containerId;
     this.parseConstraint(node.resizingConstraint, view);
 
     const subLayers = _.get(targetSymbol, 'layers');
@@ -143,7 +156,7 @@ export class SketchParser implements ISketchParser {
     outputs.push(view);
     hierarchy++;
     subLayers.forEach(layer => {
-      this.parseSymbol(layer, hierarchy, outputs);
+      this.parseSymbol(layer, hierarchy, outputs, containerId);
     });
   }
 
@@ -169,7 +182,21 @@ export class SketchParser implements ISketchParser {
     view.constraints = constraints;
   }
 
-  shouldExclude(targetName: string) {
+  /**
+   * Private methods below
+   */
+
+  private containerId(node: any): string {
+    if (node._class === 'artboard') {
+      return node.do_objectID;
+    } else if (node._class === 'page' || node._class === 'sketch') {
+      return null;
+    }
+    const parent = node.getParent();
+    return this.containerId(parent);
+  }
+
+  private shouldExclude(targetName: string) {
     // exclude node that is listed on setting config.
     const excludeNames: string[] = _.get(this.config, 'extraction.exceptions');
     if (excludeNames && excludeNames.length > 0) {

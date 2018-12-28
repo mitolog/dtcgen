@@ -34,6 +34,8 @@ export class View extends Container {
       this.containerId = belongingArtboard.do_objectID;
     }
     const parent = node.getParent(); //node.getParent('group');
+    // parent can be:
+    // group, symbolMaster, page, artboard
     if (parent._class !== 'page') {
       this.parentId = parent.do_objectID;
     }
