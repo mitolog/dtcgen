@@ -20,5 +20,8 @@ cliContainer
 cliContainer
   .bind<Domain.IExtractElementUseCase>(TYPES.IExtractElementUseCase)
   .to(SketchPlatform.ExtractElementUseCase);
+cliContainer
+  .bind<Domain.IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase)
+  .to(SketchPlatform.GenerateCodeUseCase);
 
 export { cliContainer };

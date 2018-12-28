@@ -2,6 +2,7 @@ import { ElementType } from './ElementType';
 import { Constraints } from './Constraints';
 import { Container } from './Container';
 import { Rect } from './Rect';
+import { Color } from './Color';
 
 export class View extends Container {
   isVisible: boolean;
@@ -10,6 +11,8 @@ export class View extends Container {
   containerId?: string;
   parentId?: string;
   constraints?: Constraints;
+  backgroundColor?: Color;
+  radius?: number;
 
   constructor(node: any, hierarchy: number) {
     super();
@@ -30,8 +33,8 @@ export class View extends Container {
     if (belongingArtboard) {
       this.containerId = belongingArtboard.do_objectID;
     }
-    const parent = node.getParent('group');
-    if (parent) {
+    const parent = node.getParent(); //node.getParent('group');
+    if (parent._class !== 'page') {
       this.parentId = parent.do_objectID;
     }
     this.hierarchy = hierarchy;

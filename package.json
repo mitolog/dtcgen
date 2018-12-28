@@ -36,6 +36,7 @@
     "dotenv": "^6.1.0",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.0.12",
+    "handlebars-helpers": "^0.10.0",
     "inversify": "^5.0.1",
     "lodash": "^4.17.11",
     "node-sketch": "^0.10.0",

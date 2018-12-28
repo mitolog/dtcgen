@@ -1,3 +1,3 @@
 export interface IExtractElementUseCase {
-  handle(): Promise<Node[]>;
+  handle(): Promise<void>;
 }

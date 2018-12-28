@@ -5,10 +5,17 @@ import * as _ from 'lodash';
 import { ButtonParser } from './ElementParsers/ButtonParser';
 import { Button } from '../../domain/entities/Button';
 import { IElementParser } from './ElementParsers/IElementParser';
+import { TextViewParser } from './ElementParsers/TextViewParser';
+import { TextView } from '../../domain/entities/TextView';
+import { TextInputParser } from './ElementParsers/TextInputParser';
+import { TextInput } from '../../domain/entities/TextInput';
+import { ImageParser } from './ElementParsers/ImageParser';
+import { AutoParser } from './ElementParsers/AutoParser';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
-  parseSymbol(node: any, view: View);
+  parseElement(node: any, view: View);
+  parseSymbol(node: any, hierarchy: number, outputs: any[]);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -21,21 +28,27 @@ export class SketchParser implements ISketchParser {
     this.config = config;
   }
 
+  /**
+   * Interface methods
+   */
+
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
     let maxHierarchy: number = this.config['extraction'].maxHierarchy;
     if (!maxHierarchy) {
       maxHierarchy = 3; // default
     }
 
-    // assign default values, but these may be override later procedure.
+    // assign default values, but these may be overridden latter procedure.
     const view: View = new View(node, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
 
-    // `group` translated into `container` which holds various views on it
+    if (this.shouldExclude(node.name)) return;
+
+    // `group` translated into `view` which holds various views on it
     if (
       node._class === 'group' &&
-      _.size(node.layers) &&
-      hierarchy <= maxHierarchy - 1
+      _.size(node.layers)
+      // hierarchy <= maxHierarchy - 1  // TBD: hierarchy shuoldn't be evaluated?
     ) {
       outputs.push(view);
       hierarchy++;
@@ -46,38 +59,92 @@ export class SketchParser implements ISketchParser {
     }
     // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
     else if (node._class === 'symbolInstance') {
-      const keywords = this.config['extraction'].keywords;
+      const keywords: string[] = this.config['extraction'].keywords;
       if (!keywords || keywords.length <= 0) return;
 
-      const matched = keywords.filter(keyword => {
+      const matches: string[] = keywords.filter(keyword => {
         const results = node.name.match(new RegExp(keyword, 'g'));
         return results && results.length > 0 ? true : false;
       });
-      if (matched && matched.length > 0) {
-        // matchedは最後にマッチしたものを採用する。例えば keywordsに `Button`, `View`があったとして
-        // filterをかける、node.nameが `Final View Button` とかだと、複数マッチする。
-        // この時、文法的にこのnodeはボタンと想定されるので、matchedの最後の要素を viewObjのtype
-        // とするほうが自然では。
-        view.type = matched[matched.length - 1];
+      if (matches && matches.length > 0) {
+        // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
+        // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
+        // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
+        view.type = <ElementType>matches[matches.length - 1];
+        this.parseElement(node, view);
+        outputs.push(view);
       } else {
-        return;
+        // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
+        // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
+        this.parseSymbol(node, hierarchy, outputs);
       }
-
-      this.parseSymbol(node, view);
-      outputs.push(view);
     }
   }
 
-  parseSymbol(node: any, view: View) {
+  parseElement(node: any, view: View) {
     let parser: IElementParser;
     switch (view.type) {
       case ElementType.Button:
         parser = new ButtonParser(this.sketch, this.config);
         parser.parse(node, <Button>view);
         break;
+      case ElementType.TextView:
+        parser = new TextViewParser(this.sketch, this.config);
+        parser.parse(node, <TextView>view);
+        break;
+      case ElementType.TextInput:
+        parser = new TextInputParser(this.sketch, this.config);
+        parser.parse(node, <TextInput>view);
+        break;
+      case ElementType.Image:
+        parser = new ImageParser(this.sketch, this.config);
+        parser.parse(node, <TextInput>view);
+        break;
       default:
         break;
     }
+  }
+
+  parseSymbol(node: any, hierarchy: number, outputs: any[]) {
+    if (!node._class || !node.name || this.shouldExclude(node.name)) return;
+    const symbolsPage = this.sketch['symbolsPage'];
+    let targetSymbol: any;
+    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
+      targetSymbol = symbolsPage.get(
+        'symbolMaster',
+        instance => instance.symbolID === node.symbolID,
+      );
+      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    } else if (node._class !== 'shapeGroup') {
+      targetSymbol = node;
+    }
+    if (!targetSymbol) {
+      // todo: symbolMaster, symbolInstanceでパースしたが、マッチするシンボルがない場合。
+      // またはshapeGroupの場合。イレギュラーケースもある? 要調査。
+      return;
+    }
+
+    if (this.shouldExclude(targetSymbol.name)) return;
+
+    const view: View = new View(targetSymbol, hierarchy);
+    this.parseConstraint(node.resizingConstraint, view);
+
+    const subLayers = _.get(targetSymbol, 'layers');
+    if (!subLayers || subLayers.length <= 0) {
+      // 最下層なので、ここで当該要素(node)をパース
+      // todo: parentIdを現状viewのコンストラクタでnode.parentが `group` の時のみにしてるが、
+      // この場合は、node.parentが symbolの場合もあるためそれも考慮しなければ。
+      const parser = new AutoParser(this.sketch, this.config);
+      parser.parse(targetSymbol, view);
+      outputs.push(view);
+      return;
+    }
+
+    outputs.push(view);
+    hierarchy++;
+    subLayers.forEach(layer => {
+      this.parseSymbol(layer, hierarchy, outputs);
+    });
   }
 
   /**
@@ -100,5 +167,18 @@ export class SketchParser implements ISketchParser {
       height: bitWiseAndPadded.substr(1, 1) === '0' ? 1 : 0,
     } as Constraints;
     view.constraints = constraints;
+  }
+
+  shouldExclude(targetName: string) {
+    // exclude node that is listed on setting config.
+    const excludeNames: string[] = _.get(this.config, 'extraction.exceptions');
+    if (excludeNames && excludeNames.length > 0) {
+      const found = excludeNames.find(name => {
+        const matched = targetName.match(new RegExp(name, 'g'));
+        return matched ? true : false;
+      });
+      return found ? true : false;
+    }
+    return false;
   }
 }

@@ -2,7 +2,7 @@
   "images": [
     {
       "idiom": "universal",
-      "filename": ""
+      "filename": "{{filename}}"
     }
   ],
   "info": {

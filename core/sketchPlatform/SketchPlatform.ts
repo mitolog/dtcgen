@@ -11,3 +11,4 @@ export {
 export { SketchNamingLinter } from './applications/SketchNamingLinter';
 export { LintNamingUseCase } from './usecases/LintNamingUseCase';
 export { ExtractElementUseCase } from './usecases/ExtractElementUseCase';
+export { GenerateCodeUseCase } from './usecases/GenerateCodeUseCase';
