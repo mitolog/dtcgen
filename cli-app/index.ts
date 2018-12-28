@@ -8,9 +8,9 @@ import {
 import { TYPES } from "../dist/types";
 import {
   DesignToolType,
-  DesignToolTypes
+  DesignToolTypeValues
 } from "../dist/domain/entities/DesignToolType";
-import { OSType, OSTypes } from "../dist/domain/entities/OSType";
+import { OSType, OSTypeValues } from "../dist/domain/entities/OSType";
 
 const cli = cac();
 
@@ -73,8 +73,8 @@ cli
       desc: "auto generate source code from extracted semantic data."
     },
     (input, flag) => {
-      const matchedFrom = DesignToolTypes.find(type => type === flag.from);
-      const matchedTo = OSTypes.find(type => type === flag.to);
+      const matchedFrom = DesignToolTypeValues.find(type => type === flag.from);
+      const matchedTo = OSTypeValues.find(type => type === flag.to);
       if (!matchedFrom || !matchedTo) {
         console.log("required option is not detected. see `generate --help`.");
         return;
