@@ -1,0 +1,50 @@
+{
+  "sketch": {
+    "extraction": {
+      "keywords": ["Button", "TextView", "TextInput", "Image"],
+      "exceptions": ["iPhone X Frame", "Color", "Overrides"],
+      "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
+      "maxHierarchy": 3,
+      "followOverrides": true,
+      "button": {
+        "label": "text",
+        "background": "rectangle",
+        "icon": "symbolInstance"
+      },
+      "textview": {
+        "description": "text",
+        "background": "rectangle"
+      },
+      "textinput": {
+        "placeholder": "text",
+        "background": "rectangle"
+      },
+      "image": {
+        "image": "rectangle",
+        "background": "rectangle"
+      },
+      "card": {
+        "title": "text",
+        "description": "text",
+        "image": "rectangle",
+        "background": "rectangle"
+      }
+    },
+    "namingRule": {
+      "page": {
+        "pattern": "%s",
+        "upperCamelCase": false,
+        "englishOnly": true,
+        "unique": true,
+        "maxLength": 20
+      },
+      "artboard": {
+        "pattern": "%s / %s",
+        "lowerCamelCase": true,
+        "englishOnly": true,
+        "unique": true,
+        "maxLength": 50
+      }
+    }
+  }
+}

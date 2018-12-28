@@ -1,11 +1,13 @@
-import { IExtractElementUseCase } from '../../domain/usecases/IExtractElementUseCase';
 import { ISketchRepository } from '../repositories/SketchRepository';
 import { ISketchPresenter } from '../presenters/SketchPresenter';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
+import { IGenerateCodeUseCase } from '../../domain/Domain';
+import { DesignToolType } from '../../domain/entities/DesignToolType';
+import { OSType } from '../../domain/entities/OSType';
 
 @injectable()
-export class ExtractElementUseCase implements IExtractElementUseCase {
+export class GenerateCodeUseCase implements IGenerateCodeUseCase {
   private repository: ISketchRepository;
   private presenter: ISketchPresenter;
 
@@ -17,8 +19,8 @@ export class ExtractElementUseCase implements IExtractElementUseCase {
     this.presenter = presenter;
   }
 
-  async handle(): Promise<void> {
-    await this.repository.extractAll();
-    this.repository.extractSlices();
+  async handle(designTool: DesignToolType, osType: OSType): Promise<void> {
+    if (designTool !== DesignToolType.sketch) return;
+    this.repository.generateAll(osType);
   }
 }

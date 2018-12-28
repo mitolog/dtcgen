@@ -1,43 +1,37 @@
-import { Button } from '../../../domain/entities/Button';
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
+import { TextInput } from '../../../domain/entities/TextInput';
+import * as _ from 'lodash';
+import { TextAlignment } from '../../../domain/entities/TextAlignment';
 import { SymbolParser } from './SymbolParser';
 import { ElementType } from '../../../domain/entities/ElementType';
 
-export class ButtonParser extends SymbolParser {
-  parse(node: any, button: Button) {
-    super.parse(node, button);
-
-    const elements = this.getSymbolElements(ElementType.Button);
-
+export class TextInputParser extends SymbolParser {
+  parse(node: any, view: TextInput) {
+    super.parse(node, view);
+    const elements = this.getSymbolElements(ElementType.TextInput);
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
-
       switch (key) {
-        case 'icon':
-          button.hasIcon = true;
+        case 'placeholder':
+          this.parseInput(node, view, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, button, aLayer);
-          break;
-        case 'label':
-          this.parseLabel(node, button, aLayer);
-          break;
-        default:
+          this.parseBackground(node, view, aLayer);
           break;
       }
     }
   }
 
-  parseSharedStyle(node: any, styleType: string, button: Button) {
-    throw new Error('Method not implemented.');
+  parseSharedStyle(node: any, styleType: string, view: TextInput) {
+    //throw new Error('Method not implemented.');
   }
 
-  parseOverride(node: any, styleType: string, button: Button) {
+  parseOverride(node: any, styleType: string, view: TextInput) {
+    if (!node.overrideValues) return;
     const sharedStyles: any[] = this.layerStyles;
     // const textLayerStyles = sketch.textLayerStyles;
-    if (!node.overrideValues) return null;
 
     // extract targetOverride
     // TODO: node.overrideValuesには、対象となるstyleType(例えば `layerStyle` )のoverrideは常に1つであるという前提にたっている
@@ -49,7 +43,7 @@ export class ButtonParser extends SymbolParser {
         return results && results.length > 0;
       })
       .reduce((acc, current) => current, 0);
-    if (!targetOverride) return null;
+    if (!targetOverride) return;
 
     /**
      * 5-3. 3で取得したsymbolMasterオブジェクトのlayers[]を走査し、5-2で取得したID部分と、layers[].do_objectIDとが同じであればソレが対象レイヤ
@@ -71,11 +65,11 @@ export class ButtonParser extends SymbolParser {
           fill: comps,
           name: targetStyle['name'],
         };
-        button.backgroundColor = new Color(<Color>bgColorObj);
+        view.backgroundColor = new Color(<Color>bgColorObj);
         break;
 
       case 'stringValue':
-        button.name = targetOverride['value'];
+        view.placeHolder = targetOverride['value'];
         break;
 
       default:
@@ -83,38 +77,33 @@ export class ButtonParser extends SymbolParser {
     }
   }
 
-  private parseBackground(node: any, button: Button, aLayer: any) {
-    button.radius = aLayer.fixedRadius;
+  /* Private methods below */
+
+  private parseInput(node: any, view: TextInput, aLayer: any) {
+    // prettier-ignore
+    const fontAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
+    // prettier-ignore
+    const colorAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
+
+    if (!fontAttribute || !colorAttribute) return;
+    if (this.followOverrides) {
+      this.parseOverride(node, 'stringValue', view);
+    }
+    // prettier-ignore
+    view.fontName = fontAttribute.attributes.name;
+    view.fontSize = fontAttribute.attributes.size;
+    const comps = new ColorComponents(<ColorComponents>colorAttribute);
+    view.fontColor = new Color(<Color>{ fill: comps });
+  }
+
+  private parseBackground(node: any, view: TextInput, aLayer: any) {
+    view.radius = aLayer.fixedRadius;
     const comps = new ColorComponents(<ColorComponents>(
       aLayer.style.fills[0].color
     ));
-    button.backgroundColor = new Color(<Color>{ fill: comps });
+    view.backgroundColor = new Color(<Color>{ fill: comps });
     if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', button);
-    }
-  }
-
-  private parseLabel(node: any, button: Button, aLayer: any) {
-    // prettier-ignore
-    if (
-      !aLayer.style ||
-      !aLayer.style.textStyle ||
-      !aLayer.style.textStyle.encodedAttributes ||
-      !aLayer.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute
-    )
-      return;
-    if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', button);
-    }
-    const textAttribute = aLayer.style.textStyle.encodedAttributes;
-    // prettier-ignore
-    const fontObj = aLayer.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute;
-    button.fontName = fontObj.attributes.name;
-    button.fontSize = fontObj.attributes.size;
-    const fontColorAttribute = textAttribute.MSAttributedStringColorAttribute;
-    if (fontColorAttribute) {
-      const comps = new ColorComponents(<ColorComponents>fontColorAttribute);
-      button.fontColor = new Color(<Color>{ fill: comps });
+      this.parseOverride(node, 'layerStyle', view);
     }
   }
 }
