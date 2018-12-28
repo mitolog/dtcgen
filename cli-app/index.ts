@@ -1,4 +1,4 @@
-import Cac from "Cac";
+import cac from "Cac";
 import { cliContainer } from "../dist/inversify.config";
 import {
   ILintNamingUseCase,
@@ -6,10 +6,13 @@ import {
   IGenerateCodeUseCase
 } from "../dist/domain/Domain";
 import { TYPES } from "../dist/types";
-import { DesignToolType } from "../dist/domain/entities/DesignToolType";
-import { OSType } from "../dist/domain/entities/OSType";
+import {
+  DesignToolType,
+  DesignToolTypes
+} from "../dist/domain/entities/DesignToolType";
+import { OSType, OSTypes } from "../dist/domain/entities/OSType";
 
-const cli = Cac();
+const cli = cac();
 
 /**
  * lint
@@ -63,25 +66,40 @@ cli.command(
 /**
  * generate source code
  */
-cli.command(
-  "generate",
-  {
-    desc: "auto generate source code from extracted semantic data."
-  },
-  (input, flag) => {
-    // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
-    // command like node index.js --from sketch --to ios
-    // prettier-ignore
-    const generateCodeUseCase = cliContainer.get<IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase);
-    generateCodeUseCase
-      .handle(DesignToolType.sketch, OSType.ios)
-      .then(() => {
-        console.log(`code generated`);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
-);
+cli
+  .command(
+    "generate",
+    {
+      desc: "auto generate source code from extracted semantic data."
+    },
+    (input, flag) => {
+      const matchedFrom = DesignToolTypes.find(type => type === flag.from);
+      const matchedTo = OSTypes.find(type => type === flag.to);
+      if (!matchedFrom || !matchedTo) {
+        console.log("required option is not detected. see `generate --help`.");
+        return;
+      }
+      // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
+      // command like node index.js --from sketch --to ios
+      // prettier-ignore
+      const generateCodeUseCase = cliContainer.get<IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase);
+      generateCodeUseCase
+        .handle(<DesignToolType>matchedFrom, <OSType>flag.to)
+        .then(() => {
+          console.log(`code generated`);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  )
+  .option(
+    "from [designTool]",
+    "choose an design tool name from which extract semantic data. currently it supports `sketch` only."
+  )
+  .option(
+    "to [osType]",
+    "choose an os type you want to generate source files. currently only `ios` is supported."
+  );
 
 cli.parse();
