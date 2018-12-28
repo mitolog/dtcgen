@@ -1,9 +1,9 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import * as handlebars from 'handlebars';
 import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
+import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 
 dotenv.config();
 if (dotenv.error) {
@@ -24,8 +24,7 @@ export class IOSCodeGenerator {
       process.env.TEMPLATE_DIR,
       'viewController.hbs',
     );
-    const templateStr = PathManager.read(vcTemplatePath);
-    if (!templateStr) return;
+    const vcTemplate = this.compiledTemplate(vcTemplatePath);
 
     const containers: any[] = sketchData.filter(
       element => element.id && element.type && element.type === 'Container',
@@ -41,8 +40,7 @@ export class IOSCodeGenerator {
         container: container,
         views: views,
       };
-      let template = handlebars.compile(String(templateStr));
-      const output = template(containerObj);
+      const output = vcTemplate(containerObj);
       const vcFilePath = PathManager.getOutputPath(
         OutputType.sourcecodes,
         true,
@@ -87,6 +85,11 @@ export class IOSCodeGenerator {
         dirname/
         dirname/Contents.json (namespace記載のやつ)
     */
+    const lastJsonTemplatePath = path.join(
+      process.env.TEMPLATE_DIR,
+      'lastDirContents.json',
+    );
+    const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
 
     /* deal with directory pathes below */
     if (PathManager.isDir(originPath)) {
@@ -123,11 +126,6 @@ export class IOSCodeGenerator {
     fs.ensureDirSync(imageSetDir);
 
     // create last directory json
-    const lastJsonTemplatePath = path.join(
-      process.env.TEMPLATE_DIR,
-      'lastDirContents.json',
-    );
-    const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
     const lastJsonStr = lastJsonTemplate({ filename: parsed.base });
     fs.writeFileSync(path.join(imageSetDir, 'Contents.json'), lastJsonStr);
 
@@ -137,6 +135,9 @@ export class IOSCodeGenerator {
 
   private compiledTemplate(templatePath: string): any {
     const templateStr = PathManager.read(templatePath);
-    return handlebars.compile(String(templateStr));
+    if (!templateStr) {
+      throw new Error("couldn't get template: " + templatePath);
+    }
+    return HandlebarsHelpers.handlebars().compile(String(templateStr));
   }
 }
