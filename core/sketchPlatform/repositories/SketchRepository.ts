@@ -83,13 +83,13 @@ export class SketchRepository implements ISketchRepository {
       }
       if (output.constraints.right) {
         newConstraints['right'] = (
-          baseRect.width -
+          -baseRect.width -
           (output.rect.x + output.rect.width)
         ).toString();
       }
       if (output.constraints.bottom) {
         newConstraints['bottom'] = (
-          baseRect.height -
+          -baseRect.height -
           (output.rect.y + output.rect.height)
         ).toString();
       }
