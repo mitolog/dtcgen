@@ -4,6 +4,7 @@ import * as helpers from 'handlebars-helpers';
 export class HandlebarsHelpers {
   static handlebars(): any {
     handlebars.registerHelper('eq', helpers().eq);
+    handlebars.registerHelper('forEach', helpers().forEach);
     return handlebars;
   }
 }
