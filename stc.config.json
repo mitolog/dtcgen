@@ -8,7 +8,11 @@
         "Overrides",
         "Tint",
         "Mask",
-        "Pin"
+        "Pin",
+        "Guide",
+        "Background",
+        "Tab Bar",
+        "Navigation Bar"
       ],
       "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
       "maxHierarchy": 3,

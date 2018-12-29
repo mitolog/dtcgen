@@ -87,6 +87,10 @@ class {{container.name}}ViewController: UIViewController {
         (view as! TextView).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/if}}
         {{/eq}}
+        {{#eq type 'Image'}}
+        view = UIImageView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        view!.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        {{/eq}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
         {{/if}}
@@ -97,7 +101,7 @@ class {{container.name}}ViewController: UIViewController {
         constraints.append(Constraint(
             top: {{#if constraints.top }}CGFloat({{constraints.top}}){{else}}nil{{/if}},
             right: {{#if constraints.right }}CGFloat({{constraints.right}}){{else}}nil{{/if}},
-            bottom: {{#if constraints.bottom }}CGFloat({{constraints.bottom}} + 34){{else}}nil{{/if}},
+            bottom: {{#if constraints.bottom }}CGFloat({{constraints.bottom}}){{else}}nil{{/if}},
             left: {{#if constraints.left }}CGFloat({{constraints.left}}){{else}}nil{{/if}}, 
             width: {{#if constraints.width }}CGFloat({{constraints.width}}){{else}}nil{{/if}}, 
             height: {{#if constraints.height }}CGFloat({{constraints.height}}){{else}}nil{{/if}}))
