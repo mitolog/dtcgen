@@ -1,9 +1,9 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import * as handlebars from 'handlebars';
 import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
+import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 
 dotenv.config();
 if (dotenv.error) {
@@ -24,14 +24,14 @@ export class IOSCodeGenerator {
       process.env.TEMPLATE_DIR,
       'viewController.hbs',
     );
-    const templateStr = PathManager.read(vcTemplatePath);
-    if (!templateStr) return;
+    const vcTemplate = this.compiledTemplate(vcTemplatePath);
 
     const containers: any[] = sketchData.filter(
       element => element.id && element.type && element.type === 'Container',
     );
 
     let outputs = [];
+    let vcNames: Object[] = [];
     for (const container of containers) {
       const views = sketchData.filter(
         element => element.containerId && element.containerId === container.id,
@@ -41,8 +41,7 @@ export class IOSCodeGenerator {
         container: container,
         views: views,
       };
-      let template = handlebars.compile(String(templateStr));
-      const output = template(containerObj);
+      const output = vcTemplate(containerObj);
       const vcFilePath = PathManager.getOutputPath(
         OutputType.sourcecodes,
         true,
@@ -50,12 +49,28 @@ export class IOSCodeGenerator {
         container.name + 'ViewController.swift',
       );
       outputs.push({ filePath: vcFilePath, content: output });
+      vcNames.push({ name: path.parse(vcFilePath).name });
     }
 
     // viewController毎にviewを書き出し
     for (const output of outputs) {
       fs.writeFileSync(output.filePath, output.content);
     }
+
+    // 各viewControllerを確認するためのviewControllerを書き出し
+    const baseVcFilePath = PathManager.getOutputPath(
+      OutputType.sourcecodes,
+      true,
+      OSType.ios,
+      'ViewController.swift',
+    );
+    const baseVcTemplatePath: string = path.join(
+      process.env.TEMPLATE_DIR,
+      'baseViewController.hbs',
+    );
+    const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
+    const baseVcOutput = baseVcTemplate({ viewControllers: vcNames });
+    fs.writeFileSync(baseVcFilePath, baseVcOutput);
 
     // .xcassetの作成
     const slicesDir = PathManager.getOutputPath(OutputType.slices);
@@ -71,6 +86,19 @@ export class IOSCodeGenerator {
     slices.forEach(basename => {
       this.generateAssets(path.join(slicesDir, basename), assetsDir);
     });
+
+    // appIconのコピー
+    const appIconTemplatePath: string = path.join(
+      process.env.TEMPLATE_DIR,
+      'appIcon.json',
+    );
+    const appIconJson = PathManager.read(appIconTemplatePath);
+    const appIconPath = PathManager.getOutputPath(
+      OutputType.appicons,
+      true,
+      OSType.ios,
+    );
+    fs.writeFileSync(appIconPath, appIconJson);
   }
 
   /**
@@ -87,6 +115,11 @@ export class IOSCodeGenerator {
         dirname/
         dirname/Contents.json (namespace記載のやつ)
     */
+    const lastJsonTemplatePath = path.join(
+      process.env.TEMPLATE_DIR,
+      'lastDirContents.json',
+    );
+    const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
 
     /* deal with directory pathes below */
     if (PathManager.isDir(originPath)) {
@@ -123,11 +156,6 @@ export class IOSCodeGenerator {
     fs.ensureDirSync(imageSetDir);
 
     // create last directory json
-    const lastJsonTemplatePath = path.join(
-      process.env.TEMPLATE_DIR,
-      'lastDirContents.json',
-    );
-    const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
     const lastJsonStr = lastJsonTemplate({ filename: parsed.base });
     fs.writeFileSync(path.join(imageSetDir, 'Contents.json'), lastJsonStr);
 
@@ -137,6 +165,9 @@ export class IOSCodeGenerator {
 
   private compiledTemplate(templatePath: string): any {
     const templateStr = PathManager.read(templatePath);
-    return handlebars.compile(String(templateStr));
+    if (!templateStr) {
+      throw new Error("couldn't get template: " + templatePath);
+    }
+    return HandlebarsHelpers.handlebars().compile(String(templateStr));
   }
 }

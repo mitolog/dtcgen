@@ -11,11 +11,17 @@ import { TextInputParser } from './ElementParsers/TextInputParser';
 import { TextInput } from '../../domain/entities/TextInput';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
+import { TakeOverArtboardData } from '../entities/TakeOverArtboardData';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
   parseElement(node: any, view: View);
-  parseSymbol(node: any, hierarchy: number, outputs: any[]);
+  parseSymbol(
+    node: any,
+    hierarchy: number,
+    outputs: any[],
+    takeOverData: TakeOverArtboardData,
+  );
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -29,7 +35,7 @@ export class SketchParser implements ISketchParser {
   }
 
   /**
-   * Interface methods
+   * Interface methods below
    */
 
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
@@ -57,7 +63,7 @@ export class SketchParser implements ISketchParser {
         this.parseLayer(aNode, hierarchy, outputs);
       });
     }
-    // 'symbolInstance' should be translated into each elements on container views which is originally 'group'
+    // 'symbolInstance' should be translated into each elements depends on each view type
     else if (node._class === 'symbolInstance') {
       const keywords: string[] = this.config['extraction'].keywords;
       if (!keywords || keywords.length <= 0) return;
@@ -76,7 +82,11 @@ export class SketchParser implements ISketchParser {
       } else {
         // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
         // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
-        this.parseSymbol(node, hierarchy, outputs);
+        // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
+        // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
+        // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
+        const takeOverData = new TakeOverArtboardData(node, hierarchy);
+        this.parseSymbol(node, hierarchy, outputs, takeOverData);
       }
     }
   }
@@ -105,7 +115,12 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(node: any, hierarchy: number, outputs: any[]) {
+  parseSymbol(
+    node: any,
+    hierarchy: number,
+    outputs: any[],
+    takeOverData: TakeOverArtboardData,
+  ) {
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
     const symbolsPage = this.sketch['symbolsPage'];
     let targetSymbol: any;
@@ -124,16 +139,21 @@ export class SketchParser implements ISketchParser {
       return;
     }
 
-    if (this.shouldExclude(targetSymbol.name)) return;
-
+    //if (this.shouldExclude(node.name)) return;
     const view: View = new View(targetSymbol, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
+    view.containerId = takeOverData.artboardId;
+    if (view.hierarchy === takeOverData.hierarchy) {
+      // artboardからsymbolに移動する時の1回だけ、データを引き継ぐ
+      view.rect = takeOverData.rect;
+      view.parentId = takeOverData.parentId;
+      // node名を引き継ぐと同じ名前が大量にできる傾向にあるので、一旦コメントアウト
+      //view.name = takeOverData.name;
+    }
 
     const subLayers = _.get(targetSymbol, 'layers');
     if (!subLayers || subLayers.length <= 0) {
       // 最下層なので、ここで当該要素(node)をパース
-      // todo: parentIdを現状viewのコンストラクタでnode.parentが `group` の時のみにしてるが、
-      // この場合は、node.parentが symbolの場合もあるためそれも考慮しなければ。
       const parser = new AutoParser(this.sketch, this.config);
       parser.parse(targetSymbol, view);
       outputs.push(view);
@@ -142,8 +162,11 @@ export class SketchParser implements ISketchParser {
 
     outputs.push(view);
     hierarchy++;
+    const tmpArtboardId = takeOverData.artboardId;
     subLayers.forEach(layer => {
-      this.parseSymbol(layer, hierarchy, outputs);
+      const takeOverData = new TakeOverArtboardData(layer, hierarchy);
+      takeOverData.artboardId = tmpArtboardId; // take over artboard id
+      this.parseSymbol(layer, hierarchy, outputs, takeOverData);
     });
   }
 
@@ -169,7 +192,11 @@ export class SketchParser implements ISketchParser {
     view.constraints = constraints;
   }
 
-  shouldExclude(targetName: string) {
+  /**
+   * Private methods below
+   */
+
+  private shouldExclude(targetName: string) {
     // exclude node that is listed on setting config.
     const excludeNames: string[] = _.get(this.config, 'extraction.exceptions');
     if (excludeNames && excludeNames.length > 0) {

@@ -158,7 +158,7 @@ export class AutoParser extends SymbolParser {
     }
   }
 
-  private parseBackground(node: any, view: Image) {
+  private parseBackground(node: any, view: View) {
     const color = _.get(node, 'style.fills[0].color');
     view.radius = node.fixedRadius;
     if (!color) {
