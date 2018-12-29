@@ -55,9 +55,9 @@ export class SketchRepository implements ISketchRepository {
 
   /**
    * add constraint values(numbers) which represents relative position from parent view
-   * @param outputs {View[]} An array of View or subclass of View
+   * @param outputs {any[]} An array of [ Container | View | subclass of View ]
    */
-  private addConstraintValues(outputs: View[]): void {
+  private addConstraintValues(outputs: any[]): void {
     if (!outputs) return;
 
     const baseFrame: Rect = _.get(this.config, 'extraction.baseFrame');
@@ -65,33 +65,39 @@ export class SketchRepository implements ISketchRepository {
 
     for (const output of outputs) {
       if (!output.constraints) continue;
-      const baseView: View = outputs
+      const baseView: any = outputs
         .filter(
           view =>
+            // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
+            // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
             output.parentId
-              ? view.id === output.parentId
+              ? view.id === output.parentId &&
+                (view.id === output.containerId ||
+                  view.containerId === output.containerId)
               : view.id === output.containerId,
         )
         .reduce((acc, current) => current, null);
       if (!baseView) continue;
       const baseRect: Rect =
         baseView.type !== 'Container' ? baseView.rect : baseFrame;
+      const originalRect: Rect =
+        baseView.type !== 'Container' ? baseView.originalRect : baseFrame;
       // calculate margins from each sides
       let newConstraints = {};
       if (output.constraints.top) {
         newConstraints['top'] = output.rect.y.toString();
       }
       if (output.constraints.right) {
-        newConstraints['right'] = (
-          baseRect.width -
+        newConstraints['right'] = (-(
+          originalRect.width -
           (output.rect.x + output.rect.width)
-        ).toString();
+        )).toString();
       }
       if (output.constraints.bottom) {
-        newConstraints['bottom'] = (
-          baseRect.height -
+        newConstraints['bottom'] = (-(
+          originalRect.height -
           (output.rect.y + output.rect.height)
-        ).toString();
+        )).toString();
       }
       if (output.constraints.left) {
         newConstraints['left'] = output.rect.x.toString();
