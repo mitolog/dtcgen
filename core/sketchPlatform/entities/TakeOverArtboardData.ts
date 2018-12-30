@@ -12,6 +12,7 @@ export class TakeOverArtboardData {
   name?: string;
   artboardId?: string;
   imageName?: string;
+  textTitle?: string;
 
   /**
    * take over data from the node on artboard to symbol.
@@ -48,6 +49,22 @@ export class TakeOverArtboardData {
         })
         .reduce((acc, current) => current, null);
       this.imageName = imageName;
+
+      const title = overrideValues
+        .filter(overrideObj => {
+          if (
+            !overrideObj.overrideName ||
+            overrideObj.overrideName.split('_') <= 1 ||
+            overrideObj.overrideName.split('_')[1] !== 'stringValue'
+          )
+            return false;
+          return true;
+        })
+        .map(overrideObj => {
+          return overrideObj.value;
+        })
+        .reduce((acc, current) => current, null);
+      this.textTitle = title;
     }
   }
 
