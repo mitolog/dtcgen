@@ -55,7 +55,7 @@ export class PathManager {
           OutputMidDirName.extracted,
           'images',
         );
-        if (imagesPath) {
+        if (shouldCreateMidDir) {
           fs.ensureDirSync(imagesPath);
         }
         outputPath = imagesPath;
@@ -74,12 +74,20 @@ export class PathManager {
         break;
 
       case OutputType.sourcecodes:
-        const codePath = path.join(
-          process.env.OUTPUT_PATH,
-          OutputMidDirName.generated,
-          OSType.ios,
-          fileName,
-        );
+        let codePath = '';
+        if (osType === OSType.ios) {
+          codePath = path.join(
+            process.env.OUTPUT_PATH,
+            OutputMidDirName.generated,
+            OSType.ios,
+            fileName,
+          );
+        } else {
+          throw new Error(
+            OutputType.sourcecodes +
+              ' generation for android is not implemented yet',
+          );
+        }
         if (shouldCreateMidDir) {
           fs.ensureDirSync(path.dirname(codePath));
         }
