@@ -91,7 +91,7 @@ export class ImageParser extends SymbolParser {
     const fillObj = _.get(aLayer, 'style.fills[0]');
     const fillType = _.get(fillObj, 'fillType');
     if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
-    if (this.followOverrides) {
+    if (this.followOverrides && node.overrideValues) {
       this.parseOverride(node, 'image', view);
     } else {
       // retrieve symbol’s default value

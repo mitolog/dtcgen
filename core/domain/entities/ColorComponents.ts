@@ -13,7 +13,7 @@ export class ColorComponents {
 
   static randomColor(): ColorComponents {
     const randomColor = new ColorComponents(<ColorComponents>{
-      alpha: 1,
+      alpha: 0.5,
       red: Math.random(),
       green: Math.random(),
       blue: Math.random(),

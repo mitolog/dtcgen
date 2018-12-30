@@ -110,6 +110,12 @@ export class AutoParser extends SymbolParser {
       case 'stringValue':
         (view as TextView).text = targetOverride['value'];
         break;
+      case 'image':
+        const imageRef = _.get(targetOverride, 'value._ref');
+        if (!imageRef) break;
+        const imageName = imageRef.split('/')[1];
+        (view as Image).imageName = imageName ? imageName : '';
+        break;
       default:
         break;
     }
@@ -142,7 +148,7 @@ export class AutoParser extends SymbolParser {
     const fillType = _.get(fillObj, 'fillType');
 
     if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
-    if (this.followOverrides) {
+    if (this.followOverrides && node.overrideValues) {
       this.parseOverride(node, 'image', view);
     } else {
       // retrieve symbol’s default value
