@@ -4,6 +4,7 @@ import * as path from 'path';
 import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
+import { ElementType } from '../../domain/entities/ElementType';
 
 dotenv.config();
 if (dotenv.error) {
@@ -27,7 +28,10 @@ export class IOSCodeGenerator {
     const vcTemplate = this.compiledTemplate(vcTemplatePath);
 
     const containers: any[] = sketchData.filter(
-      element => element.id && element.type && element.type === 'Container',
+      element =>
+        element.id &&
+        element.type &&
+        element.type === <string>ElementType.Container,
     );
 
     let outputs = [];
@@ -99,6 +103,49 @@ export class IOSCodeGenerator {
       OSType.ios,
     );
     fs.writeFileSync(appIconPath, appIconJson);
+
+    // imagesのコピー
+    // 1. metadataを取得し、imageNameがついてるやつをfilter
+    // 2. imagesディレクトリ配下のファイル名一覧を取得
+    // 3. 1でフィルタしたviewのnameとfile名の最初5文字までフォルダ名兼asset名に. 例)
+    //    Images/Contents.json
+    //    Images/Map_1e02f/Map_1e02f.imageset
+    //    Images/Map_1e02f/Map_1e02f.imageset/Contents.json
+    //    Images/Map_1e02f/Map_1e02f.imageset/1e02fxxxxxxxxxxxxx.png
+    const imageElements = sketchData.filter(
+      element => element.type === <string>ElementType.Image,
+    );
+    const imagesDir = PathManager.getOutputPath(
+      OutputType.images,
+      false,
+      OSType.ios,
+    );
+    this.generateAssets(imagesDir, assetsDir);
+
+    // const imageNames = fs.readdirSync(imagesDir);
+    // if (!imageNames || imageNames.length <= 0) {
+    //   return;
+    // }
+    // const imageAssets = imageElements.map(element => {
+    //   const imageName = imageNames.find(
+    //     imageName => element.imageName === imageName,
+    //   );
+    //   if (!imageName) return;
+    //   const imageAssetObj = {};
+    //   imageAssetObj[element.name + '_' + imageName.slice(0, 5)] =
+    //     element.imageName;
+    //   return imageAssetObj;
+    // });
+    // imageAssets.forEach(imageAssetObj => {
+    //   const basename = Object.keys(imageAssetObj).reduce(
+    //     (acc, current) => current,
+    //     '',
+    //   );
+    //   const imageName = imageAssetObj[basename];
+    //   const imagesetDir = path.join(assetsDir, 'Images', basename);
+    //   const imagesetContentsJson = path.join(imagesetDir, 'Contents.json');
+    //   const imagePath = path.join(imagesetDir, imageName);
+    // });
   }
 
   /**
