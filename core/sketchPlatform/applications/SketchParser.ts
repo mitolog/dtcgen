@@ -12,6 +12,7 @@ import { TextInput } from '../../domain/entities/TextInput';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
 import { TakeOverArtboardData } from '../entities/TakeOverArtboardData';
+import { Image } from '../../domain/entities/Image';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
@@ -156,6 +157,10 @@ export class SketchParser implements ISketchParser {
       // 最下層なので、ここで当該要素(node)をパース
       const parser = new AutoParser(this.sketch, this.config);
       parser.parse(targetSymbol, view);
+      if (takeOverData.imageName) {
+        //console.log(takeOverData.imageName);
+        (view as Image).imageName = takeOverData.imageName;
+      }
       outputs.push(view);
       return;
     }
@@ -163,9 +168,11 @@ export class SketchParser implements ISketchParser {
     outputs.push(view);
     hierarchy++;
     const tmpArtboardId = takeOverData.artboardId;
+    const tmpImageName = takeOverData.imageName;
     subLayers.forEach(layer => {
       const takeOverData = new TakeOverArtboardData(layer, hierarchy);
       takeOverData.artboardId = tmpArtboardId; // take over artboard id
+      takeOverData.imageName = tmpImageName; // take over image name
       this.parseSymbol(layer, hierarchy, outputs, takeOverData);
     });
   }

@@ -1,4 +1,5 @@
 import { Rect } from '../../domain/entities/Rect';
+import * as _ from 'lodash';
 
 /**
  * This class is for taking over from artboard view to symbol view
@@ -10,6 +11,7 @@ export class TakeOverArtboardData {
 
   name?: string;
   artboardId?: string;
+  imageName?: string;
 
   /**
    * take over data from the node on artboard to symbol.
@@ -32,6 +34,21 @@ export class TakeOverArtboardData {
       console.log('no parent on takeover data');
     }
     this.name = node.name;
+    const overrideValues = node.overrideValues;
+    if (overrideValues && overrideValues.length > 0) {
+      const imageName = overrideValues
+        .filter(overrideObj => {
+          const className = _.get(overrideObj, 'value._class');
+          const refClass = _.get(overrideObj, 'value._ref_class');
+          const ref = _.get(overrideObj, 'value._ref');
+          return className && refClass && ref ? true : false;
+        })
+        .map(overrideObj => {
+          return _.get(overrideObj, 'value._ref');
+        })
+        .reduce((acc, current) => current, null);
+      this.imageName = imageName;
+    }
   }
 
   private containerId(node: any): string {
