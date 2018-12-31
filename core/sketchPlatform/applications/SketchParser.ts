@@ -157,9 +157,13 @@ export class SketchParser implements ISketchParser {
       // 最下層なので、ここで当該要素(node)をパース
       const parser = new AutoParser(this.sketch, this.config);
       parser.parse(targetSymbol, view);
+      // todo: 以下2つのtakeOverの渡し方、めちゃめちゃヘボい。artboard上での必要な情報をsymbolに引き継ぐのに
+      // artboard上のsymbolInstanceごと渡した方が良さそう
       if (takeOverData.imageName) {
-        //console.log(takeOverData.imageName);
         (view as Image).imageName = takeOverData.imageName;
+      }
+      if (takeOverData.textTitle) {
+        (view as TextView).text = takeOverData.textTitle;
       }
       outputs.push(view);
       return;
@@ -167,12 +171,15 @@ export class SketchParser implements ISketchParser {
 
     outputs.push(view);
     hierarchy++;
+    // todo: こちらの引き継ぎ方も上記同様だめ
     const tmpArtboardId = takeOverData.artboardId;
     const tmpImageName = takeOverData.imageName;
+    const tmpTextTitle = takeOverData.textTitle;
     subLayers.forEach(layer => {
       const takeOverData = new TakeOverArtboardData(layer, hierarchy);
-      takeOverData.artboardId = tmpArtboardId; // take over artboard id
-      takeOverData.imageName = tmpImageName; // take over image name
+      takeOverData.artboardId = tmpArtboardId;
+      takeOverData.imageName = tmpImageName;
+      takeOverData.textTitle = tmpTextTitle;
       this.parseSymbol(layer, hierarchy, outputs, takeOverData);
     });
   }
