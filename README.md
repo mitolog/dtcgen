@@ -7,29 +7,34 @@
 
 ## What you can do
 
-- lint ... 指定した命名規則に則っているかをチェック。 (extract の方が進んでしまい今は out of date 状態)
+- [WIP]lint ... 指定した命名規則に則っているかをチェック。 (extract の方が進んでしまい今は out of date 状態)
 - extract ... 指定した命名規則で sketch をパースして要素を抽出し json ファイルに出力。同時に画像やアイコンなども抽出。
 - generate ... ectract した json から対象の OS のコードを生成する。
 
-## How to Use
+## How to Use (in development phase)
 
 基本的なフローは、
 
 1. .env ファイルの各種パスを設定
 2. 抽出したい要素の名前を `stc.config.json` の `sketch.extraction.keywords[]` に追加していく
 3. 1 で追加した keyword をキーにして、その配下にぶら下がっている要素の名前と sketch 上でのクラス名オブジェクトを追加していく(以下 `stc.config.json` の項を参照)
-4. それぞれ細かな設定を必要に応じて行い、 コマンド実行 (例: `node index.js -eg --output iOS` )する
+4. `cli-app`と`core`ディレクトリ配下で `tsc` でトランスパイル
+5. `cd cli-app` して `node index.js extract` でメタデータを sketch から抽出
+6. `node index.js -from sketch --to ios` でコードを所定の場所に生成
 
 という流れ。
 
-## Rules in detail
+## How it works
 
-- 当該 sketch ファイルの Pages に含まれるすべての artboard を再帰的に走査する
-- それぞれの artboard に含まれる `group` は `View` に変換し、 `symbol` は各 OS 別のクラスに変換する
+- sketch ファイルを [node-sketch](https://github.com/oscarotero/node-sketch)を使ってすべての artboard と symbol をパース
+- パースした結果を json に出力、同時に画像やスライスも出力
+- 出力した結果に従って OS 別のコードやアセットファイルを生成
+
+### extract
+
+- それぞれの artboard に含まれる `group` は `View` に変換し、 `symbol` は要素の特徴によってクラス抽出
 - どの `symbol` を抽出するかは、名前で決める、その名前は config ファイルで定義する
 - また、どの `symbol` がどのクラスに対応するかも `stc.config.json` で定義する
-
-## How it works
 
 - sketch をパースする `node-sketch` モジュールを使って要素を抽出している
 - アイコンの抽出などは、sketch.app に含まれる `sketch-tool` の slice コマンドを使っていいる
