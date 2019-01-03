@@ -19,8 +19,12 @@ export class GenerateCodeUseCase implements IGenerateCodeUseCase {
     this.presenter = presenter;
   }
 
-  async handle(designTool: DesignToolType, osType: OSType): Promise<void> {
+  async handle(
+    designTool: DesignToolType,
+    osType: OSType,
+    outputDir?: string,
+  ): Promise<void> {
     if (designTool !== DesignToolType.sketch) return;
-    this.repository.generateAll(osType);
+    this.repository.generateAll(osType, outputDir);
   }
 }

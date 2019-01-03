@@ -29,10 +29,12 @@ export interface ISketchParser {
 export class SketchParser implements ISketchParser {
   private sketch: Object;
   private config: Object;
+  private outputDir?: string;
 
-  constructor(sketch: Object, config: Object) {
+  constructor(sketch: Object, config: Object, outputDir?: string) {
     this.sketch = sketch;
     this.config = config;
+    this.outputDir = outputDir;
   }
 
   /**
@@ -40,11 +42,6 @@ export class SketchParser implements ISketchParser {
    */
 
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
-    let maxHierarchy: number = this.config['extraction'].maxHierarchy;
-    if (!maxHierarchy) {
-      maxHierarchy = 3; // default
-    }
-
     // assign default values, but these may be overridden latter procedure.
     const view: View = new View(node, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
@@ -52,11 +49,7 @@ export class SketchParser implements ISketchParser {
     if (this.shouldExclude(node.name)) return;
 
     // `group` translated into `view` which holds various views on it
-    if (
-      node._class === 'group' &&
-      _.size(node.layers)
-      // hierarchy <= maxHierarchy - 1  // TBD: hierarchy shuoldn't be evaluated?
-    ) {
+    if (node._class === 'group' && _.size(node.layers)) {
       outputs.push(view);
       hierarchy++;
       // parse underlying nodes
@@ -108,7 +101,7 @@ export class SketchParser implements ISketchParser {
         parser.parse(node, <TextInput>view);
         break;
       case ElementType.Image:
-        parser = new ImageParser(this.sketch, this.config);
+        parser = new ImageParser(this.sketch, this.config, this.outputDir);
         parser.parse(node, <TextInput>view);
         break;
       default:
@@ -155,7 +148,7 @@ export class SketchParser implements ISketchParser {
     const subLayers = _.get(targetSymbol, 'layers');
     if (!subLayers || subLayers.length <= 0) {
       // 最下層なので、ここで当該要素(node)をパース
-      const parser = new AutoParser(this.sketch, this.config);
+      const parser = new AutoParser(this.sketch, this.config, this.outputDir);
       parser.parse(targetSymbol, view);
       // todo: 以下2つのtakeOverの渡し方、めちゃめちゃヘボい。artboard上での必要な情報をsymbolに引き継ぐのに
       // artboard上のsymbolInstanceごと渡した方が良さそう

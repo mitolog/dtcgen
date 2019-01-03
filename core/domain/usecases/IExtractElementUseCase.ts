@@ -1,3 +1,3 @@
 export interface IExtractElementUseCase {
-  handle(): Promise<void>;
+  handle(inputPath: string, outputDir?: string): Promise<void>;
 }

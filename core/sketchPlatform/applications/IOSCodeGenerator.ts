@@ -12,17 +12,27 @@ if (dotenv.error) {
 }
 
 export class IOSCodeGenerator {
-  constructor() {}
+  private pathManager: PathManager;
+  private templateDir: string;
+
+  constructor(outputDir?: string) {
+    this.pathManager = new PathManager(outputDir);
+    const templatePath = path.isAbsolute(process.env.TEMPLATE_DIR)
+      ? process.env.TEMPLATE_DIR
+      : path.resolve(process.cwd(), process.env.TEMPLATE_DIR);
+    this.templateDir = templatePath;
+  }
 
   generate(metadataJsonPath: string): void {
     if (!metadataJsonPath) {
       throw new Error('cannot find directory: ' + metadataJsonPath);
     }
-    const sketchData: any[] = JSON.parse(PathManager.read(metadataJsonPath));
+    const sketchData: any[] = JSON.parse(
+      this.pathManager.read(metadataJsonPath),
+    );
     if (!sketchData) return;
-
     const vcTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'viewController.hbs',
     );
     const vcTemplate = this.compiledTemplate(vcTemplatePath);
@@ -46,7 +56,7 @@ export class IOSCodeGenerator {
         views: views,
       };
       const output = vcTemplate(containerObj);
-      const vcFilePath = PathManager.getOutputPath(
+      const vcFilePath = this.pathManager.getOutputPath(
         OutputType.sourcecodes,
         true,
         OSType.ios,
@@ -62,14 +72,14 @@ export class IOSCodeGenerator {
     }
 
     // 各viewControllerを確認するためのviewControllerを書き出し
-    const baseVcFilePath = PathManager.getOutputPath(
+    const baseVcFilePath = this.pathManager.getOutputPath(
       OutputType.sourcecodes,
       true,
       OSType.ios,
       'ViewController.swift',
     );
     const baseVcTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'baseViewController.hbs',
     );
     const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
@@ -77,8 +87,8 @@ export class IOSCodeGenerator {
     fs.writeFileSync(baseVcFilePath, baseVcOutput);
 
     // .xcassetの作成
-    const slicesDir = PathManager.getOutputPath(OutputType.slices);
-    const assetsDir = PathManager.getOutputPath(
+    const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
+    const assetsDir = this.pathManager.getOutputPath(
       OutputType.assets,
       true,
       OSType.ios,
@@ -93,11 +103,11 @@ export class IOSCodeGenerator {
 
     // appIconのコピー
     const appIconTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'appIcon.json',
     );
-    const appIconJson = PathManager.read(appIconTemplatePath);
-    const appIconPath = PathManager.getOutputPath(
+    const appIconJson = this.pathManager.read(appIconTemplatePath);
+    const appIconPath = this.pathManager.getOutputPath(
       OutputType.appicons,
       true,
       OSType.ios,
@@ -115,7 +125,7 @@ export class IOSCodeGenerator {
     const imageElements = sketchData.filter(
       element => element.type === <string>ElementType.Image,
     );
-    const imagesDir = PathManager.getOutputPath(
+    const imagesDir = this.pathManager.getOutputPath(
       OutputType.images,
       false,
       OSType.ios,
@@ -163,7 +173,7 @@ export class IOSCodeGenerator {
         dirname/Contents.json (namespace記載のやつ)
     */
     const lastJsonTemplatePath = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'lastDirContents.json',
     );
     const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
@@ -183,7 +193,7 @@ export class IOSCodeGenerator {
         'Contents.json', // intermediate json
       );
       const intermediateJsonTemplatePath = path.join(
-        process.env.TEMPLATE_DIR,
+        this.templateDir,
         'midDirContents.json',
       );
       fs.copyFileSync(intermediateJsonTemplatePath, intermediateJsonPath);
@@ -211,7 +221,7 @@ export class IOSCodeGenerator {
   }
 
   private compiledTemplate(templatePath: string): any {
-    const templateStr = PathManager.read(templatePath);
+    const templateStr = this.pathManager.read(templatePath);
     if (!templateStr) {
       throw new Error("couldn't get template: " + templatePath);
     }
