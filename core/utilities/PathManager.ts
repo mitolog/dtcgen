@@ -23,13 +23,28 @@ export enum OutputType {
 }
 
 export class PathManager {
+  private outputDir: string;
+
+  constructor(outputDir?: string) {
+    if (outputDir) {
+      this.outputDir = path.isAbsolute(outputDir)
+        ? outputDir
+        : path.resolve(process.cwd(), outputDir);
+    } else {
+      this.outputDir = path.resolve(
+        process.cwd(),
+        process.env.DEFAULT_OUTPUT_PATH,
+      );
+    }
+  }
+
   /**
    * get distinct path or directory depends on each output type.
    * @param pathType {OutputType} Output type
    * @param shouldCreateMidDir {boolean} should create intermediate directory or not
    * @retuns outputPath {string} output path
    */
-  static getOutputPath(
+  getOutputPath(
     pathType: OutputType,
     shouldCreateMidDir: boolean = false,
     osType?: OSType,
@@ -39,7 +54,7 @@ export class PathManager {
     switch (pathType) {
       case OutputType.metadata:
         const metadataDirName = path.join(
-          process.env.OUTPUT_PATH,
+          this.outputDir,
           OutputMidDirName.extracted,
           'metadata',
         );
@@ -51,7 +66,7 @@ export class PathManager {
 
       case OutputType.images:
         const imagesPath = path.join(
-          process.env.OUTPUT_PATH,
+          this.outputDir,
           OutputMidDirName.extracted,
           'images',
         );
@@ -63,7 +78,7 @@ export class PathManager {
 
       case OutputType.slices:
         const slicesPath = path.join(
-          process.env.OUTPUT_PATH,
+          this.outputDir,
           OutputMidDirName.extracted,
           'slices',
         );
@@ -77,7 +92,7 @@ export class PathManager {
         let codePath = '';
         if (osType === OSType.ios) {
           codePath = path.join(
-            process.env.OUTPUT_PATH,
+            this.outputDir,
             OutputMidDirName.generated,
             OSType.ios,
             fileName,
@@ -98,7 +113,7 @@ export class PathManager {
         let assetsPath = '';
         if (osType === OSType.ios) {
           assetsPath = path.join(
-            process.env.OUTPUT_PATH,
+            this.outputDir,
             OutputMidDirName.generated,
             OSType.ios,
             'Assets.xcassets/',
@@ -118,7 +133,7 @@ export class PathManager {
         let appIconPath = '';
         if (osType === OSType.ios) {
           appIconPath = path.join(
-            process.env.OUTPUT_PATH,
+            this.outputDir,
             OutputMidDirName.generated,
             OSType.ios,
             'Assets.xcassets/',
@@ -150,7 +165,7 @@ export class PathManager {
    * @param dirOrFilePath directory or filepath
    * @param recursive indicate if it shuold remove recursively
    */
-  static removeWhiteSpaces(dirOrFilePath: string, recursive: boolean = true) {
+  removeWhiteSpaces(dirOrFilePath: string, recursive: boolean = true) {
     const parsed = path.parse(dirOrFilePath);
     // removes whitespaces within
     for (let k of Object.keys(parsed)) {
@@ -162,7 +177,7 @@ export class PathManager {
     // if you don't add overwrite, EEXIST error raises.
     fs.moveSync(dirOrFilePath, destPath, { overwrite: true });
     // `isDir()` used to be `fs.statSync(destPath).isDirectory()`
-    if (recursive && this.isDir(destPath)) {
+    if (recursive && PathManager.isDir(destPath)) {
       const files = fs.readdirSync(destPath);
       files.forEach(file => {
         this.removeWhiteSpaces(path.join(destPath, file));
@@ -170,7 +185,7 @@ export class PathManager {
     }
   }
 
-  static read(filePath): string {
+  read(filePath): string {
     let content = '';
     if (this.check(filePath)) {
       content = fs.readFileSync(filePath, 'utf8');
@@ -178,7 +193,7 @@ export class PathManager {
     return content;
   }
 
-  static check(filePath): boolean {
+  check(filePath): boolean {
     var isExist = false;
     try {
       fs.statSync(filePath);

@@ -23,12 +23,16 @@ cli.command(
     desc: "lint design resource file"
   },
   (input, flag) => {
-    // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
+    const inputPath = flag.input;
+    if (!inputPath) {
+      console.log("required option is not detected. see `generate --help`.");
+      return;
+    }
     console.log("now start linting...");
     // prettier-ignore
     const lintNamingUseCase = cliContainer.get<ILintNamingUseCase>(TYPES.ILintNamingUseCase);
     lintNamingUseCase
-      .handle()
+      .handle(inputPath)
       .then(layers => {
         console.log("finished linting.");
         console.log("--------------------");
@@ -49,11 +53,18 @@ cli.command(
     desc: "extract semantic elements for layout file auto generation."
   },
   (input, flag) => {
-    // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
+    const matchedSketch = DesignToolTypeValues.find(type => type === flag.tool);
+    const inputPath = flag.input;
+    const outputDir = flag.output;
+    if (!inputPath) {
+      console.log("required option is not detected. see `generate --help`.");
+      return;
+    }
+
     // prettier-ignore
     const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(TYPES.IExtractElementUseCase);
     extractElementUseCase
-      .handle()
+      .handle(inputPath, outputDir)
       .then(() => {
         console.log(`file extracted`);
       })
@@ -66,40 +77,42 @@ cli.command(
 /**
  * generate source code
  */
-cli
-  .command(
-    "generate",
-    {
-      desc: "auto generate source code from extracted semantic data."
-    },
-    (input, flag) => {
-      const matchedFrom = DesignToolTypeValues.find(type => type === flag.from);
-      const matchedTo = OSTypeValues.find(type => type === flag.to);
-      if (!matchedFrom || !matchedTo) {
-        console.log("required option is not detected. see `generate --help`.");
-        return;
-      }
-      // todo: config.jsonの読み込み後のnormalizeなり型チェックはeslintのソレを使ってもいいかも
-      // command like node index.js --from sketch --to ios
-      // prettier-ignore
-      const generateCodeUseCase = cliContainer.get<IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase);
-      generateCodeUseCase
-        .handle(<DesignToolType>matchedFrom, <OSType>flag.to)
-        .then(() => {
-          console.log(`code generated`);
-        })
-        .catch(error => {
-          console.log(error);
-        });
+cli.command(
+  "generate",
+  {
+    desc: "generate source code from extracted semantic data."
+  },
+  (input, flag) => {
+    const matchedTool = DesignToolTypeValues.find(type => type === flag.tool);
+    const matchedPlatform = OSTypeValues.find(type => type === flag.platform);
+    const outputDir = flag.output;
+    if (!matchedTool || !matchedPlatform) {
+      console.log("required option is not detected. see `generate --help`.");
+      return;
     }
+    // prettier-ignore
+    const generateCodeUseCase = cliContainer.get<IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase);
+    generateCodeUseCase
+      .handle(<DesignToolType>matchedTool, <OSType>matchedPlatform, outputDir)
+      .then(() => {
+        console.log(`code generated`);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+);
+
+cli
+  .option("tool [designTool]", "required. currently `sketch` only.")
+  .option("platform [osType]", "required. currently `ios` only.")
+  .option(
+    "input [relative/absolute path]",
+    "required for lint/extract. File path to be executed comamnd."
   )
   .option(
-    "from [designTool]",
-    "choose an design tool name from which extract semantic data. currently it supports `sketch` only."
-  )
-  .option(
-    "to [osType]",
-    "choose an os type you want to generate source files. currently only `ios` is supported."
+    "output [relative/absolute dir]",
+    "MUST BE SAME PATH BOTH ON extract/generate. Default dir is set on .env file."
   );
 
 cli.parse();
