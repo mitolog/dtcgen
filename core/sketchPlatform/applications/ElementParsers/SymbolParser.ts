@@ -1,12 +1,14 @@
 import { View } from '../../../domain/entities/View';
 import { IElementParser } from './IElementParser';
 import { ElementType } from '../../../domain/entities/ElementType';
+import { PathManager } from '../../../utilities/PathManager';
 
 export type SymbolElement<T> = { key: T };
 export abstract class SymbolParser implements IElementParser {
   private sketch: Object;
   private config: Object;
 
+  public pathManager: PathManager;
   public subLayers?: any[];
   public get followOverrides(): boolean {
     return this.config['extraction'].followOverrides;
@@ -15,9 +17,10 @@ export abstract class SymbolParser implements IElementParser {
     return this.sketch['layerStyles'];
   }
 
-  constructor(sketch: Object, config: Object) {
+  constructor(sketch: Object, config: Object, outputDir?: string) {
     this.sketch = sketch;
     this.config = config;
+    this.pathManager = new PathManager(outputDir);
   }
 
   parse(node: any, view: View) {

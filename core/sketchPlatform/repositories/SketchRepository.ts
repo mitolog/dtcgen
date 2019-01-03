@@ -5,11 +5,11 @@ import { SketchLayerType } from '../entities/SketchLayerType';
 import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
+import * as path from 'path';
 import { Container } from '../../domain/entities/Container';
 import { ElementType } from '../../domain/entities/ElementType';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
-import { View } from '../../domain/entities/View';
 import { OSType } from '../../domain/entities/OSType';
 import { IOSCodeGenerator } from '../applications/IOSCodeGenerator';
 import { ICodeGenerator } from '../../domain/applications/ICodeGenerator';
@@ -21,10 +21,10 @@ if (dotenv.error) {
 }
 
 export interface ISketchRepository {
-  getAll(type: SketchLayerType): Promise<Node[]>;
-  extractAll(): Promise<void>;
-  extractSlices(): void;
-  generateAll(ostype: OSType): void;
+  getAll(inputPath: string): Promise<Node[]>;
+  extractAll(inputPath: string, outputDir?: string): Promise<void>;
+  extractSlices(inputPath: string, outputDir?: string): void;
+  generateAll(ostype: OSType, outputDir?: string): void;
 }
 
 @injectable()
@@ -49,8 +49,18 @@ export class SketchRepository implements ISketchRepository {
    * get sketch file object from which extract metadata and asset files
    * return {Promise<any>} node-sketch object which express sketch file.
    */
-  private async getTargetSketch(): Promise<any> {
-    return await ns.read(process.env.SKETCH_FILE_PATH);
+  private async getTargetSketch(inputPath: string): Promise<any> {
+    const absolutePath = this.absolutePath(inputPath);
+    if (!absolutePath) return;
+    return await ns.read(absolutePath);
+  }
+
+  private absolutePath(pathOrDir: string): string {
+    const absolutePath = path.isAbsolute(pathOrDir)
+      ? pathOrDir
+      : path.resolve(process.cwd(), pathOrDir);
+    if (!absolutePath) return null;
+    return absolutePath;
   }
 
   /**
@@ -117,8 +127,8 @@ export class SketchRepository implements ISketchRepository {
    */
 
   /// retrieve all artboards the sketch file has.
-  async getAll(): Promise<Node[]> {
-    const sketch = await this.getTargetSketch();
+  async getAll(inputPath: string): Promise<Node[]> {
+    const sketch = await this.getTargetSketch(inputPath);
     const pages = sketch.pages;
     const nodes = [];
     for (const page of pages) {
@@ -132,17 +142,18 @@ export class SketchRepository implements ISketchRepository {
   }
 
   /// Extract all elements which belongs to each artboards. No validation because we assume it's already linted.
-  async extractAll(): Promise<void> {
-    const sketch = await this.getTargetSketch();
+  async extractAll(inputPath: string, outputDir?: string): Promise<void> {
+    const sketch = await this.getTargetSketch(inputPath);
+    const pathManager = new PathManager(outputDir);
 
     // extract all images within 'Pages'(not in 'Symbols')
-    const imagesDirName = PathManager.getOutputPath(OutputType.images, true);
+    const imagesDirName = pathManager.getOutputPath(OutputType.images, true);
     sketch.use(new ns.plugins.ExportImages(imagesDirName));
 
     // extract all artboards
-    const artboards = await this.getAll();
+    const artboards = await this.getAll(inputPath);
     const outputs: any[] = [];
-    const sketchParser = new SketchParser(sketch, this.config);
+    const sketchParser = new SketchParser(sketch, this.config, outputDir);
 
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
@@ -167,16 +178,19 @@ export class SketchRepository implements ISketchRepository {
 
     this.addConstraintValues(outputs);
 
-    const metadataPath = PathManager.getOutputPath(OutputType.metadata, true);
+    const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
     fs.writeFileSync(metadataPath, JSON.stringify(outputs));
   }
 
-  extractSlices(): void {
+  extractSlices(inputPath: string, outputDir?: string): void {
+    const absoluteInputPath = this.absolutePath(inputPath);
+    const pathManager = new PathManager(outputDir);
+    if (!absoluteInputPath) return;
     const execSync = cp.execSync;
-    const dirPath = PathManager.getOutputPath(OutputType.slices, true);
+    const dirPath = pathManager.getOutputPath(OutputType.slices, true);
     let command = process.env.SKETCH_TOOL_PATH;
     command += ' export slices ';
-    command += process.env.SKETCH_FILE_PATH;
+    command += absoluteInputPath;
     command += ' --formats=pdf'; //png,svg
     // command += ' --scales=1,2,3';
     command += ' --output=' + dirPath;
@@ -184,17 +198,18 @@ export class SketchRepository implements ISketchRepository {
     execSync(command);
 
     // `export slices` command may make leading/trailing spaces, so remove these.
-    PathManager.removeWhiteSpaces(dirPath);
+    pathManager.removeWhiteSpaces(dirPath);
   }
 
-  generateAll(ostype: OSType): void {
+  generateAll(ostype: OSType, outputDir?: string): void {
     if (!ostype) return;
-    const metadataFilePath = PathManager.getOutputPath(OutputType.metadata);
+    const pathManager = new PathManager(outputDir);
+    const metadataFilePath = pathManager.getOutputPath(OutputType.metadata);
     let generator: ICodeGenerator;
 
     switch (ostype) {
       case OSType.ios:
-        generator = new IOSCodeGenerator();
+        generator = new IOSCodeGenerator(outputDir);
         generator.generate(metadataFilePath);
         break;
       case OSType.android:
