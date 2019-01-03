@@ -13,8 +13,14 @@ if (dotenv.error) {
 
 export class IOSCodeGenerator {
   private pathManager: PathManager;
+  private templateDir: string;
+
   constructor(outputDir?: string) {
     this.pathManager = new PathManager(outputDir);
+    const templatePath = path.isAbsolute(process.env.TEMPLATE_DIR)
+      ? process.env.TEMPLATE_DIR
+      : path.resolve(process.cwd(), process.env.TEMPLATE_DIR);
+    this.templateDir = templatePath;
   }
 
   generate(metadataJsonPath: string): void {
@@ -25,9 +31,8 @@ export class IOSCodeGenerator {
       this.pathManager.read(metadataJsonPath),
     );
     if (!sketchData) return;
-
     const vcTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'viewController.hbs',
     );
     const vcTemplate = this.compiledTemplate(vcTemplatePath);
@@ -74,7 +79,7 @@ export class IOSCodeGenerator {
       'ViewController.swift',
     );
     const baseVcTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'baseViewController.hbs',
     );
     const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
@@ -98,7 +103,7 @@ export class IOSCodeGenerator {
 
     // appIconのコピー
     const appIconTemplatePath: string = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'appIcon.json',
     );
     const appIconJson = this.pathManager.read(appIconTemplatePath);
@@ -168,7 +173,7 @@ export class IOSCodeGenerator {
         dirname/Contents.json (namespace記載のやつ)
     */
     const lastJsonTemplatePath = path.join(
-      process.env.TEMPLATE_DIR,
+      this.templateDir,
       'lastDirContents.json',
     );
     const lastJsonTemplate = this.compiledTemplate(lastJsonTemplatePath);
@@ -188,7 +193,7 @@ export class IOSCodeGenerator {
         'Contents.json', // intermediate json
       );
       const intermediateJsonTemplatePath = path.join(
-        process.env.TEMPLATE_DIR,
+        this.templateDir,
         'midDirContents.json',
       );
       fs.copyFileSync(intermediateJsonTemplatePath, intermediateJsonPath);
