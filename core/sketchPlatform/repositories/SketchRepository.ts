@@ -29,21 +29,38 @@ export interface ISketchRepository {
 
 @injectable()
 export class SketchRepository implements ISketchRepository {
-  private config?: any = null;
-
-  constructor() {
-    // todo: config探索
-    const jsonObj = JSON.parse(
-      fs.readFileSync(process.env.CONFIG_PATH, 'utf8'),
-    );
-    if (jsonObj) {
-      this.config = jsonObj.sketch;
-    }
-  }
+  constructor() {}
 
   /**
    * Private methods
    */
+
+  /**
+   * recursively lookup config json from
+   * command executed directory to upper directories.
+   * @param jsonPath {string?} path to config json
+   * @return sketch {string?} sketch config object
+   */
+  private getConfig(jsonPath?: string): Object | null {
+    const targetPath = jsonPath || process.env.CONFIG_PATH;
+    const absolutePath = path.isAbsolute(targetPath)
+      ? targetPath
+      : path.resolve(process.cwd(), targetPath);
+
+    if (fs.existsSync(absolutePath)) {
+      const jsonObj = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+      return jsonObj.sketch;
+    } else if (path.dirname(absolutePath) === '/') {
+      throw new Error('no config file');
+    }
+
+    const upperFilePath = path.join(
+      path.dirname(absolutePath),
+      '../',
+      path.basename(absolutePath),
+    );
+    return this.getConfig(upperFilePath);
+  }
 
   /**
    * get sketch file object from which extract metadata and asset files
@@ -70,7 +87,7 @@ export class SketchRepository implements ISketchRepository {
   private addConstraintValues(outputs: any[]): void {
     if (!outputs) return;
 
-    const baseFrame: Rect = _.get(this.config, 'extraction.baseFrame');
+    const baseFrame: Rect = _.get(this.getConfig(), 'extraction.baseFrame');
     if (!baseFrame) return;
 
     for (const output of outputs) {
@@ -153,7 +170,7 @@ export class SketchRepository implements ISketchRepository {
     // extract all artboards
     const artboards = await this.getAll(inputPath);
     const outputs: any[] = [];
-    const sketchParser = new SketchParser(sketch, this.config, outputDir);
+    const sketchParser = new SketchParser(sketch, this.getConfig(), outputDir);
 
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue

@@ -42,11 +42,6 @@ export class SketchParser implements ISketchParser {
    */
 
   parseLayer(node: any, hierarchy: number, outputs: any[]) {
-    let maxHierarchy: number = this.config['extraction'].maxHierarchy;
-    if (!maxHierarchy) {
-      maxHierarchy = 3; // default
-    }
-
     // assign default values, but these may be overridden latter procedure.
     const view: View = new View(node, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
@@ -54,11 +49,7 @@ export class SketchParser implements ISketchParser {
     if (this.shouldExclude(node.name)) return;
 
     // `group` translated into `view` which holds various views on it
-    if (
-      node._class === 'group' &&
-      _.size(node.layers)
-      // hierarchy <= maxHierarchy - 1  // TBD: hierarchy shuoldn't be evaluated?
-    ) {
+    if (node._class === 'group' && _.size(node.layers)) {
       outputs.push(view);
       hierarchy++;
       // parse underlying nodes
