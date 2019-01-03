@@ -15,7 +15,6 @@
         "Navigation Bar"
       ],
       "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
-      "maxHierarchy": 3,
       "followOverrides": true,
       "button": {
         "label": "text",

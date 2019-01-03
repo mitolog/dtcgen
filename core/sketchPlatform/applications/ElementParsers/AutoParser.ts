@@ -159,7 +159,10 @@ export class AutoParser extends SymbolParser {
       // because ExportImages plugin(which is used within SketchRepository)
       // exports only images under pages.
       const imageRefNode = fillObj.get('MSJSONFileReference');
-      const imagePathName = PathManager.getOutputPath(OutputType.images, true);
+      const imagePathName = this.pathManager.getOutputPath(
+        OutputType.images,
+        true,
+      );
       imageRefNode.export(imagePathName);
     }
   }

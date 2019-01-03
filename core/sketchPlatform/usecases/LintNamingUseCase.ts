@@ -23,9 +23,8 @@ export class LintNamingUseCase implements ILintNamingUseCase {
     this.linter = linter;
   }
 
-  async handle(): Promise<LayerName[]> {
-    // 取り合えず artboardのみ
-    const nodes = await this.repository.getAll(SketchLayerType.Artboard);
+  async handle(inputPath: string): Promise<LayerName[]> {
+    const nodes = await this.repository.getAll(inputPath);
     const layers = this.presenter.translate(nodes);
     this.linter.lint(layers, SketchLayerType.Artboard);
     return layers;
