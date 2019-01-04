@@ -19,7 +19,7 @@ export class ImageParser extends SymbolParser {
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
-      switch (key) {
+      switch (key.toLowerCase()) {
         case 'image':
           this.parseImage(node, view, aLayer);
           break;

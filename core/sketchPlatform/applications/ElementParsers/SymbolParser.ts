@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { View } from '../../../domain/entities/View';
 import { IElementParser } from './IElementParser';
 import { ElementType } from '../../../domain/entities/ElementType';
@@ -45,16 +46,16 @@ export abstract class SymbolParser implements IElementParser {
   abstract parseSharedStyle(node: any, styleType: string, view: View);
   abstract parseOverride(node: any, styleType: string, view: View);
 
-  getSymbolElements(elementType: ElementType): SymbolElement<string> {
-    return this.config['extraction'][(elementType as string).toLowerCase()];
+  getSymbolElements(
+    elementType: ElementType,
+  ): SymbolElement<string> | undefined {
+    return _.get(this.config, `extraction.symbols.${elementType}`);
   }
 
   getSubLayerFor(key: string, elements: SymbolElement<string>): any {
     if (!this.subLayers || this.subLayers.length <= 0) return null;
-    // TBD: 命名規則で大文字小文字を指定したものをここでも踏襲したほうがいいのではと
-    const nameKey = key.charAt(0).toUpperCase() + key.slice(1); // とりあえず頭文字だけ大文字
     const matchedLayers = this.subLayers.filter(
-      layer => layer.name === nameKey && layer._class === elements[key],
+      layer => layer.name === key && layer._class === elements[key],
     );
     return matchedLayers[0];
   }

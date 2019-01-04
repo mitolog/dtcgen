@@ -7,7 +7,6 @@ import { ColorComponents } from './ColorComponents';
 
 export class View extends Container {
   isVisible: boolean;
-  rect: Rect;
   originalRect: Rect; // hold original rect to use for calculating constraints properly.
 
   hierarchy?: number;
@@ -18,7 +17,7 @@ export class View extends Container {
   radius?: number;
 
   constructor(node: any, hierarchy: number) {
-    super();
+    super(node);
 
     // required
     this.type = ElementType.View;
