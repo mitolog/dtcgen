@@ -60,8 +60,6 @@ export class SketchParser implements ISketchParser {
     // 'symbolInstance' should be translated into each elements depends on each view type
     else if (node._class === 'symbolInstance') {
       const keywords: string[] = this.config['extraction'].keywords;
-      if (!keywords || keywords.length <= 0) return;
-
       const matches: string[] = keywords.filter(keyword => {
         const results = node.name.match(new RegExp(keyword, 'g'));
         return results && results.length > 0 ? true : false;

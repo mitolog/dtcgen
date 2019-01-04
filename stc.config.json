@@ -14,30 +14,31 @@
         "Tab Bar",
         "Navigation Bar"
       ],
-      "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
       "followOverrides": true,
-      "button": {
-        "label": "text",
-        "background": "rectangle",
-        "icon": "symbolInstance"
-      },
-      "textview": {
-        "description": "text",
-        "background": "rectangle"
-      },
-      "textinput": {
-        "placeholder": "text",
-        "background": "rectangle"
-      },
-      "image": {
-        "image": "rectangle",
-        "background": "rectangle"
-      },
-      "card": {
-        "title": "text",
-        "description": "text",
-        "image": "rectangle",
-        "background": "rectangle"
+      "symbols": {
+        "Button": {
+          "Label": "text",
+          "Background": "rectangle",
+          "Icon": "symbolInstance"
+        },
+        "TextView": {
+          "Description": "text",
+          "Background": "rectangle"
+        },
+        "TextInput": {
+          "Placeholder": "text",
+          "Background": "rectangle"
+        },
+        "Image": {
+          "Image": "rectangle",
+          "Background": "rectangle"
+        },
+        "Card": {
+          "Title": "text",
+          "Description": "text",
+          "Image": "rectangle",
+          "Background": "rectangle"
+        }
       }
     },
     "namingRule": {

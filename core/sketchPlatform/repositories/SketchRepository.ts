@@ -87,9 +87,6 @@ export class SketchRepository implements ISketchRepository {
   private addConstraintValues(outputs: any[]): void {
     if (!outputs) return;
 
-    const baseFrame: Rect = _.get(this.getConfig(), 'extraction.baseFrame');
-    if (!baseFrame) return;
-
     for (const output of outputs) {
       if (!output.constraints) continue;
       const baseView: any = outputs
@@ -105,10 +102,8 @@ export class SketchRepository implements ISketchRepository {
         )
         .reduce((acc, current) => current, null);
       if (!baseView) continue;
-      const baseRect: Rect =
-        baseView.type !== 'Container' ? baseView.rect : baseFrame;
       const originalRect: Rect =
-        baseView.type !== 'Container' ? baseView.originalRect : baseFrame;
+        baseView.type === 'Container' ? baseView.rect : baseView.originalRect;
       // calculate margins from each sides
       let newConstraints = {};
       if (output.constraints.top) {
@@ -182,9 +177,7 @@ export class SketchRepository implements ISketchRepository {
         .map(str => str.trim())
         .join('');
 
-      const container: Container = new Container();
-      container.type = ElementType.Container;
-      container.id = artboard['do_objectID'];
+      const container: Container = new Container(artboard);
       container.name = artboardName;
       outputs.push(container);
 
