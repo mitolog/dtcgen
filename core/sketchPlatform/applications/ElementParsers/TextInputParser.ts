@@ -13,7 +13,7 @@ export class TextInputParser extends SymbolParser {
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
-      switch (key) {
+      switch (key.toLowerCase()) {
         case 'placeholder':
           this.parseInput(node, view, aLayer);
           break;

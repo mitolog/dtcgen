@@ -14,7 +14,7 @@ export class ButtonParser extends SymbolParser {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
 
-      switch (key) {
+      switch (key.toLowerCase()) {
         case 'icon':
           button.hasIcon = true;
           break;
