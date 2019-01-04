@@ -14,7 +14,6 @@
         "Tab Bar",
         "Navigation Bar"
       ],
-      "baseFrame": { "x": 0, "y": 0, "width": 375, "height": 812 },
       "followOverrides": true,
       "button": {
         "label": "text",
