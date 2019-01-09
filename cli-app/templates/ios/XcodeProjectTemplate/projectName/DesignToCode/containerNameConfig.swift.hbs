@@ -63,14 +63,6 @@ class {{container.name}}Config: ViewConfigImpl {
         {{else}}
         constraints.append(nil)
         {{/if}}
-
-        {{!-- リバイズ案 --}}
-        {{!-- 1. result.jsonにあったcodableを生成 --}}
-        {{!-- 2. とりまviewController内で当該codableの配列を作成 --}}
-        {{!-- view.snp.makeConstraints { (make) -> Void in
-        make.width.height.equalTo(50)
-        make.center.equalTo(self.view)
-        } --}}
         {{/views}}
     }
 }

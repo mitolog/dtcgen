@@ -1,12 +1,12 @@
 # taken from https://github.com/yonaskolb/XcodeGen
 name: {{projectName}}
 options:
-  bundleIdPrefix: {{bundleIdPrefix}}
+  bundleIdPrefix: "your.reverse.domain.{{projectName}}"
 targets:
   {{projectName}}:
     type: application
     platform: iOS
-    deploymentTarget: "{{deploymentTarget}}"
+    deploymentTarget: "10.0"
     sources: [{{projectName}}]
     settings:
       configs:
