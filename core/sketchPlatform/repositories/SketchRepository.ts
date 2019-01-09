@@ -7,12 +7,8 @@ import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
 import { Container } from '../../domain/entities/Container';
-import { ElementType } from '../../domain/entities/ElementType';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
-import { OSType } from '../../domain/entities/OSType';
-import { IOSCodeGenerator } from '../applications/IOSCodeGenerator';
-import { ICodeGenerator } from '../../domain/applications/ICodeGenerator';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 
 dotenv.config();
@@ -24,7 +20,6 @@ export interface ISketchRepository {
   getAll(inputPath: string): Promise<Node[]>;
   extractAll(inputPath: string, outputDir?: string): Promise<void>;
   extractSlices(inputPath: string, outputDir?: string): void;
-  generateAll(ostype: OSType, outputDir?: string): void;
 }
 
 @injectable()
@@ -209,24 +204,5 @@ export class SketchRepository implements ISketchRepository {
 
     // `export slices` command may make leading/trailing spaces, so remove these.
     pathManager.removeWhiteSpaces(dirPath);
-  }
-
-  generateAll(ostype: OSType, outputDir?: string): void {
-    if (!ostype) return;
-    const pathManager = new PathManager(outputDir);
-    const metadataFilePath = pathManager.getOutputPath(OutputType.metadata);
-    let generator: ICodeGenerator;
-
-    switch (ostype) {
-      case OSType.ios:
-        generator = new IOSCodeGenerator(outputDir);
-        generator.generate(metadataFilePath);
-        break;
-      case OSType.android:
-        /** TBA */
-        break;
-      default:
-        break;
-    }
   }
 }
