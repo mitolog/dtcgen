@@ -3,7 +3,7 @@ import { DIContainer } from "../dist/inversify.config";
 import {
   ILintNamingUseCase,
   IExtractElementUseCase,
-  IGenerateCodeUseCase
+  IGenerateProjectUseCase
 } from "../dist/domain/Domain";
 import { TYPES } from "../dist/types";
 import {
@@ -97,13 +97,20 @@ cli
       const platform =
         OSTypeValues.find(type => type === flag.platform) || OSType.ios;
       const outputDir = flag.output;
+      const projectName = flag.project;
+      if (!projectName) {
+        console.log(
+          "`--project` option is not detected. see `extract --help`."
+        );
+        return;
+      }
 
       const cliContainer = new DIContainer(<OSType>platform).getContainer();
-      const generateCodeUseCase = cliContainer.get<IGenerateCodeUseCase>(
-        TYPES.IGenerateCodeUseCase
+      const generateProjectUseCase = cliContainer.get<IGenerateProjectUseCase>(
+        TYPES.IGenerateProjectUseCase
       );
-      generateCodeUseCase
-        .handle(outputDir)
+      generateProjectUseCase
+        .handle(projectName, outputDir)
         .then(() => {
           console.log(`code generated`);
         })
@@ -112,11 +119,8 @@ cli
         });
     }
   )
-  .option(
-    "platform [osType]",
-    "required for generate command. currently `ios` only."
-  )
-  .option("project-name [name]", "required. specify the name for the project.");
+  .option("platform [osType]", "optional. currently `ios` only.")
+  .option("project [name]", "required. specify the name for the project.");
 
 cli
   .option(

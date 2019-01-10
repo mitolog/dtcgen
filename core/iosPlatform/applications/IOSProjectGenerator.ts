@@ -11,7 +11,7 @@ if (dotenv.error) {
   throw dotenv.error;
 }
 
-export class IOSCodeGenerator {
+export class IOSProjectGenerator {
   private pathManager: PathManager;
   private projectTemplateRootDir: string;
 
@@ -27,7 +27,7 @@ export class IOSCodeGenerator {
     );
   }
 
-  generate(): void {
+  generate(projectName: string): void {
     const metadataJsonPath = this.pathManager.getOutputPath(
       OutputType.metadata,
     );
@@ -42,19 +42,28 @@ export class IOSCodeGenerator {
     // 1. XcodeProjectTemplateディレクトリそのものをすべて `generated/ios/XcodeProject` にコピー
     // 2. topディレクトリで `projectName` の文言が含まれるディレクトリは optionでもらった名前に変更
     // 3.
-    //
-    //
 
     // copy directory to geenerated
     const templateDestDir = this.pathManager.getOutputPath(
       OutputType.sourcecodes,
       true,
       OSType.ios,
-      '',
+      'XcodeProject',
     );
-    fs.copySync(this.projectTemplateRootDir, path.join(templateDestDir));
+    fs.copySync(this.projectTemplateRootDir, templateDestDir);
 
     // rename directories
+    const projectRootDirs: string[] = fs.readdirSync(templateDestDir);
+    projectRootDirs
+      .filter(
+        dirOrFile =>
+          PathManager.isDir(path.join(templateDestDir, dirOrFile)) &&
+          dirOrFile.match(/projectName/g),
+      )
+      .forEach(matchedDir => {
+        const newDirName = matchedDir.replace(/projectName/g, projectName);
+        console.log(newDirName);
+      });
 
     // const vcTemplatePath: string = path.join(
     //   this.projectTemplateRootDir,
