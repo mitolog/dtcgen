@@ -1,1 +1,1 @@
-export { GenerateCodeUseCase } from './usecases/GenerateCodeUseCase';
+export { GenerateProjectUseCase } from './usecases/GenerateProjectUseCase';

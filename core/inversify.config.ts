@@ -72,7 +72,7 @@ export class DIContainer {
   injectIos(container: Container) {
     // Generate use case
     container
-      .bind<Domain.IGenerateCodeUseCase>(TYPES.IGenerateCodeUseCase)
-      .to(IOSPlatform.GenerateCodeUseCase);
+      .bind<Domain.IGenerateProjectUseCase>(TYPES.IGenerateProjectUseCase)
+      .to(IOSPlatform.GenerateProjectUseCase);
   }
 }
