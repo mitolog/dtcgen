@@ -28,6 +28,15 @@ export class IOSProjectGenerator {
   }
 
   generate(projectName: string): void {
+    if (
+      !projectName ||
+      projectName.length <= 0 ||
+      projectName.trim().length <= 0
+    ) {
+      throw new Error('project name is empty');
+    }
+    const trimedProjectName = projectName.trim();
+
     const metadataJsonPath = this.pathManager.getOutputPath(
       OutputType.metadata,
     );
@@ -43,83 +52,31 @@ export class IOSProjectGenerator {
     // 2. topディレクトリで `projectName` の文言が含まれるディレクトリは optionでもらった名前に変更
     // 3.
 
-    // copy directory to geenerated
     const templateDestDir = this.pathManager.getOutputPath(
       OutputType.sourcecodes,
       true,
       OSType.ios,
       'XcodeProject',
     );
+
+    // remove all files first
+    fs.removeSync(templateDestDir);
+
+    // copy directory to geenerated
     fs.copySync(this.projectTemplateRootDir, templateDestDir);
 
-    // rename directories
-    const projectRootDirs: string[] = fs.readdirSync(templateDestDir);
-    projectRootDirs
-      .filter(
-        dirOrFile =>
-          PathManager.isDir(path.join(templateDestDir, dirOrFile)) &&
-          dirOrFile.match(/projectName/g),
-      )
-      .forEach(matchedDir => {
-        const newDirName = matchedDir.replace(/projectName/g, projectName);
-        console.log(newDirName);
-      });
+    // rename top directory names
+    this.renameDirectories(templateDestDir, trimedProjectName);
 
-    // const vcTemplatePath: string = path.join(
-    //   this.projectTemplateRootDir,
-    //   'viewController.hbs',
-    // );
-    // const vcTemplate = this.compiledTemplate(vcTemplatePath);
+    // deal with project.yml
+    this.generateProjectYml(templateDestDir, {
+      projectName: trimedProjectName,
+    });
 
-    // const containers: any[] = sketchData.filter(
-    //   element =>
-    //     element.id &&
-    //     element.type &&
-    //     element.type === <string>ElementType.Container,
-    // );
+    // deal with *Tests directories
+    this.generateTests(templateDestDir, { projectName: trimedProjectName });
 
-    // let outputs = [];
-    // let vcNames: Object[] = [];
-    // for (const container of containers) {
-    //   const views = sketchData.filter(
-    //     element => element.containerId && element.containerId === container.id,
-    //   );
-
-    //   let containerObj = {
-    //     container: container,
-    //     views: views,
-    //   };
-    //   const output = vcTemplate(containerObj);
-    //   const vcFilePath = this.pathManager.getOutputPath(
-    //     OutputType.sourcecodes,
-    //     true,
-    //     OSType.ios,
-    //     container.name + 'ViewController.swift',
-    //   );
-    //   outputs.push({ filePath: vcFilePath, content: output });
-    //   vcNames.push({ name: path.parse(vcFilePath).name });
-    // }
-
-    // // viewController毎にviewを書き出し
-    // for (const output of outputs) {
-    //   fs.writeFileSync(output.filePath, output.content);
-    // }
-
-    // // 各viewControllerを確認するためのviewControllerを書き出し
-    // const baseVcFilePath = this.pathManager.getOutputPath(
-    //   OutputType.sourcecodes,
-    //   true,
-    //   OSType.ios,
-    //   'ViewController.swift',
-    // );
-    // const baseVcTemplatePath: string = path.join(
-    //   this.templateDir,
-    //   'baseViewController.hbs',
-    // );
-    // const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
-    // const baseVcOutput = baseVcTemplate({ viewControllers: vcNames });
-    // fs.writeFileSync(baseVcFilePath, baseVcOutput);
-
+    // deal with assets
     // // .xcassetの作成
     // const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
     // const assetsDir = this.pathManager.getOutputPath(
@@ -190,11 +147,175 @@ export class IOSProjectGenerator {
     //   const imagesetContentsJson = path.join(imagesetDir, 'Contents.json');
     //   const imagePath = path.join(imagesetDir, imageName);
     // });
+
+    // const vcTemplatePath: string = path.join(
+    //   this.projectTemplateRootDir,
+    //   'viewController.hbs',
+    // );
+    // const vcTemplate = this.compiledTemplate(vcTemplatePath);
+
+    // const containers: any[] = sketchData.filter(
+    //   element =>
+    //     element.id &&
+    //     element.type &&
+    //     element.type === <string>ElementType.Container,
+    // );
+
+    // let outputs = [];
+    // let vcNames: Object[] = [];
+    // for (const container of containers) {
+    //   const views = sketchData.filter(
+    //     element => element.containerId && element.containerId === container.id,
+    //   );
+
+    //   let containerObj = {
+    //     container: container,
+    //     views: views,
+    //   };
+    //   const output = vcTemplate(containerObj);
+    //   const vcFilePath = this.pathManager.getOutputPath(
+    //     OutputType.sourcecodes,
+    //     true,
+    //     OSType.ios,
+    //     container.name + 'ViewController.swift',
+    //   );
+    //   outputs.push({ filePath: vcFilePath, content: output });
+    //   vcNames.push({ name: path.parse(vcFilePath).name });
+    // }
+
+    // // viewController毎にviewを書き出し
+    // for (const output of outputs) {
+    //   fs.writeFileSync(output.filePath, output.content);
+    // }
+
+    // // 各viewControllerを確認するためのviewControllerを書き出し
+    // const baseVcFilePath = this.pathManager.getOutputPath(
+    //   OutputType.sourcecodes,
+    //   true,
+    //   OSType.ios,
+    //   'ViewController.swift',
+    // );
+    // const baseVcTemplatePath: string = path.join(
+    //   this.templateDir,
+    //   'baseViewController.hbs',
+    // );
+    // const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
+    // const baseVcOutput = baseVcTemplate({ viewControllers: vcNames });
+    // fs.writeFileSync(baseVcFilePath, baseVcOutput);
   }
 
   /**
    * Private methods
    */
+
+  /**
+   *
+   * @param directory directory to rename
+   * @param toName name directory to be changed
+   * @param recursive if true, recursively rename. default true.
+   * @return void
+   */
+  private renameDirectories(
+    directory: string,
+    toName: string,
+    renameFile: boolean = true,
+    recursive: boolean = true,
+  ): void {
+    if (!PathManager.isDir(directory)) return;
+
+    let dirContents: string[] = fs.readdirSync(directory);
+    dirContents
+      .filter(dirOrFile => {
+        const isDir = PathManager.isDir(path.join(directory, dirOrFile));
+        const nameMatched = dirOrFile.match(/projectName/g);
+        return isDir && nameMatched;
+      })
+      .forEach(matchedDirName => {
+        const newDirName = matchedDirName.replace(/projectName/g, toName);
+        const origDir = path.join(directory, matchedDirName);
+        const newDir = path.join(directory, newDirName);
+        fs.moveSync(origDir, newDir, { overwrite: true });
+
+        if (renameFile) {
+          this.renameFiles(newDir, toName);
+        }
+        if (recursive) {
+          this.renameDirectories(
+            path.join(directory, newDirName),
+            toName,
+            recursive,
+          );
+        }
+      });
+  }
+
+  private renameFiles(directory: string, toName: string): void {
+    if (!PathManager.isDir(directory)) return;
+
+    let dirContents: string[] = fs.readdirSync(directory);
+    dirContents
+      .filter(dirOrFile => {
+        const isDir = PathManager.isDir(path.join(directory, dirOrFile));
+        const nameMatched = dirOrFile.match(/projectName/g);
+        return !isDir && nameMatched;
+      })
+      .forEach(matchedFileName => {
+        const newFileName = matchedFileName.replace(/projectName/g, toName);
+        const origFile = path.join(directory, matchedFileName);
+        const newFile = path.join(directory, newFileName);
+        fs.moveSync(origFile, newFile, { overwrite: true });
+      });
+  }
+
+  private generateTests(searchDir: string, data: Object) {
+    if (!PathManager.isDir(searchDir)) return;
+
+    const baseDirContents = fs.readdirSync(searchDir);
+    baseDirContents
+      .filter(dirOrFile => {
+        const isDir = PathManager.isDir(path.join(searchDir, dirOrFile));
+        const isMatched = dirOrFile.match(/Tests.*hbs$/);
+        if (isDir) {
+          this.generateTests(path.join(searchDir, dirOrFile), data);
+        }
+        return !isDir && isMatched;
+      })
+      .forEach(testFileName => {
+        const testFilePath = path.join(searchDir, testFileName);
+        const testTemplate = this.compiledTemplate(testFilePath);
+        const output = testTemplate(data);
+        const sliceCnt = path.parse(testFilePath).ext.length;
+        const newPath = testFilePath.slice(0, -sliceCnt);
+
+        fs.removeSync(testFilePath);
+        fs.writeFileSync(newPath, output);
+      });
+  }
+
+  private generateProjectYml(searchDir: string, data: Object) {
+    if (!PathManager.isDir(searchDir)) return;
+
+    const baseDirContents = fs.readdirSync(searchDir);
+    baseDirContents
+      .filter(dirOrFile => {
+        const isDir = PathManager.isDir(path.join(searchDir, dirOrFile));
+        const isMatched = dirOrFile.match(/project\.yml\.hbs/);
+        if (isDir) {
+          this.generateProjectYml(path.join(searchDir, dirOrFile), data);
+        }
+        return !isDir && isMatched;
+      })
+      .forEach(fileName => {
+        const filePath = path.join(searchDir, fileName);
+        const template = this.compiledTemplate(filePath);
+        const output = template(data);
+        const sliceCnt = path.parse(filePath).ext.length;
+        const newPath = filePath.slice(0, -sliceCnt);
+
+        fs.removeSync(filePath);
+        fs.writeFileSync(newPath, output);
+      });
+  }
 
   // private generateAssets(originPath: string, destDirOrPath: string) {
   //   /*
