@@ -6,11 +6,13 @@ import UIKit
  */
 
 struct Dtc {
-    {{#views}}
-    static var {{container.name}}Config: ViewConfig {
-        get {
-            return {{container.name}}Config()
+    struct config {
+        {{#forEach names}}
+        static var {{name}}: ViewConfig {
+            get {
+                return {{name}}Config()
+            }
         }
+        {{/forEach}}
     }
-    {{/views}}
 }

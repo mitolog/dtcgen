@@ -16,6 +16,13 @@ class XcAssetJsonPaths {
   last: string;
 }
 
+class DesignToCodeTemplatePaths {
+  containerNameConfig: string;
+  designToCodeGenerated: string;
+  containerNameViewController: string;
+  viewController: string;
+}
+
 export class IOSProjectGenerator {
   private pathManager: PathManager;
   private projectTemplateRootDir: string;
@@ -76,60 +83,8 @@ export class IOSProjectGenerator {
     // deal with assets
     this.generateAssets(templateDestDir);
 
-    // const vcTemplatePath: string = path.join(
-    //   this.projectTemplateRootDir,
-    //   'viewController.hbs',
-    // );
-    // const vcTemplate = this.compiledTemplate(vcTemplatePath);
-
-    // const containers: any[] = sketchData.filter(
-    //   element =>
-    //     element.id &&
-    //     element.type &&
-    //     element.type === <string>ElementType.Container,
-    // );
-
-    // let outputs = [];
-    // let vcNames: Object[] = [];
-    // for (const container of containers) {
-    //   const views = sketchData.filter(
-    //     element => element.containerId && element.containerId === container.id,
-    //   );
-
-    //   let containerObj = {
-    //     container: container,
-    //     views: views,
-    //   };
-    //   const output = vcTemplate(containerObj);
-    //   const vcFilePath = this.pathManager.getOutputPath(
-    //     OutputType.sourcecodes,
-    //     true,
-    //     OSType.ios,
-    //     container.name + 'ViewController.swift',
-    //   );
-    //   outputs.push({ filePath: vcFilePath, content: output });
-    //   vcNames.push({ name: path.parse(vcFilePath).name });
-    // }
-
-    // // viewController毎にviewを書き出し
-    // for (const output of outputs) {
-    //   fs.writeFileSync(output.filePath, output.content);
-    // }
-
-    // // 各viewControllerを確認するためのviewControllerを書き出し
-    // const baseVcFilePath = this.pathManager.getOutputPath(
-    //   OutputType.sourcecodes,
-    //   true,
-    //   OSType.ios,
-    //   'ViewController.swift',
-    // );
-    // const baseVcTemplatePath: string = path.join(
-    //   this.templateDir,
-    //   'baseViewController.hbs',
-    // );
-    // const baseVcTemplate = this.compiledTemplate(baseVcTemplatePath);
-    // const baseVcOutput = baseVcTemplate({ viewControllers: vcNames });
-    // fs.writeFileSync(baseVcFilePath, baseVcOutput);
+    // deal with sourcecodes
+    this.generateSourceCodes(templateDestDir);
   }
 
   /**
@@ -195,6 +150,14 @@ export class IOSProjectGenerator {
       });
   }
 
+  /**
+   * lookup deeper from `searchDir` and check if file or directory exists
+   * matched to `regExpStr`. then adopt `data`.
+   * If exists, remove matched files, then create new one sliced last extension.
+   * @param searchDir
+   * @param regExpStr
+   * @param data
+   */
   private searchAndAdoptTemplate(
     searchDir: string,
     regExpStr: string,
@@ -354,6 +317,125 @@ export class IOSProjectGenerator {
 
     // copy asset data itself
     fs.copyFileSync(originPath, path.join(imageSetDir, parsed.base));
+  }
+
+  private generateSourceCodes(searchDir: string) {
+    const metadataJson = this.getMetadataJson();
+
+    // Prepare needed pathes
+    const templatePaths = new DesignToCodeTemplatePaths();
+
+    let tmpRegExpStr = `^containerNameConfig\.swift\.hbs$`;
+    let tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    if (!tmpPaths || tmpPaths.length <= 0) {
+      throw new Error(`${tmpRegExpStr} is not found`);
+    }
+    templatePaths.containerNameConfig = tmpPaths[0];
+
+    tmpRegExpStr = `^DesignToCode\.generated\.swift\.hbs$`;
+    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    if (!tmpPaths || tmpPaths.length <= 0) {
+      throw new Error(`${tmpRegExpStr} is not found`);
+    }
+    templatePaths.designToCodeGenerated = tmpPaths[0];
+
+    tmpRegExpStr = `^containerNameViewController\.swift\.hbs$`;
+    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    if (!tmpPaths || tmpPaths.length <= 0) {
+      throw new Error(`${tmpRegExpStr} is not found`);
+    }
+    templatePaths.containerNameViewController = tmpPaths[0];
+
+    tmpRegExpStr = `^viewController\.swift\.hbs$`;
+    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    if (!tmpPaths || tmpPaths.length <= 0) {
+      throw new Error(`${tmpRegExpStr} is not found`);
+    }
+    templatePaths.viewController = tmpPaths[0];
+
+    const containers: any[] = metadataJson.filter(
+      element =>
+        element.id &&
+        element.type &&
+        element.type === <string>ElementType.Container,
+    );
+
+    // iterate containers and adopt templates
+    let outputs: any[] = [];
+    let containerNames: Object[] = [];
+    for (const container of containers) {
+      const views = metadataJson.filter(
+        element => element.containerId && element.containerId === container.id,
+      );
+      let containerObj = {
+        container: container,
+        views: views,
+      };
+
+      // viewConfigs
+      const configTemplate = this.compiledTemplate(
+        templatePaths.containerNameConfig,
+      );
+      const configOutput = configTemplate(containerObj);
+      const configParsed = path.parse(templatePaths.containerNameConfig);
+      const configName = container.name + 'Config.swift';
+      const configOutputPath = path.join(configParsed.dir, configName);
+
+      outputs.push({ filePath: configOutputPath, content: configOutput });
+
+      // viewControllers
+      const vcTemplate = this.compiledTemplate(
+        templatePaths.containerNameViewController,
+      );
+      const vcOutput = vcTemplate(containerObj);
+      const vcParsed = path.parse(templatePaths.containerNameViewController);
+      const vcName = container.name + 'ViewController.swift';
+      const vcOutputPath = path.join(
+        vcParsed.dir,
+        '../',
+        container.name,
+        vcName,
+      );
+
+      outputs.push({ filePath: vcOutputPath, content: vcOutput });
+
+      // for viewController.swift.hbs and
+      containerNames.push({ name: container.name });
+    }
+
+    // generate iterated files
+    for (const output of outputs) {
+      fs.ensureFileSync(output.filePath);
+      fs.writeFileSync(output.filePath, output.content);
+    }
+
+    // generate base view controller
+    const viewControllerNames = containerNames.map(obj => {
+      return { name: obj['name'] + 'ViewController' };
+    });
+    this.searchAndAdoptTemplate(
+      path.parse(templatePaths.viewController).dir,
+      `^viewController\.swift\.hbs$`,
+      { names: viewControllerNames },
+    );
+
+    // generate DesignToCode
+    this.searchAndAdoptTemplate(
+      path.parse(templatePaths.designToCodeGenerated).dir,
+      `^DesignToCode\.generated\.swift\.hbs$`,
+      { names: containerNames },
+    );
+
+    // remove templates itself
+    for (const key of Object.keys(templatePaths)) {
+      const templatePath = templatePaths[key];
+      if (key === 'containerNameViewController') {
+        // remove `containerName` directory
+        fs.removeSync(path.join(templatePath, '../'));
+      } else {
+        fs.removeSync(templatePath);
+      }
+    }
   }
 
   private getMetadataJson(): any {
