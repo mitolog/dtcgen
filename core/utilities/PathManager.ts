@@ -18,6 +18,7 @@ export enum OutputType {
   images,
   metadata,
   sourcecodes,
+  project,
 }
 
 export class PathManager {
@@ -107,6 +108,27 @@ export class PathManager {
         outputPath = codePath;
         break;
 
+      case OutputType.project:
+        let projectPath = '';
+        if (osType === OSType.ios) {
+          projectPath = path.join(
+            this.outputDir,
+            OutputMidDirName.generated,
+            OSType.ios,
+            'XcodeProject',
+          );
+        } else {
+          throw new Error(
+            OutputType.project +
+              ' generation for android is not implemented yet',
+          );
+        }
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(path.dirname(projectPath));
+        }
+        outputPath = projectPath;
+        break;
+
       default:
         break;
     }
@@ -140,6 +162,46 @@ export class PathManager {
         this.removeWhiteSpaces(path.join(destPath, file));
       });
     }
+  }
+
+  /**
+   * Search files or directories that match `regExp`
+   * under `searchDir` directory `recursive`-ly if needed.
+   * @param searchDir {string} directory path. SHUOLD BE DIRECTORY.
+   * @param regExp {string} regular expression string
+   * @param recursive {boolean} if true, search recursively
+   */
+  searchDirsOrFiles(
+    searchDir: string,
+    regExp: string,
+    recursive: boolean,
+  ): string[] | null {
+    if (!PathManager.isDir(searchDir)) return null;
+
+    let foundPaths: string[] = [];
+    const dirContents = fs.readdirSync(searchDir);
+    dirContents
+      .filter(dirOrFile => {
+        const isDir = PathManager.isDir(path.join(searchDir, dirOrFile));
+        const isMatched = dirOrFile.match(new RegExp(regExp, 'g'));
+        if (isDir && recursive) {
+          const paths = this.searchDirsOrFiles(
+            path.join(searchDir, dirOrFile),
+            regExp,
+            isDir,
+          );
+          if (paths && paths.length > 0) {
+            paths.forEach(path => foundPaths.push(path));
+          }
+        }
+        return isMatched;
+      })
+      .forEach(fileName => {
+        const filePath = path.join(searchDir, fileName);
+        foundPaths.push(filePath);
+      });
+
+    return foundPaths;
   }
 
   read(filePath): string {
