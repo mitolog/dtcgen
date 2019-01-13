@@ -163,7 +163,11 @@ export class IOSProjectGenerator {
     regExpStr: string,
     data: Object,
   ): void {
-    const templatePaths = this.searchDirsOrFiles(searchDir, regExpStr, true);
+    const templatePaths = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      regExpStr,
+      true,
+    );
     if (!templatePaths || templatePaths.length <= 0) return;
 
     templatePaths.forEach(filePath => {
@@ -177,45 +181,16 @@ export class IOSProjectGenerator {
     });
   }
 
-  private searchDirsOrFiles(
-    searchDir: string,
-    regExp: string,
-    recursive: boolean,
-  ): string[] | null {
-    if (!PathManager.isDir(searchDir)) return null;
-
-    let foundPaths: string[] = [];
-    const dirContents = fs.readdirSync(searchDir);
-    dirContents
-      .filter(dirOrFile => {
-        const isDir = PathManager.isDir(path.join(searchDir, dirOrFile));
-        const isMatched = dirOrFile.match(new RegExp(regExp, 'g'));
-        if (isDir && recursive) {
-          const paths = this.searchDirsOrFiles(
-            path.join(searchDir, dirOrFile),
-            regExp,
-            isDir,
-          );
-          if (paths && paths.length > 0) {
-            paths.forEach(path => foundPaths.push(path));
-          }
-        }
-        return isMatched;
-      })
-      .forEach(fileName => {
-        const filePath = path.join(searchDir, fileName);
-        foundPaths.push(filePath);
-      });
-
-    return foundPaths;
-  }
-
   private generateAssets(searchDir: string): void {
     if (!PathManager.isDir(searchDir)) return;
 
     // Prepare needed paths/directories
     const jsonTemplatePaths = this.getAssetJsonTemplatePaths();
-    const destDirs = this.searchDirsOrFiles(searchDir, `xcassets$`, true);
+    const destDirs = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      `xcassets$`,
+      true,
+    );
     if (!destDirs || destDirs.length <= 0) {
       throw new Error('no xcassets directory within template.');
     }
@@ -326,28 +301,44 @@ export class IOSProjectGenerator {
     const templatePaths = new DesignToCodeTemplatePaths();
 
     let tmpRegExpStr = `^containerNameConfig\.swift\.hbs$`;
-    let tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    let tmpPaths = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      tmpRegExpStr,
+      true,
+    );
     if (!tmpPaths || tmpPaths.length <= 0) {
       throw new Error(`${tmpRegExpStr} is not found`);
     }
     templatePaths.containerNameConfig = tmpPaths[0];
 
     tmpRegExpStr = `^DesignToCode\.generated\.swift\.hbs$`;
-    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    tmpPaths = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      tmpRegExpStr,
+      true,
+    );
     if (!tmpPaths || tmpPaths.length <= 0) {
       throw new Error(`${tmpRegExpStr} is not found`);
     }
     templatePaths.designToCodeGenerated = tmpPaths[0];
 
     tmpRegExpStr = `^containerNameViewController\.swift\.hbs$`;
-    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    tmpPaths = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      tmpRegExpStr,
+      true,
+    );
     if (!tmpPaths || tmpPaths.length <= 0) {
       throw new Error(`${tmpRegExpStr} is not found`);
     }
     templatePaths.containerNameViewController = tmpPaths[0];
 
     tmpRegExpStr = `^viewController\.swift\.hbs$`;
-    tmpPaths = this.searchDirsOrFiles(searchDir, tmpRegExpStr, true);
+    tmpPaths = this.pathManager.searchDirsOrFiles(
+      searchDir,
+      tmpRegExpStr,
+      true,
+    );
     if (!tmpPaths || tmpPaths.length <= 0) {
       throw new Error(`${tmpRegExpStr} is not found`);
     }
@@ -453,7 +444,7 @@ export class IOSProjectGenerator {
   }
 
   private getAssetJsonTemplatePaths(): XcAssetJsonPaths {
-    const assetsDir = this.searchDirsOrFiles(
+    const assetsDir = this.pathManager.searchDirsOrFiles(
       this.projectTemplateRootDir,
       'xcassets$',
       true,
