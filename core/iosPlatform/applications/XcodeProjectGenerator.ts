@@ -44,6 +44,7 @@ export class XcodeProjectGenator {
         `git clone https://github.com/yonaskolb/XcodeGen.git ${clonePath}`,
         execOption,
       );
+      xcodeGenPaths.push(clonePath);
     }
 
     const xcodeGenRootDir = xcodeGenPaths.reduce((prev, current) => {
