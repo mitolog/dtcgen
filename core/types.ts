@@ -5,6 +5,7 @@ const TYPES = {
   ILintNamingUseCase: Symbol.for('ILintNamingUseCase'),
   IExtractElementUseCase: Symbol.for('IExtractElementUseCase'),
   IGenerateCodeUseCase: Symbol.for('IGenerateCodeUseCase'),
+  IGenerateProjectUseCase: Symbol.for('IGenerateProjectUseCase'),
 };
 
 export { TYPES };
