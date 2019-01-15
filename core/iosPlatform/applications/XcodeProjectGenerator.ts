@@ -40,7 +40,6 @@ export class XcodeProjectGenator {
     if (!xcodeGenPaths || xcodeGenPaths.length <= 0) {
       // git clone
       const clonePath = path.join(projectDir, '../', 'XcodeGen');
-      console.log(clonePath);
       execSync(
         `git clone https://github.com/yonaskolb/XcodeGen.git ${clonePath}`,
         execOption,
@@ -70,8 +69,6 @@ export class XcodeProjectGenator {
     if (!projectYmlPaths || projectYmlPaths.length <= 0) {
       throw new Error('no project.yml file for XcodeGen.');
     }
-
-    console.log(projectYmlPaths);
     execSync(
       `swift run --package-path ${xcodeGenRootDir} xcodegen -s ${
         projectYmlPaths[0]
