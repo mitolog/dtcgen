@@ -17,12 +17,7 @@ import { Image } from '../../domain/entities/Image';
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
   parseElement(node: any, view: View);
-  parseSymbol(
-    node: any,
-    hierarchy: number,
-    outputs: any[],
-    takeOverData: TakeOverData,
-  );
+  parseSymbol(takeOverData: TakeOverData, outputs: any[]);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -78,7 +73,7 @@ export class SketchParser implements ISketchParser {
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
         const takeOverData = new TakeOverData(node, hierarchy);
-        this.parseSymbol(node, hierarchy, outputs, takeOverData);
+        this.parseSymbol(takeOverData, outputs);
       }
     }
   }
@@ -107,45 +102,24 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(
-    node: any,
-    hierarchy: number,
-    outputs: any[],
-    takeOverData: TakeOverData,
-  ) {
+  parseSymbol(takeOverData: TakeOverData, outputs: any[]) {
+    const node = takeOverData.node;
+    let hierarchy = takeOverData.hierarchy;
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
-    const symbolsPage = this.sketch['symbolsPage'];
-    let targetSymbol: any;
-    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
-      targetSymbol = symbolsPage.get(
-        'symbolMaster',
-        instance => instance.symbolID === node.symbolID,
-      );
-      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
-    } else if (node._class !== 'shapeGroup') {
-      targetSymbol = node;
-    }
+    const targetSymbol: any = this.symbolForNode(node);
     if (!targetSymbol) {
       // todo: symbolMaster, symbolInstanceでパースしたが、マッチするシンボルがない場合。
       // またはshapeGroupの場合。イレギュラーケースもある? 要調査。
       return;
     }
 
-    //if (this.shouldExclude(node.name)) return;
-    const view: View = new View(targetSymbol, hierarchy);
+    const view = new View(targetSymbol, hierarchy);
     this.parseConstraint(node.resizingConstraint, view);
-
-    // view.id(restorationIdentifier)がsymbolのIDになってしまっている
-    // ので、artboard上でのidを引き継ぐ必要がある。が、それにしたがって、
-    // そのviewにのっかってる1階層目のviewのparentIdも変える必要がある
-    //view.id = takeOverData.id;
-    view.containerId = takeOverData.artboardId;
-    view.rect = takeOverData.rect;
-    view.parentId = takeOverData.parentId;
+    takeOverData.takeOverCommonProps(view);
 
     const subLayers = _.get(targetSymbol, 'layers');
     if (!subLayers || subLayers.length <= 0) {
-      // 最下層なので、ここで当該要素(node)をパース
+      // Parse this node(node-sketch), bevause it's an end of the tree structure.
       const parser = new AutoParser(this.sketch, this.config, this.outputDir);
       parser.parse(targetSymbol, view);
 
@@ -160,14 +134,14 @@ export class SketchParser implements ISketchParser {
     }
 
     outputs.push(view);
-    hierarchy++;
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
         layer,
-        hierarchy,
-        takeOverData.nodeOnArtboard,
+        hierarchy++,
+        takeOverData.topSymbolHierarchy,
+        takeOverData.nodeOnArtboard || takeOverData.node,
       );
-      this.parseSymbol(layer, hierarchy, outputs, newTakeOverData);
+      this.parseSymbol(newTakeOverData, outputs);
     });
   }
 
@@ -196,6 +170,25 @@ export class SketchParser implements ISketchParser {
   /**
    * Private methods below
    */
+
+  /**
+   * Retrieve corresponding symbol for a node(node-sketch) instance.
+   * @param node Node instance
+   */
+  private symbolForNode(node: any): any {
+    const symbolsPage = this.sketch['symbolsPage'];
+    let targetSymbol: any;
+    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
+      targetSymbol = symbolsPage.get(
+        'symbolMaster',
+        instance => instance.symbolID === node.symbolID,
+      );
+      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    } else if (node._class !== 'shapeGroup') {
+      targetSymbol = node;
+    }
+    return targetSymbol;
+  }
 
   private shouldExclude(targetName: string) {
     // exclude node that is listed on setting config.
