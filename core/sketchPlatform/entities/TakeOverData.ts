@@ -1,37 +1,48 @@
 import { Rect } from '../../domain/entities/Rect';
 import * as _ from 'lodash';
+import { View } from '../../domain/entities/View';
 
 /**
  * This class is for taking over from artboard view to symbol view
  */
 export class TakeOverData {
   // should be filled on constructor
-  id: string;
   rect: Rect;
   node: any;
   hierarchy: number;
-  parentId: string;
+  topSymbolHierarchy: number;
 
   // optional
   artboardId?: string;
   nodeOnArtboard?: any;
   //imageName?: string;
 
+  // private
+  private isTopSymbolLayer: boolean;
+
   /**
    * take over data from the node on artboard to symbol.
    * @param node {any} node from which we take over data. should be instance on artboard.
    * @param hierarchy {number} hierarchy of view layer
    */
-  constructor(node: any, hierarchy: number, nodeOnArtboard?: any) {
+  constructor(
+    node: any,
+    hierarchy: number,
+    topSymbolHierarchy: number = null,
+    nodeOnArtboard?: any,
+  ) {
     this.node = node;
     this.hierarchy = hierarchy;
-    this.nodeOnArtboard = nodeOnArtboard ? nodeOnArtboard : node;
-    const parent = node.getParent();
-    if (parent) {
-      this.parentId = parent.do_objectID;
+    //this.nodeOnArtboard = nodeOnArtboard ? nodeOnArtboard : node;
+    if (nodeOnArtboard) {
+      this.isTopSymbolLayer = false;
+      this.nodeOnArtboard = nodeOnArtboard;
     } else {
-      console.log('no parent on takeover data');
+      this.isTopSymbolLayer = true;
+      this.nodeOnArtboard = null;
     }
+
+    this.topSymbolHierarchy = topSymbolHierarchy || hierarchy;
 
     this.rect = new Rect(<Rect>{
       x: node.frame.x,
@@ -43,19 +54,27 @@ export class TakeOverData {
     this.artboardId = nodeOnArtboard
       ? this.containerId(nodeOnArtboard)
       : this.containerId(node);
-
-    this.id = nodeOnArtboard ? nodeOnArtboard.do_objectID : node.do_objectID;
   }
 
-  private containerId(node: any): string | null {
-    if (node._class === 'artboard') {
-      return node.do_objectID;
-    } else if (node._class === 'page' || node._class === 'sketch') {
-      //console.log('no containerId on takeover data');
-      return null;
+  takeOverCommonProps(view: View): void {
+    // view.id(restorationIdentifier)がsymbolのIDになってしまっている
+    // ので、artboard上でのidを引き継ぐ必要がある。が、それにしたがって、
+    // そのviewにのっかってる1階層目のviewのparentIdも変える必要がある
+    if (this.isTopSymbolLayer) {
+      // nodeOnArtboardがない場合、つまり初回のtakeOverの際のみ
+      // つまり、artboardからsymbolに以降する際のみ、idを上書きする。
+      view.id = this.node.do_objectID;
     }
-    const parent = node.getParent();
-    return this.containerId(parent);
+    view.containerId = this.artboardId;
+    view.rect = this.rect;
+    if (
+      !this.isTopSymbolLayer &&
+      this.topSymbolHierarchy &&
+      this.hierarchy - this.topSymbolHierarchy === 1
+    ) {
+      // symbolから1階層目のviewだけは、artboard上のidを指定
+      view.parentId = this.nodeOnArtboard.do_objectID;
+    }
   }
 
   get name(): string {
@@ -63,7 +82,10 @@ export class TakeOverData {
   }
 
   get imageName(): string | null {
-    const overrideValues = this.nodeOnArtboard.overrideValues;
+    const overrideValues = _.get(
+      this.nodeOnArtboard || this.node,
+      'overrideValues',
+    );
     if (!overrideValues || overrideValues.length <= 0) return null;
 
     const imagePaths = overrideValues
@@ -89,8 +111,11 @@ export class TakeOverData {
   }
 
   get textTitle(): string | null {
-    const overrideValues = this.nodeOnArtboard.overrideValues;
-    if (!overrideValues) return null;
+    const overrideValues = _.get(
+      this.nodeOnArtboard || this.node,
+      'overrideValues',
+    );
+    if (!overrideValues || overrideValues.length <= 0) return null;
     const stringOverrides = overrideValues
       .filter(overrideObj => {
         const name = overrideObj.overrideName;
@@ -108,7 +133,20 @@ export class TakeOverData {
         return targetId === this.node.do_objectID;
       })
       .map(overrideObj => overrideObj.value);
-    //console.log(stringOverrides);
     return stringOverrides[0] || null;
+  }
+
+  /**
+   * Private methods
+   */
+  private containerId(node: any): string | null {
+    if (node._class === 'artboard') {
+      return node.do_objectID;
+    } else if (node._class === 'page' || node._class === 'sketch') {
+      //console.log('no containerId on takeover data');
+      return null;
+    }
+    const parent = node.getParent();
+    return this.containerId(parent);
   }
 }
