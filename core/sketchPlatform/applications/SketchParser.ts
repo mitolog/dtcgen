@@ -67,8 +67,7 @@ export class SketchParser implements ISketchParser {
         this.parseElement(node, view);
         outputs.push(view);
       } else {
-        // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
-        // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
+        // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
@@ -114,6 +113,9 @@ export class SketchParser implements ISketchParser {
     }
 
     const view = new View(targetSymbol, hierarchy);
+    if (takeOverData.nodeOnArtboard) {
+      //console.log('parent: ', node.getParent()._class);
+    }
     this.parseConstraint(node.resizingConstraint, view);
     takeOverData.takeOverCommonProps(view);
 
@@ -134,13 +136,15 @@ export class SketchParser implements ISketchParser {
     }
 
     outputs.push(view);
+    hierarchy++;
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
         layer,
-        hierarchy++,
+        hierarchy,
         takeOverData.topSymbolHierarchy,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
+      //console.log('symbol node: ', newTakeOverData.node._class);
       this.parseSymbol(newTakeOverData, outputs);
     });
   }
