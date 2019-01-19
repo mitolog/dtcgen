@@ -11,6 +11,7 @@ export class View extends Container {
 
   hierarchy?: number;
   containerId?: string;
+  symbolId?: string;
   parentId?: string;
   constraints?: Constraints;
   backgroundColor?: Color;
@@ -41,12 +42,19 @@ export class View extends Container {
     if (belongingArtboard) {
       this.containerId = belongingArtboard.do_objectID;
     }
-    const parent = node.getParent(); //node.getParent('group');
+
+    // If the node is `symbolMaster`, it's parent will be `Symbols` page.
+    // So you cannot track parent when `symbolMaster`.
+    const parent = node.getParent();
     // parent can be: group, symbolMaster, page, artboard
     if (parent._class !== 'page') {
       this.parentId = parent.do_objectID;
     }
     this.hierarchy = hierarchy;
+
+    if (node.symbolID) {
+      this.symbolId = node.symbolID;
+    }
 
     // todo: just for testing. randomly adopt background.
     this.backgroundColor = new Color(<Color>{
