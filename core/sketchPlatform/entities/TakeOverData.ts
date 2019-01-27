@@ -80,24 +80,63 @@ export class TakeOverData {
     view.containerId = this.artboardId;
     view.rect = this.rect;
 
-    // if (this.node.do_objectID === '6961D835-1316-4AF9-BBC6-2F73C148E84B') {
-    //   console.log('isTopSymbolLayer: ', this.isTopSymbolLayer);
-    //   console.log('topSymbolHierarchy: ', this.topSymbolHierarchy);
-    //   console.log('hierarchy: ', this.hierarchy);
-    // }
+    // symbolが複数箇所で使われていて、且つそのsymbolがoverrideされていて、
+    // 且つそのsymbolの子要素がある場合、それらの要素は、parentIdでしか親symbolを特定できないが、
+    // 親symbolのidは複数存在するため、意図しない箇所のsymbolにaddsubviewされる可能性がある。
+    // よって何かしらの対応が必要となる。
+    // 基本方針としては、親symbolにoverride情報(overrideの固有id含む)をもたせ、
+    // 子symbolにoverrideの固有idをもたせ、それでヒモづけを行う。
+    // この時、子symbolはそれより下にlayersを持たないものと仮定する(存在する場合はその時考える)
 
-    // symbol上にsymbolがのっかってる場合は、metadata.jsonにした時、
-    // 親symbolのrestorationIdentifierに symbolMasterのdo_objectIDが入って、
-    // 子symbolのparentIdは同restorationIdentifierを向くことになる。
-    // が、これだと親symbolはアプリ上で何度も利用されるので、
-    // xcode上で view.id == child.parentIdでマッチングした時に 想定しないviewに
-    // addsubviewされる可能性がある。
-    // よって、symbol上のsymbolの場合は、artboard上でどのパーツに乗ってるかを指定しなければいけない。
-    // それには、nodeOnArtboard.do_objectIDを metadata.jsonに付与する必要がある。
-    // で、xcode上で、view.id(親)にはsymbolMaster.do_objectIDは利用せず、以下のようにする：
-    // targetView.parentId(子) == view.restorationIdentifier (親) ... このときのidは artboard上のdo_objectID
-    // &&
-    // targetView.symbolParentId(子) == view.symbolId(親) ... この時idは symbol上のdo_objectID
+    // xcode上での親子関係の特定の仕方
+    // 1. reuseIdentifier(view.id)と parentId のマッチング (従来)
+    // 2. overrideの do_objectIDでマッチング
+
+    // 2の場合の、Xcode上での探索の仕方：
+    // targetView.parentIdにマッチするview.reuseIdentifierが複数個マッチする場合、
+    // 当該viewを別途配列に格納(1)。1の配列を走査し、parentIdが無いところまで遡る。
+    // そこで、overrideValues[]を見つけたら、その中に自分のreuseIdentifier(各overrideValuesの
+    // do_objectIDにする)が入ってないかチェック。入っていれば、1の配列に入っている直近のparentに
+    // あたるviewにaddsubviewする。
+
+    // 本プログラム上での処理：
+    //
+    // 1. takeOverDataの中で、`isTopSymbolLayer` のviewの場合、
+    // nodeにoverrideValuesが存在するかチェック。存在すれば、2を実施、しなければ何もしない。
+
+    // 2. view.overridesに 各overrideObjectの do_ObjectIDの配列を作成:
+    // view.overrides = [ "do_ObjectID_1", "do_ObjectID_2", "do_ObjectID_3", ... ]
+
+    // 3. this.nodeOnArtboardにoverrideValuesがあるかチェック。なければ何もしない。あれば、
+    // overrideValues[n]['overrideName'].split('_').[0] に、今回のnode.do_objectIDがマッチするか
+    // チェック。マッチすれば、view.id を overrideValues[n]['do_objectID']にする
+
+    // 3の手順をしたときに、view.idをparentIdとする下層のsymbolがある場合は存在する？
+    // その時対応するか...。
+
+    /**
+     * Assign overrideOriginId if needed
+     */
+    const overrideValues = this.overrideValues();
+    if (this.nodeOnArtboard && overrideValues && overrideValues.length) {
+      overrideValues
+        .filter(obj => {
+          const name = obj['overrideName'];
+          return name && name.split('_') && name.split('_')[0].length;
+        })
+        .forEach(obj => {
+          const nameFormer = obj['overrideName'].split('_')[0];
+          const names = nameFormer.split('/');
+          const targetId =
+            names && names.length > 1 ? names[names.length - 1] : names[0];
+          // If unique id of this node is included within override object,
+          // assign unique id(do_objectID) of node on artboard to the `view`.
+          if (targetId === this.node.do_objectID) {
+            // expect here to come only once on each iteration.
+            view.overrideOriginId = this.nodeOnArtboard.do_objectID;
+          }
+        });
+    }
 
     const isFirstElementUnderTheSymbol =
       !this.isTopSymbolLayer && this.hierarchy - this.topSymbolHierarchy === 1;
@@ -121,15 +160,12 @@ export class TakeOverData {
   }
 
   get imageName(): string | null {
-    const overrideValues = _.get(
-      this.nodeOnArtboard || this.node,
-      'overrideValues',
-    );
+    const overrideValues = this.overrideValues();
     if (!overrideValues || overrideValues.length <= 0) return null;
 
     const imagePaths = overrideValues
       .filter(overrideObj => {
-        const name = overrideObj.overrideName;
+        const name = overrideObj['overrideName'];
         if (
           !name ||
           name.split('_').length <= 1 ||
@@ -150,14 +186,11 @@ export class TakeOverData {
   }
 
   get textTitle(): string | null {
-    const overrideValues = _.get(
-      this.nodeOnArtboard || this.node,
-      'overrideValues',
-    );
+    const overrideValues = this.overrideValues();
     if (!overrideValues || overrideValues.length <= 0) return null;
     const stringOverrides = overrideValues
       .filter(overrideObj => {
-        const name = overrideObj.overrideName;
+        const name = overrideObj['overrideName'];
         if (
           !name ||
           name.split('_').length <= 1 ||
@@ -171,13 +204,18 @@ export class TakeOverData {
           ids && ids.length > 1 ? ids[ids.length - 1] : nameFormerPart;
         return targetId === this.node.do_objectID;
       })
-      .map(overrideObj => overrideObj.value);
+      .map(overrideObj => overrideObj['value']);
     return stringOverrides[0] || null;
   }
 
   /**
    * Private methods
    */
+
+  private overrideValues(): Object[] | undefined {
+    return _.get(this.nodeOnArtboard || this.node, 'overrideValues');
+  }
+
   private containerId(node: any): string | null {
     if (node._class === 'artboard') {
       return node.do_objectID;
