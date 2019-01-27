@@ -49,6 +49,9 @@ class {{container.name}}Config: ViewConfigImpl {
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
         {{/if}}
+        {{#if overrideOriginId }}
+        view!.overrideOriginId = "{{overrideOriginId}}"
+        {{/if}}
         view!.clipsToBounds = true
         view!.translatesAutoresizingMaskIntoConstraints = false
         view!.restorationIdentifier = "{{id}}"
