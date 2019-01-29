@@ -50,14 +50,40 @@ class ViewConfigImpl : ViewConfig {
     func configureViews() {
     }
 
+    private func searchOrigin(_ targetView: UIView, originId: String) -> Bool {
+        let parentId = targetView.parentId
+        var hasOrigin = false
+        for (_, view) in views.enumerated() {
+            let isOrigin = (originId == view.restorationIdentifier)
+            let isParent = (parentId == nil || parentId == view.restorationIdentifier)
+            let hasParent = (view.parentId != nil) ? true : false
+
+            if (isParent && hasParent && !hasOrigin) {
+                hasOrigin = searchOrigin(view, originId: originId)
+            } else if (isParent && !hasParent && isOrigin) {
+                hasOrigin = true
+                break
+            }
+        }
+        return hasOrigin
+    }
+
     private func add(_ targetView: UIView, _ onView: UIView) {
         var hasParentView = false
-        for view in views {
+        for view in self.views {
             guard let viewId = view.restorationIdentifier else { continue }
             if targetView.parentId == viewId {
-                view.addSubview(targetView)
-                hasParentView = true
-                break
+                if let overrideOriginId = targetView.overrideOriginId {
+                    if self.searchOrigin(view, originId: overrideOriginId) {
+                        view.addSubview(targetView)
+                        hasParentView = true
+                        break
+                    }
+                } else {
+                    view.addSubview(targetView)
+                    hasParentView = true
+                    break
+                }
             }
         }
         if !hasParentView {

@@ -11,18 +11,13 @@ import { TextInputParser } from './ElementParsers/TextInputParser';
 import { TextInput } from '../../domain/entities/TextInput';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
-import { TakeOverArtboardData } from '../entities/TakeOverArtboardData';
+import { TakeOverData } from '../entities/TakeOverData';
 import { Image } from '../../domain/entities/Image';
 
 export interface ISketchParser {
   parseLayer(node: any, hierarchy: number, outputs: any[]);
   parseElement(node: any, view: View);
-  parseSymbol(
-    node: any,
-    hierarchy: number,
-    outputs: any[],
-    takeOverData: TakeOverArtboardData,
-  );
+  parseSymbol(takeOverData: TakeOverData, outputs: any[]);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -72,13 +67,12 @@ export class SketchParser implements ISketchParser {
         this.parseElement(node, view);
         outputs.push(view);
       } else {
-        // マッチしないシンボルはouputには入れず、symbolの実態をviewとして扱う
-        // 更にそのsymbolの配下を再帰的にパースしてoutputに追加する形をとる
+        // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
-        const takeOverData = new TakeOverArtboardData(node, hierarchy);
-        this.parseSymbol(node, hierarchy, outputs, takeOverData);
+        const takeOverData = new TakeOverData(node, hierarchy);
+        this.parseSymbol(takeOverData, outputs);
       }
     }
   }
@@ -107,49 +101,30 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(
-    node: any,
-    hierarchy: number,
-    outputs: any[],
-    takeOverData: TakeOverArtboardData,
-  ) {
+  parseSymbol(takeOverData: TakeOverData, outputs: any[]) {
+    const node = takeOverData.node;
+    let hierarchy = takeOverData.hierarchy;
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
-    const symbolsPage = this.sketch['symbolsPage'];
-    let targetSymbol: any;
-    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
-      targetSymbol = symbolsPage.get(
-        'symbolMaster',
-        instance => instance.symbolID === node.symbolID,
-      );
-      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
-    } else if (node._class !== 'shapeGroup') {
-      targetSymbol = node;
-    }
+    const targetSymbol: any = this.symbolForNode(node);
     if (!targetSymbol) {
       // todo: symbolMaster, symbolInstanceでパースしたが、マッチするシンボルがない場合。
       // またはshapeGroupの場合。イレギュラーケースもある? 要調査。
       return;
     }
 
-    //if (this.shouldExclude(node.name)) return;
-    const view: View = new View(targetSymbol, hierarchy);
-    this.parseConstraint(node.resizingConstraint, view);
-    view.containerId = takeOverData.artboardId;
-    if (view.hierarchy === takeOverData.hierarchy) {
-      // artboardからsymbolに移動する時の1回だけ、データを引き継ぐ
-      view.rect = takeOverData.rect;
-      view.parentId = takeOverData.parentId;
-      // node名を引き継ぐと同じ名前が大量にできる傾向にあるので、一旦コメントアウト
-      //view.name = takeOverData.name;
+    const view = new View(targetSymbol, hierarchy);
+    if (takeOverData.nodeOnArtboard) {
+      //console.log('parent: ', node.getParent()._class);
     }
+    this.parseConstraint(node.resizingConstraint, view);
+    takeOverData.takeOverCommonProps(view);
 
     const subLayers = _.get(targetSymbol, 'layers');
     if (!subLayers || subLayers.length <= 0) {
-      // 最下層なので、ここで当該要素(node)をパース
+      // Parse this node(node-sketch), bevause it's an end of the tree structure.
       const parser = new AutoParser(this.sketch, this.config, this.outputDir);
       parser.parse(targetSymbol, view);
-      // todo: 以下2つのtakeOverの渡し方、めちゃめちゃヘボい。artboard上での必要な情報をsymbolに引き継ぐのに
-      // artboard上のsymbolInstanceごと渡した方が良さそう
+
       if (takeOverData.imageName) {
         (view as Image).imageName = takeOverData.imageName;
       }
@@ -162,16 +137,15 @@ export class SketchParser implements ISketchParser {
 
     outputs.push(view);
     hierarchy++;
-    // todo: こちらの引き継ぎ方も上記同様だめ
-    const tmpArtboardId = takeOverData.artboardId;
-    const tmpImageName = takeOverData.imageName;
-    const tmpTextTitle = takeOverData.textTitle;
     subLayers.forEach(layer => {
-      const takeOverData = new TakeOverArtboardData(layer, hierarchy);
-      takeOverData.artboardId = tmpArtboardId;
-      takeOverData.imageName = tmpImageName;
-      takeOverData.textTitle = tmpTextTitle;
-      this.parseSymbol(layer, hierarchy, outputs, takeOverData);
+      const newTakeOverData = new TakeOverData(
+        layer,
+        hierarchy,
+        takeOverData.topSymbolHierarchy,
+        takeOverData.nodeOnArtboard || takeOverData.node,
+      );
+      //console.log('symbol node: ', newTakeOverData.node._class);
+      this.parseSymbol(newTakeOverData, outputs);
     });
   }
 
@@ -200,6 +174,25 @@ export class SketchParser implements ISketchParser {
   /**
    * Private methods below
    */
+
+  /**
+   * Retrieve corresponding symbol for a node(node-sketch) instance.
+   * @param node Node instance
+   */
+  private symbolForNode(node: any): any {
+    const symbolsPage = this.sketch['symbolsPage'];
+    let targetSymbol: any;
+    if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
+      targetSymbol = symbolsPage.get(
+        'symbolMaster',
+        instance => instance.symbolID === node.symbolID,
+      );
+      // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
+    } else if (node._class !== 'shapeGroup') {
+      targetSymbol = node;
+    }
+    return targetSymbol;
+  }
 
   private shouldExclude(targetName: string) {
     // exclude node that is listed on setting config.
