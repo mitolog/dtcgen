@@ -48,6 +48,7 @@ export class View extends Container {
     const parent = node.getParent();
     // parent can be: group, symbolMaster, page, artboard
     if (parent._class !== 'page') {
+      // parent._classがartboardの時もparentIdを付与してしまっているが、本来は不要
       this.parentId = parent.do_objectID;
     }
     this.hierarchy = hierarchy;

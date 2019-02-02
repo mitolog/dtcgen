@@ -77,6 +77,7 @@ export class TakeOverData {
       view.id = this.node.do_objectID;
     }
 
+    view.name = this.node.name;
     view.containerId = this.artboardId;
     view.rect = this.rect;
 
