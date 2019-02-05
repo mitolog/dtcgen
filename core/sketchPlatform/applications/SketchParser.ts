@@ -2,6 +2,7 @@ import { View } from '../../domain/entities/View';
 import { ElementType } from '../../domain/entities/ElementType';
 import { Constraints } from '../../domain/entities/Constraints';
 import * as _ from 'lodash';
+import * as uuidv4 from 'uuid/v4';
 import { ButtonParser } from './ElementParsers/ButtonParser';
 import { Button } from '../../domain/entities/Button';
 import { IElementParser } from './ElementParsers/IElementParser';
@@ -13,11 +14,12 @@ import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
 import { TakeOverData } from '../entities/TakeOverData';
 import { Image } from '../../domain/entities/Image';
+import { TreeElement } from '../../domain/entities/TreeElement';
 
 export interface ISketchParser {
-  parseLayer(node: any, hierarchy: number, outputs: any[]);
+  parseLayer(node: any, hierarchy: number, props: object, treeObj: TreeElement);
   parseElement(node: any, view: View);
-  parseSymbol(takeOverData: TakeOverData, outputs: any[]);
+  parseSymbol(takeOverData: TakeOverData, props: object, treeObj: TreeElement);
   parseConstraint(value: number, viewObj: object);
 }
 
@@ -36,20 +38,28 @@ export class SketchParser implements ISketchParser {
    * Interface methods below
    */
 
-  parseLayer(node: any, hierarchy: number, outputs: any[]) {
+  parseLayer(
+    node: any,
+    hierarchy: number,
+    props: object,
+    parentTree: TreeElement,
+  ) {
     // assign default values, but these may be overridden latter procedure.
+    const uidValue: string = uuidv4();
     const view: View = new View(node, hierarchy);
+    const treeElement: TreeElement = new TreeElement(uidValue, view.name);
     this.parseConstraint(node.resizingConstraint, view);
 
     if (this.shouldExclude(node.name)) return;
 
     // `group` translated into `view` which holds various views on it
     if (node._class === 'group' && _.size(node.layers)) {
-      outputs.push(view);
+      props[uidValue] = view;
+      parentTree.elements.push(treeElement);
       hierarchy++;
       // parse underlying nodes
       node.layers.forEach(aNode => {
-        this.parseLayer(aNode, hierarchy, outputs);
+        this.parseLayer(aNode, hierarchy, props, treeElement);
       });
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
@@ -65,14 +75,16 @@ export class SketchParser implements ISketchParser {
         // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
         view.type = <ElementType>matches[matches.length - 1];
         this.parseElement(node, view);
-        outputs.push(view);
+        props[uidValue] = view;
+        treeElement.name = view.name;
+        parentTree.elements.push(treeElement);
       } else {
         // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
         const takeOverData = new TakeOverData(node, hierarchy);
-        this.parseSymbol(takeOverData, outputs);
+        this.parseSymbol(takeOverData, props, parentTree);
       }
     }
   }
@@ -101,7 +113,11 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(takeOverData: TakeOverData, outputs: any[]) {
+  parseSymbol(
+    takeOverData: TakeOverData,
+    props: object,
+    parentTree: TreeElement,
+  ) {
     const node = takeOverData.node;
     let hierarchy = takeOverData.hierarchy;
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
@@ -112,7 +128,9 @@ export class SketchParser implements ISketchParser {
       return;
     }
 
+    const uid = uuidv4();
     const view = new View(targetSymbol, hierarchy);
+    const treeElement = new TreeElement(uid, takeOverData.name);
     if (takeOverData.nodeOnArtboard) {
       //console.log('parent: ', node.getParent()._class);
     }
@@ -131,11 +149,13 @@ export class SketchParser implements ISketchParser {
       if (takeOverData.textTitle) {
         (view as TextView).text = takeOverData.textTitle;
       }
-      outputs.push(view);
+      props[uid] = view;
+      parentTree.elements.push(treeElement);
       return;
     }
 
-    outputs.push(view);
+    props[uid] = view;
+    parentTree.elements.push(treeElement);
     hierarchy++;
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
@@ -144,8 +164,7 @@ export class SketchParser implements ISketchParser {
         takeOverData.topSymbolHierarchy,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
-      //console.log('symbol node: ', newTakeOverData.node._class);
-      this.parseSymbol(newTakeOverData, outputs);
+      this.parseSymbol(newTakeOverData, props, treeElement);
     });
   }
 

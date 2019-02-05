@@ -6,10 +6,12 @@ import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
+import * as uuidv4 from 'uuid/v4';
 import { Container } from '../../domain/entities/Container';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
 import { PathManager, OutputType } from '../../utilities/PathManager';
+import { TreeElement } from '../../domain/entities/TreeElement';
 
 dotenv.config();
 if (dotenv.error) {
@@ -79,23 +81,28 @@ export class SketchRepository implements ISketchRepository {
    * add constraint values(numbers) which represents relative position from parent view
    * @param outputs {any[]} An array of [ Container | View | subclass of View ]
    */
-  private addConstraintValues(outputs: any[]): void {
-    if (!outputs) return;
+  private addConstraintValues(props: object): void {
+    if (!props) return;
 
-    for (const output of outputs) {
+    for (const key of Object.keys(props)) {
+      const output = props[key];
       if (!output.constraints) continue;
-      const baseView: any = outputs
-        .filter(
-          view =>
-            // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
-            // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
-            output.parentId
-              ? view.id === output.parentId &&
-                (view.id === output.containerId ||
-                  view.containerId === output.containerId)
-              : view.id === output.containerId,
-        )
-        .reduce((acc, current) => current, null);
+      let baseView: any;
+
+      for (const propKey of Object.keys(props)) {
+        const prop = props[propKey];
+        // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
+        // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
+        const isParent = output.parentId
+          ? prop.id === output.parentId &&
+            (prop.id === output.containerId ||
+              prop.containerId === output.containerId)
+          : prop.id === output.containerId;
+        if (isParent) {
+          baseView = prop;
+          break;
+        }
+      }
       if (!baseView) continue;
       const originalRect: Rect =
         baseView.type === 'Container' ? baseView.rect : baseView.originalRect;
@@ -159,7 +166,8 @@ export class SketchRepository implements ISketchRepository {
 
     // extract all artboards
     const artboards = await this.getAll(inputPath);
-    const outputs: any[] = [];
+    const props: object = {};
+    const treeElements: [TreeElement?] = [];
     const sketchParser = new SketchParser(sketch, this.getConfig(), outputDir);
 
     artboards.forEach(artboard => {
@@ -172,19 +180,25 @@ export class SketchRepository implements ISketchRepository {
         .map(str => str.trim())
         .join('');
 
+      const uid = uuidv4();
+      const aTree: TreeElement = new TreeElement(uid, artboardName);
       const container: Container = new Container(artboard);
       container.name = artboardName;
-      outputs.push(container);
+      props[uid] = container;
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, 1, outputs);
+        sketchParser.parseLayer(node, 1, props, aTree);
       });
+      treeElements.push(aTree);
     });
 
-    this.addConstraintValues(outputs);
+    this.addConstraintValues(props);
 
     const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
-    fs.writeFileSync(metadataPath, JSON.stringify(outputs));
+    fs.writeFileSync(metadataPath, JSON.stringify(props));
+
+    const treePath = pathManager.getOutputPath(OutputType.tree, true);
+    fs.writeFileSync(treePath, JSON.stringify(treeElements));
   }
 
   extractSlices(inputPath: string, outputDir?: string): void {
