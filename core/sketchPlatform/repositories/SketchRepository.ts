@@ -136,6 +136,31 @@ export class SketchRepository implements ISketchRepository {
     }
   }
 
+  private checkIntegrity(
+    node: TreeElement,
+    metadataJson: Object,
+    matched: [string?],
+    errors: [string?],
+  ) {
+    let result = false;
+    for (const key of Object.keys(metadataJson)) {
+      if (key === node.uid) {
+        result = true;
+      }
+    }
+    if (result) {
+      matched.push(node.uid);
+    } else {
+      errors.push(node.uid);
+    }
+
+    if (node.elements && node.elements.length > 0) {
+      for (const aNode of node.elements) {
+        this.checkIntegrity(aNode, metadataJson, matched, errors);
+      }
+    }
+  }
+
   /**
    * interface implementation
    */
@@ -193,6 +218,18 @@ export class SketchRepository implements ISketchRepository {
     });
 
     this.addConstraintValues(props);
+
+    const errors: [string?] = [];
+    let matched: [string?] = [];
+    const elementTotalCount: number = Object.keys(props).length;
+    for (const element of treeElements) {
+      this.checkIntegrity(element, props, matched, errors);
+    }
+    if (matched.length !== elementTotalCount) {
+      throw new Error(
+        `extracted jsons have some unintegrity: ${errors.map(error => error)}`,
+      );
+    }
 
     const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
     fs.writeFileSync(metadataPath, JSON.stringify(props));
