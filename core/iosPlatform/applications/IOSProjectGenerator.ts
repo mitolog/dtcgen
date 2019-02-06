@@ -295,7 +295,8 @@ export class IOSProjectGenerator {
   }
 
   private generateSourceCodes(searchDir: string) {
-    const metadataJson = this.getMetadataJson();
+    const metadataJson = this.getJson(OutputType.metadata);
+    const treeJson = this.getJson(OutputType.tree);
 
     // Prepare needed pathes
     const templatePaths = new DesignToCodeTemplatePaths();
@@ -344,20 +345,27 @@ export class IOSProjectGenerator {
     }
     templatePaths.viewController = tmpPaths[0];
 
-    const containers: any[] = metadataJson.filter(
-      element =>
-        element.id &&
-        element.type &&
-        element.type === <string>ElementType.Container,
-    );
+    const containers: any[] = Object.keys(metadataJson)
+      .filter(key => {
+        const element = metadataJson[key];
+        return (
+          element.id &&
+          element.type &&
+          element.type === <string>ElementType.Container
+        );
+      })
+      .map(key => metadataJson[key]);
 
     // iterate containers and adopt templates
     let outputs: any[] = [];
     let containerNames: Object[] = [];
     for (const container of containers) {
-      const views = metadataJson.filter(
-        element => element.containerId && element.containerId === container.id,
-      );
+      const views = Object.keys(metadataJson)
+        .filter(key => {
+          const element = metadataJson[key];
+          return element.containerId && element.containerId === container.id;
+        })
+        .map(key => metadataJson[key]);
       let containerObj = {
         container: container,
         views: views,
@@ -429,10 +437,8 @@ export class IOSProjectGenerator {
     }
   }
 
-  private getMetadataJson(): any {
-    const metadataJsonPath = this.pathManager.getOutputPath(
-      OutputType.metadata,
-    );
+  private getJson(outputType: OutputType): any {
+    const metadataJsonPath = this.pathManager.getOutputPath(outputType);
     if (!metadataJsonPath) {
       throw new Error('cannot find directory: ' + metadataJsonPath);
     }
