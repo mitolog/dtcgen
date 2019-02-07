@@ -6,4 +6,5 @@ protocol ViewConfig {
     func adopt(on onView: UIView)
     func layoutViews(_ onView: UIView)
     func configureViews()
+    func getView(_ viewId: String)
 }

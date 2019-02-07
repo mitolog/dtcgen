@@ -5,6 +5,7 @@ import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { ElementType } from '../../domain/entities/ElementType';
+import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
 
 dotenv.config();
 if (dotenv.error) {
@@ -37,6 +38,12 @@ export class IOSProjectGenerator {
       OSType.ios,
       'XcodeProjectTemplate',
     );
+    const partialTemplateRootDir = path.join(
+      templatePath,
+      OSType.ios,
+      'partials',
+    );
+    HandlebarsPartials.registerPartials(partialTemplateRootDir);
   }
 
   generate(projectName: string): void {
@@ -422,7 +429,7 @@ export class IOSProjectGenerator {
     this.searchAndAdoptTemplate(
       path.parse(templatePaths.designToCodeGenerated).dir,
       `^DesignToCode\.generated\.swift\.hbs$`,
-      { names: containerNames },
+      { names: containerNames, tree: treeJson },
     );
 
     // remove templates itself
