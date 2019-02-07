@@ -15,4 +15,12 @@ struct Dtc {
         }
         {{/forEach}}
     }
+
+    struct viewId {
+        {{#forEach tree}}
+        struct {{name}} {
+        {{> structViewId nodes=elements}}
+        }
+        {{/forEach}}
+    }
 }
