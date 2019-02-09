@@ -7,7 +7,7 @@ export class HandlebarsPartials {
     if (!partialTemplateRootDir) return;
 
     const pathManager = new PathManager();
-    // load partials if exists, then adopt to template
+
     let tmpRegExpStr = `.*\.hbs$`;
     let partialPaths = pathManager.searchDirsOrFiles(
       partialTemplateRootDir,
@@ -20,7 +20,6 @@ export class HandlebarsPartials {
         throw new Error("couldn't get template: " + partialPath);
       }
       const partialName = path.basename(partialPath, '.hbs');
-      console.log(partialName);
       handlebars.registerPartial(partialName, partialStr);
     }
   }
