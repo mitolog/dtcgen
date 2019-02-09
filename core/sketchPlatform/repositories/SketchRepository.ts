@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as uuidv4 from 'uuid/v4';
+import '../../extensions/String.extensions';
 import { Container } from '../../domain/entities/Container';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
@@ -199,16 +200,12 @@ export class SketchRepository implements ISketchRepository {
       if (!artboard['name']) return; // same as continue
       let artboardName = artboard['name'];
 
-      // todo: パターンマッチによる名前の抽出
-      artboardName = artboardName
-        .split('/')
-        .map(str => str.trim())
-        .join('');
-
       const uid = uuidv4();
       const aTree: TreeElement = new TreeElement(uid, artboardName);
       const container: Container = new Container(artboard);
-      container.name = artboardName;
+      // todo: パターンマッチによる名前の抽出
+      container.name = artboard['name'].toLowerCamelCase('/');
+      aTree.name = container.name;
       props[uid] = container;
 
       artboard['layers'].forEach(node => {

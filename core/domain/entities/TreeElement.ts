@@ -5,7 +5,7 @@ export class TreeElement {
 
   constructor(uid: string, name: string, elements?: [TreeElement]) {
     this.uid = uid;
-    this.name = name;
+    this.name = name.toLowerCamelCase(' ');
     this.elements = elements || [];
   }
 }
