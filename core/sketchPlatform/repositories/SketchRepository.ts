@@ -6,13 +6,13 @@ import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
-import * as uuidv4 from 'uuid/v4';
 import '../../extensions/String.extensions';
-import { Container } from '../../domain/entities/Container';
+import { SketchContainer } from '../entities/SketchContainer';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { TreeElement } from '../../domain/entities/TreeElement';
+import { SketchView } from '../entities/SketchView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -82,16 +82,14 @@ export class SketchRepository implements ISketchRepository {
    * add constraint values(numbers) which represents relative position from parent view
    * @param outputs {any[]} An array of [ Container | View | subclass of View ]
    */
-  private addConstraintValues(props: object): void {
-    if (!props) return;
+  private addConstraintValues(props: [SketchView?]): void {
+    if (!props || props.length <= 0) return;
 
-    for (const key of Object.keys(props)) {
-      const output = props[key];
+    for (const output of props) {
       if (!output.constraints) continue;
       let baseView: any;
 
-      for (const propKey of Object.keys(props)) {
-        const prop = props[propKey];
+      for (const prop of props) {
         // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
         // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
         const isParent = output.parentId
@@ -139,13 +137,13 @@ export class SketchRepository implements ISketchRepository {
 
   private checkIntegrity(
     node: TreeElement,
-    metadataJson: Object,
+    views: [SketchView?],
     matched: [string?],
     errors: [string?],
   ) {
     let result = false;
-    for (const key of Object.keys(metadataJson)) {
-      if (key === node.uid) {
+    for (const view of views) {
+      if (view.id === node.uid) {
         result = true;
       }
     }
@@ -157,7 +155,7 @@ export class SketchRepository implements ISketchRepository {
 
     if (node.elements && node.elements.length > 0) {
       for (const aNode of node.elements) {
-        this.checkIntegrity(aNode, metadataJson, matched, errors);
+        this.checkIntegrity(aNode, views, matched, errors);
       }
     }
   }
@@ -192,35 +190,33 @@ export class SketchRepository implements ISketchRepository {
 
     // extract all artboards
     const artboards = await this.getAll(inputPath);
-    const props: object = {};
+    const views: [SketchView?] = [];
     const treeElements: [TreeElement?] = [];
     const sketchParser = new SketchParser(sketch, this.getConfig(), outputDir);
 
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
-      let artboardName = artboard['name'];
 
-      const uid = uuidv4();
-      const aTree: TreeElement = new TreeElement(uid, artboardName);
-      const container: Container = new Container(artboard);
+      const container: SketchContainer = new SketchContainer(artboard);
+      const aTree: TreeElement = new TreeElement(container);
       // todo: パターンマッチによる名前の抽出
       container.name = artboard['name'].toLowerCamelCase('/');
       aTree.name = container.name;
-      props[uid] = container;
+      views.push(container as SketchView);
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, 1, props, aTree);
+        sketchParser.parseLayer(node, 1, views, aTree);
       });
       treeElements.push(aTree);
     });
 
-    this.addConstraintValues(props);
+    this.addConstraintValues(views);
 
     const errors: [string?] = [];
     let matched: [string?] = [];
-    const elementTotalCount: number = Object.keys(props).length;
+    const elementTotalCount: number = views.length;
     for (const element of treeElements) {
-      this.checkIntegrity(element, props, matched, errors);
+      this.checkIntegrity(element, views, matched, errors);
     }
     if (matched.length !== elementTotalCount) {
       throw new Error(
@@ -229,7 +225,7 @@ export class SketchRepository implements ISketchRepository {
     }
 
     const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
-    fs.writeFileSync(metadataPath, JSON.stringify(props));
+    fs.writeFileSync(metadataPath, JSON.stringify(views));
 
     const treePath = pathManager.getOutputPath(OutputType.tree, true);
     fs.writeFileSync(treePath, JSON.stringify(treeElements));
