@@ -6,7 +6,7 @@ import { Color } from '../../domain/entities/Color';
 import { ColorComponents } from '../../domain/entities/ColorComponents';
 
 export class SketchView extends View {
-  constructor(node: any, hierarchy: number) {
+  constructor(node: any, hierarchy: number, parentId?: string) {
     super();
 
     const uidValue: string = uuidv4();
@@ -29,10 +29,15 @@ export class SketchView extends View {
       width: node.frame.width,
       height: node.frame.height,
     });
-    const belongingArtboard = node.getParent('artboard');
-    if (belongingArtboard) {
-      this.containerId = belongingArtboard.do_objectID;
+
+    if (parentId && parentId.length > 0) {
+      this.parentId = parentId;
     }
+
+    // const belongingArtboard = node.getParent('artboard');
+    // if (belongingArtboard) {
+    //   this.containerId = belongingArtboard.do_objectID;
+    // }
 
     // If the node is `symbolMaster`, it's parent will be `Symbols` page.
     // So you cannot track parent when `symbolMaster`.

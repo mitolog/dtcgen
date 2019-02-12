@@ -37,9 +37,10 @@ export class SketchParser {
     hierarchy: number,
     views: [SketchView?],
     parentTree: TreeElement,
+    parentId?: string,
   ) {
     // assign default values, but these may be overridden latter procedure.
-    const view: SketchView = new SketchView(node, hierarchy);
+    const view: SketchView = new SketchView(node, hierarchy, parentId);
     const treeElement: TreeElement = new TreeElement(view);
     this.parseConstraint(node.resizingConstraint, view);
 
@@ -52,7 +53,7 @@ export class SketchParser {
       hierarchy++;
       // parse underlying nodes
       node.layers.forEach(aNode => {
-        this.parseLayer(aNode, hierarchy, views, treeElement);
+        this.parseLayer(aNode, hierarchy, views, treeElement, view.id);
       });
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
@@ -77,7 +78,7 @@ export class SketchParser {
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
         const takeOverData = new TakeOverData(node, hierarchy);
-        this.parseSymbol(takeOverData, views, parentTree);
+        this.parseSymbol(takeOverData, views, parentTree, parentId);
       }
     }
   }
@@ -114,6 +115,7 @@ export class SketchParser {
     takeOverData: TakeOverData,
     views: [SketchView?],
     parentTree: TreeElement,
+    parentId?: string,
   ) {
     const node = takeOverData.node;
     let hierarchy = takeOverData.hierarchy;
@@ -125,7 +127,7 @@ export class SketchParser {
       return;
     }
 
-    const view = new SketchView(targetSymbol, hierarchy);
+    const view = new SketchView(targetSymbol, hierarchy, parentId);
     const treeElement = new TreeElement(view);
     treeElement.name = takeOverData.name;
     if (takeOverData.nodeOnArtboard) {
@@ -161,7 +163,7 @@ export class SketchParser {
         takeOverData.topSymbolHierarchy,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
-      this.parseSymbol(newTakeOverData, views, treeElement);
+      this.parseSymbol(newTakeOverData, views, treeElement, view.id);
     });
   }
 
