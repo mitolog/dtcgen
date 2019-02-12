@@ -89,6 +89,7 @@ export class SketchRepository implements ISketchRepository {
       if (!output.constraints) continue;
       let baseView: any;
 
+      // you can replace with parentId(which is uid form)
       for (const prop of props) {
         // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
         // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
@@ -136,25 +137,25 @@ export class SketchRepository implements ISketchRepository {
   }
 
   private checkIntegrity(
-    node: TreeElement,
+    treeElement: TreeElement,
     views: [SketchView?],
     matched: [string?],
     errors: [string?],
   ) {
     let result = false;
     for (const view of views) {
-      if (view.id === node.uid) {
+      if (view.id === treeElement.uid) {
         result = true;
       }
     }
     if (result) {
-      matched.push(node.uid);
+      matched.push(treeElement.uid);
     } else {
-      errors.push(node.uid);
+      errors.push(treeElement.uid);
     }
 
-    if (node.elements && node.elements.length > 0) {
-      for (const aNode of node.elements) {
+    if (treeElement.elements && treeElement.elements.length > 0) {
+      for (const aNode of treeElement.elements) {
         this.checkIntegrity(aNode, views, matched, errors);
       }
     }
@@ -198,16 +199,16 @@ export class SketchRepository implements ISketchRepository {
       if (!artboard['name']) return; // same as continue
 
       const container: SketchContainer = new SketchContainer(artboard);
-      const aTree: TreeElement = new TreeElement(container);
+      const topTree: TreeElement = new TreeElement(container);
       // todo: パターンマッチによる名前の抽出
       container.name = artboard['name'].toLowerCamelCase('/');
-      aTree.name = container.name;
+      topTree.name = container.name;
       views.push(container as SketchView);
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, 1, views, aTree);
+        sketchParser.parseLayer(node, 1, views, topTree, container.id);
       });
-      treeElements.push(aTree);
+      treeElements.push(topTree);
     });
 
     this.addConstraintValues(views);

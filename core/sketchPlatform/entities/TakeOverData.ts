@@ -71,11 +71,11 @@ export class TakeOverData {
     // view.id(restorationIdentifier)がsymbolのIDになってしまっている
     // ので、artboard上でのidを引き継ぐ必要がある。それにしたがって、
     // そのviewにのっかってる1階層目のviewのparentIdも変える必要があるがそれは下段にて実施。
-    if (this.isTopSymbolLayer) {
-      // nodeOnArtboardがない場合、つまり初回のtakeOverの際のみ
-      // つまり、artboardからsymbolに以降する際のみ、idを上書きする。
-      view.id = this.node.do_objectID;
-    }
+    // if (this.isTopSymbolLayer) {
+    //   // nodeOnArtboardがない場合、つまり初回のtakeOverの際のみ
+    //   // つまり、artboardからsymbolに以降する際のみ、idを上書きする。
+    //   view.id = this.node.do_objectID;
+    // }
 
     view.name = this.node.name;
     view.containerId = this.artboardId;
@@ -147,13 +147,13 @@ export class TakeOverData {
       this.node._class === 'symbolInstance' &&
       parent._class === 'symbolMaster';
 
-    if (isFirstElementUnderTheSymbol) {
-      // symbolから1階層目のviewだけは、artboard上のidを指定
-      view.parentId = this.nodeOnArtboard.do_objectID;
-    } else if (isSymbolUnderTheSymbol) {
-      // symbolから2階層目以降のsymbolに関しては、親symbolのidをparentに指定
-      view.parentId = parent.do_objectID;
-    }
+    // if (isFirstElementUnderTheSymbol) {
+    //   // symbolから1階層目のviewだけは、artboard上のidを指定
+    //   view.parentId = this.nodeOnArtboard.do_objectID;
+    // } else if (isSymbolUnderTheSymbol) {
+    //   // symbolから2階層目以降のsymbolに関しては、親symbolのidをparentに指定
+    //   view.parentId = parent.do_objectID;
+    // }
   }
 
   get name(): string {

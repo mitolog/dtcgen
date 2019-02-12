@@ -4,7 +4,6 @@ export class TreeElement {
   public uid: string;
   public name: string;
   public elements: [TreeElement?];
-  public parent: TreeElement;
 
   constructor(container: Container, elements?: [TreeElement]) {
     this.uid = container.id;
