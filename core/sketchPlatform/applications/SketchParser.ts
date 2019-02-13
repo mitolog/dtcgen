@@ -49,7 +49,7 @@ export class SketchParser {
     // `group` translated into `view` which holds various views on it
     if (node._class === 'group' && _.size(node.layers)) {
       views.push(view);
-      parentTree.elements.push(treeElement);
+      parentTree.addElement(treeElement);
       hierarchy++;
       // parse underlying nodes
       node.layers.forEach(aNode => {
@@ -71,7 +71,7 @@ export class SketchParser {
         this.parseElement(node, view);
         views.push(view);
         treeElement.name = view.name;
-        parentTree.elements.push(treeElement);
+        parentTree.addElement(treeElement);
       } else {
         // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
@@ -149,12 +149,12 @@ export class SketchParser {
         (view as TextView).text = takeOverData.textTitle;
       }
       views.push(view);
-      parentTree.elements.push(treeElement);
+      parentTree.addElement(treeElement);
       return;
     }
 
     views.push(view);
-    parentTree.elements.push(treeElement);
+    parentTree.addElement(treeElement);
     hierarchy++;
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(

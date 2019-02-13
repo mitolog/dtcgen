@@ -4,25 +4,23 @@ import UIKit
 class ViewConfigImpl : ViewConfig {
 
     // each element should be UIView or subclasses
-    var views: [UIView] = []
-    var constraints: [Constraint?] = []
+    var views: [String: UIView] = [:]
+    var constraints: [String: Constraint] = [:]
 
     func adopt(on onView: UIView) {
 
         self.configureViews()
-        for view in self.views {
+        for (_, view) in self.views {
             self.add(view, onView)
         }
         self.layoutViews(onView)
     }
 
     func layoutViews(_ onView: UIView) {
-        guard views.count == constraints.count else { return }
         var anchors: [NSLayoutConstraint] = []
 
-        for idx in 0..<views.count {
-            guard let constraint = constraints[idx] else { continue }
-            let view = views[idx]
+        for (key, view) in views {
+            guard let constraint = constraints[key] else { continue }
             let superview = view.superview ?? onView
 
             if let top = constraint.top {
@@ -50,6 +48,10 @@ class ViewConfigImpl : ViewConfig {
     func configureViews() {
     }
 
+    func getView(_ viewId: String) -> UIView? {
+        return self.views[viewId]
+    }
+
     private func searchOrigin(_ targetView: UIView, originId: String) -> Bool {
         let parentId = targetView.parentId
         var hasOrigin = false
@@ -70,20 +72,15 @@ class ViewConfigImpl : ViewConfig {
 
     private func add(_ targetView: UIView, _ onView: UIView) {
         var hasParentView = false
-        for view in self.views {
-            guard let viewId = view.restorationIdentifier else { continue }
-            if targetView.parentId == viewId {
-                if let overrideOriginId = targetView.overrideOriginId {
-                    if self.searchOrigin(view, originId: overrideOriginId) {
-                        view.addSubview(targetView)
-                        hasParentView = true
-                        break
-                    }
-                } else {
-                    view.addSubview(targetView)
-                    hasParentView = true
-                    break
-                }
+        for (_, view) in self.views {
+            guard
+                let viewId = view.restorationIdentifier,
+                let parentId = targetView.parentId else { continue }
+
+            if parentId == viewId {
+                view.addSubview(targetView)
+                hasParentView = true
+                break
             }
         }
         if !hasParentView {
