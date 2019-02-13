@@ -4,8 +4,8 @@ import UIKit
 class {{container.name}}Config: ViewConfigImpl {
 
     override func configureViews() {
-        self.views = []
-        self.constraints = []
+        self.views = [:]
+        self.constraints = [:]
         var view: UIView? = nil
         
         {{#views}}
@@ -55,17 +55,15 @@ class {{container.name}}Config: ViewConfigImpl {
         view!.clipsToBounds = true
         view!.translatesAutoresizingMaskIntoConstraints = false
         view!.restorationIdentifier = "{{id}}"
-        views.append(view!)
+        views["{{id}}"] = view
         {{#if constraints }}
-        constraints.append(Constraint(
+        constraints["{{id}}"] = Constraint(
         top: {{#if constraints.top }}CGFloat({{constraints.top}}){{else}}nil{{/if}},
         right: {{#if constraints.right }}CGFloat({{constraints.right}}){{else}}nil{{/if}},
         bottom: {{#if constraints.bottom }}CGFloat({{constraints.bottom}}){{else}}nil{{/if}},
         left: {{#if constraints.left }}CGFloat({{constraints.left}}){{else}}nil{{/if}},
         width: {{#if constraints.width }}CGFloat({{constraints.width}}){{else}}nil{{/if}},
-        height: {{#if constraints.height }}CGFloat({{constraints.height}}){{else}}nil{{/if}}))
-        {{else}}
-        constraints.append(nil)
+        height: {{#if constraints.height }}CGFloat({{constraints.height}}){{else}}nil{{/if}})
         {{/if}}
         
         {{/views}}

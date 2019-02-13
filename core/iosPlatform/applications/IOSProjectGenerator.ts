@@ -6,6 +6,8 @@ import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { ElementType } from '../../domain/entities/ElementType';
 import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
+import { TreeElement } from '../../domain/Entities';
+import { SketchView } from '../../sketchPlatform/entities/SketchView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -352,27 +354,38 @@ export class IOSProjectGenerator {
     }
     templatePaths.viewController = tmpPaths[0];
 
-    const containers: any[] = Object.keys(metadataJson)
-      .filter(key => {
-        const element = metadataJson[key];
-        return (
-          element.id &&
-          element.type &&
-          element.type === <string>ElementType.Container
-        );
-      })
-      .map(key => metadataJson[key]);
+    const containers: any[] = metadataJson.filter(element => {
+      return (
+        element.id &&
+        element.type &&
+        element.type === <string>ElementType.Container
+      );
+    });
 
     // iterate containers and adopt templates
     let outputs: any[] = [];
     let containerNames: Object[] = [];
     for (const container of containers) {
-      const views = Object.keys(metadataJson)
-        .filter(key => {
-          const element = metadataJson[key];
-          return element.containerId && element.containerId === container.id;
-        })
-        .map(key => metadataJson[key]);
+      const viewIds: [any?] = [];
+      const views: [SketchView?] = [];
+
+      // lookup views' uids belonging to the container
+      for (const treeElement of treeJson) {
+        if (treeElement.uid === container.id) {
+          this.viewIdsForContainer(treeElement.elements, viewIds);
+          break;
+        }
+      }
+      // gather views that matches uids
+      for (const view of metadataJson) {
+        for (const viewId of viewIds) {
+          if (viewId === view.id) {
+            views.push(view);
+            break;
+          }
+        }
+      }
+
       let containerObj = {
         container: container,
         views: views,
@@ -440,6 +453,15 @@ export class IOSProjectGenerator {
         fs.removeSync(path.join(templatePath, '../'));
       } else {
         fs.removeSync(templatePath);
+      }
+    }
+  }
+
+  private viewIdsForContainer(treeElements: [TreeElement?], viewIds: [any?]) {
+    for (const aTreeElement of treeElements) {
+      viewIds.push(aTreeElement.uid);
+      if (aTreeElement.elements && aTreeElement.elements.length > 0) {
+        this.viewIdsForContainer(aTreeElement.elements, viewIds);
       }
     }
   }
