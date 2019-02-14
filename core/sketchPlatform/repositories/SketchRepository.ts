@@ -201,7 +201,7 @@ export class SketchRepository implements ISketchRepository {
       views.push(container as SketchView);
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, 1, views, topTree, container.id);
+        sketchParser.parseLayer(node, views, topTree, container.id);
       });
       treeElements.push(topTree);
     });

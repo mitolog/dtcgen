@@ -6,7 +6,7 @@ import { Color } from '../../domain/entities/Color';
 import { ColorComponents } from '../../domain/entities/ColorComponents';
 
 export class SketchView extends View {
-  constructor(node: any, hierarchy: number, parentId?: string) {
+  constructor(node: any, parentId?: string) {
     super();
 
     const uidValue: string = uuidv4();
@@ -33,16 +33,6 @@ export class SketchView extends View {
     if (parentId && parentId.length > 0) {
       this.parentId = parentId;
     }
-
-    // If the node is `symbolMaster`, it's parent will be `Symbols` page.
-    // So you cannot track parent when `symbolMaster`.
-    // const parent = node.getParent();
-    // // parent can be: group, symbolMaster, page, artboard
-    // if (parent._class !== 'page') {
-    //   // parent._classがartboardの時もparentIdを付与してしまっているが、本来は不要
-    //   this.parentId = parent.do_objectID;
-    // }
-    this.hierarchy = hierarchy;
 
     // todo: just for testing. randomly adopt background.
     this.backgroundColor = new Color(<Color>{

@@ -9,7 +9,6 @@ export class View extends Container {
   isVisible: boolean;
   originalRect: Rect; // hold original rect to use for calculating constraints properly.
 
-  hierarchy?: number;
   overrideOriginId?: string;
   parentId?: string;
   constraints?: Constraints;
