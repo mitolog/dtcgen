@@ -9,8 +9,6 @@ export class TakeOverData {
   // should be filled on constructor
   rect: Rect;
   node: any;
-  hierarchy: number;
-  topSymbolHierarchy: number;
 
   // optional
   nodeOnArtboard?: any;
@@ -22,16 +20,9 @@ export class TakeOverData {
   /**
    * take over data from the node on artboard to symbol.
    * @param node {any} node from which we take over data. should be instance on artboard.
-   * @param hierarchy {number} hierarchy of view layer
    */
-  constructor(
-    node: any,
-    hierarchy: number,
-    topSymbolHierarchy: number = null,
-    nodeOnArtboard?: any,
-  ) {
+  constructor(node: any, nodeOnArtboard?: any) {
     this.node = node;
-    this.hierarchy = hierarchy;
 
     if (nodeOnArtboard) {
       this.isTopSymbolLayer = false;
@@ -40,8 +31,6 @@ export class TakeOverData {
       this.isTopSymbolLayer = true;
       this.nodeOnArtboard = null;
     }
-
-    this.topSymbolHierarchy = topSymbolHierarchy || hierarchy;
 
     this.rect = new Rect(<Rect>{
       x: node.frame.x,
@@ -132,22 +121,6 @@ export class TakeOverData {
           }
         });
     }
-
-    const isFirstElementUnderTheSymbol =
-      !this.isTopSymbolLayer && this.hierarchy - this.topSymbolHierarchy === 1;
-
-    const isSymbolUnderTheSymbol =
-      !this.isTopSymbolLayer &&
-      this.node._class === 'symbolInstance' &&
-      parent._class === 'symbolMaster';
-
-    // if (isFirstElementUnderTheSymbol) {
-    //   // symbolから1階層目のviewだけは、artboard上のidを指定
-    //   view.parentId = this.nodeOnArtboard.do_objectID;
-    // } else if (isSymbolUnderTheSymbol) {
-    //   // symbolから2階層目以降のsymbolに関しては、親symbolのidをparentに指定
-    //   view.parentId = parent.do_objectID;
-    // }
   }
 
   get name(): string {

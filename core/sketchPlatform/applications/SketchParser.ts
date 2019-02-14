@@ -34,13 +34,12 @@ export class SketchParser {
 
   parseLayer(
     node: any,
-    hierarchy: number,
     views: [SketchView?],
     parentTree: TreeElement,
     parentId?: string,
   ) {
     // assign default values, but these may be overridden latter procedure.
-    const view: SketchView = new SketchView(node, hierarchy, parentId);
+    const view: SketchView = new SketchView(node, parentId);
     const treeElement: TreeElement = new TreeElement(view);
     this.parseConstraint(node.resizingConstraint, view);
 
@@ -50,10 +49,9 @@ export class SketchParser {
     if (node._class === 'group' && _.size(node.layers)) {
       views.push(view);
       parentTree.addElement(treeElement);
-      hierarchy++;
       // parse underlying nodes
       node.layers.forEach(aNode => {
-        this.parseLayer(aNode, hierarchy, views, treeElement, view.id);
+        this.parseLayer(aNode, views, treeElement, view.id);
       });
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
@@ -77,7 +75,7 @@ export class SketchParser {
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
-        const takeOverData = new TakeOverData(node, hierarchy);
+        const takeOverData = new TakeOverData(node);
         this.parseSymbol(takeOverData, views, parentTree, parentId);
       }
     }
@@ -118,7 +116,6 @@ export class SketchParser {
     parentId?: string,
   ) {
     const node = takeOverData.node;
-    let hierarchy = takeOverData.hierarchy;
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
     const targetSymbol: any = this.symbolForNode(node);
     if (!targetSymbol) {
@@ -127,7 +124,7 @@ export class SketchParser {
       return;
     }
 
-    const view = new SketchView(targetSymbol, hierarchy, parentId);
+    const view = new SketchView(targetSymbol, parentId);
     const treeElement = new TreeElement(view);
     treeElement.name = takeOverData.name.toLowerCamelCase(' ');
     if (takeOverData.nodeOnArtboard) {
@@ -155,12 +152,9 @@ export class SketchParser {
 
     views.push(view);
     parentTree.addElement(treeElement);
-    hierarchy++;
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
         layer,
-        hierarchy,
-        takeOverData.topSymbolHierarchy,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
       this.parseSymbol(newTakeOverData, views, treeElement, view.id);
