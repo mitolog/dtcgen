@@ -45,8 +45,6 @@ export class TakeOverData {
     //  nodeの_classがsymbolInstance
     //  parentがsymbolMaster
 
-    const parent: any = this.node.getParent();
-
     view.name = this.node.name;
     view.rect = this.rect;
   }
