@@ -13,7 +13,6 @@ export class TakeOverData {
   topSymbolHierarchy: number;
 
   // optional
-  artboardId?: string;
   nodeOnArtboard?: any;
   //imageName?: string;
 
@@ -50,10 +49,6 @@ export class TakeOverData {
       width: node.frame.width,
       height: node.frame.height,
     });
-
-    this.artboardId = nodeOnArtboard
-      ? this.containerId(nodeOnArtboard)
-      : this.containerId(node);
   }
 
   takeOverCommonProps(view: View): void {
@@ -78,7 +73,6 @@ export class TakeOverData {
     // }
 
     view.name = this.node.name;
-    view.containerId = this.artboardId;
     view.rect = this.rect;
 
     // symbolが複数箇所で使われていて、且つそのsymbolがoverrideされていて、
@@ -215,16 +209,5 @@ export class TakeOverData {
 
   private overrideValues(): Object[] | undefined {
     return _.get(this.nodeOnArtboard || this.node, 'overrideValues');
-  }
-
-  private containerId(node: any): string | null {
-    if (node._class === 'artboard') {
-      return node.do_objectID;
-    } else if (node._class === 'page' || node._class === 'sketch') {
-      //console.log('no containerId on takeover data');
-      return null;
-    }
-    const parent = node.getParent();
-    return this.containerId(parent);
   }
 }

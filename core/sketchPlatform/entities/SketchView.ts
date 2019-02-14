@@ -34,11 +34,6 @@ export class SketchView extends View {
       this.parentId = parentId;
     }
 
-    // const belongingArtboard = node.getParent('artboard');
-    // if (belongingArtboard) {
-    //   this.containerId = belongingArtboard.do_objectID;
-    // }
-
     // If the node is `symbolMaster`, it's parent will be `Symbols` page.
     // So you cannot track parent when `symbolMaster`.
     // const parent = node.getParent();
