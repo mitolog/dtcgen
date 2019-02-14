@@ -14,9 +14,6 @@ export class TakeOverData {
   nodeOnArtboard?: any;
   //imageName?: string;
 
-  // private
-  private isTopSymbolLayer: boolean;
-
   /**
    * take over data from the node on artboard to symbol.
    * @param node {any} node from which we take over data. should be instance on artboard.
@@ -25,10 +22,8 @@ export class TakeOverData {
     this.node = node;
 
     if (nodeOnArtboard) {
-      this.isTopSymbolLayer = false;
       this.nodeOnArtboard = nodeOnArtboard;
     } else {
-      this.isTopSymbolLayer = true;
       this.nodeOnArtboard = null;
     }
 
@@ -51,15 +46,6 @@ export class TakeOverData {
     //  parentがsymbolMaster
 
     const parent: any = this.node.getParent();
-
-    // view.id(restorationIdentifier)がsymbolのIDになってしまっている
-    // ので、artboard上でのidを引き継ぐ必要がある。それにしたがって、
-    // そのviewにのっかってる1階層目のviewのparentIdも変える必要があるがそれは下段にて実施。
-    // if (this.isTopSymbolLayer) {
-    //   // nodeOnArtboardがない場合、つまり初回のtakeOverの際のみ
-    //   // つまり、artboardからsymbolに以降する際のみ、idを上書きする。
-    //   view.id = this.node.do_objectID;
-    // }
 
     view.name = this.node.name;
     view.rect = this.rect;
