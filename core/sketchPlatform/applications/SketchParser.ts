@@ -19,7 +19,6 @@ import { TextViewParser } from './ElementParsers/TextViewParser';
 import { TextInputParser } from './ElementParsers/TextInputParser';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
-import { SketchContainer } from '../entities/SketchContainer';
 
 export class SketchParser {
   private sketch: Object;

@@ -52,32 +52,11 @@ class ViewConfigImpl : ViewConfig {
         return self.views[viewId]
     }
 
-    private func searchOrigin(_ targetView: UIView, originId: String) -> Bool {
-        let parentId = targetView.parentId
-        var hasOrigin = false
-        for (_, view) in views.enumerated() {
-            let isOrigin = (originId == view.restorationIdentifier)
-            let isParent = (parentId == nil || parentId == view.restorationIdentifier)
-            let hasParent = (view.parentId != nil) ? true : false
-
-            if (isParent && hasParent && !hasOrigin) {
-                hasOrigin = searchOrigin(view, originId: originId)
-            } else if (isParent && !hasParent && isOrigin) {
-                hasOrigin = true
-                break
-            }
-        }
-        return hasOrigin
-    }
-
     private func add(_ targetView: UIView, _ onView: UIView) {
         var hasParentView = false
-        for (_, view) in self.views {
-            guard
-                let viewId = view.restorationIdentifier,
-                let parentId = targetView.parentId else { continue }
-
-            if parentId == viewId {
+        for (key, view) in self.views {
+            guard let parentId = targetView.parentId else { continue }
+            if parentId == key {
                 view.addSubview(targetView)
                 hasParentView = true
                 break
