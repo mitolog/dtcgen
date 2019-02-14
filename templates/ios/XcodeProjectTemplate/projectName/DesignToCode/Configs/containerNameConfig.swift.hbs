@@ -51,7 +51,6 @@ class {{container.name}}Config: ViewConfigImpl {
         {{/if}}
         view!.clipsToBounds = true
         view!.translatesAutoresizingMaskIntoConstraints = false
-        view!.restorationIdentifier = "{{id}}"
         views["{{id}}"] = view
         {{#if constraints }}
         constraints["{{id}}"] = Constraint(
