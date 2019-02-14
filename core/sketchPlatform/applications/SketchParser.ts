@@ -70,7 +70,7 @@ export class SketchParser {
         view.type = <ElementType>matches[matches.length - 1];
         this.parseElement(node, view);
         views.push(view);
-        treeElement.name = view.name;
+        treeElement.name = view.name.toLowerCamelCase(' ');
         parentTree.addElement(treeElement);
       } else {
         // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
@@ -129,7 +129,7 @@ export class SketchParser {
 
     const view = new SketchView(targetSymbol, hierarchy, parentId);
     const treeElement = new TreeElement(view);
-    treeElement.name = takeOverData.name;
+    treeElement.name = takeOverData.name.toLowerCamelCase(' ');
     if (takeOverData.nodeOnArtboard) {
       //console.log('parent: ', node.getParent()._class);
     }

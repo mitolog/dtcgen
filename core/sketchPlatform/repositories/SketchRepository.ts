@@ -86,26 +86,21 @@ export class SketchRepository implements ISketchRepository {
     if (!props || props.length <= 0) return;
 
     for (const output of props) {
-      if (!output.constraints) continue;
-      let baseView: any;
-
+      if (!output.constraints || !output.parentId) continue;
+      let baseView: SketchContainer | SketchView;
+      let parentId = output.parentId;
       // you can replace with parentId(which is uid form)
       for (const prop of props) {
-        // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
-        // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
-        const isParent = output.parentId
-          ? prop.id === output.parentId &&
-            (prop.id === output.containerId ||
-              prop.containerId === output.containerId)
-          : prop.id === output.containerId;
-        if (isParent) {
+        if (prop.id === parentId) {
           baseView = prop;
           break;
         }
       }
       if (!baseView) continue;
       const originalRect: Rect =
-        baseView.type === 'Container' ? baseView.rect : baseView.originalRect;
+        baseView.type === 'Container'
+          ? baseView.rect
+          : (baseView as SketchView).originalRect;
       // calculate margins from each sides
       let newConstraints = {};
       if (output.constraints.top) {
