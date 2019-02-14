@@ -126,9 +126,6 @@ export class SketchParser {
     const view = new SketchView(targetSymbol, parentId);
     const treeElement = new TreeElement(view);
     treeElement.name = takeOverData.name.toLowerCamelCase(' ');
-    if (takeOverData.nodeOnArtboard) {
-      //console.log('parent: ', node.getParent()._class);
-    }
     this.parseConstraint(node.resizingConstraint, view);
     takeOverData.takeOverCommonProps(view);
 

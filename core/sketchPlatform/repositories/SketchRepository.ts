@@ -89,7 +89,6 @@ export class SketchRepository implements ISketchRepository {
       if (!output.constraints || !output.parentId) continue;
       let baseView: SketchContainer | SketchView;
       let parentId = output.parentId;
-      // you can replace with parentId(which is uid form)
       for (const prop of props) {
         if (prop.id === parentId) {
           baseView = prop;
