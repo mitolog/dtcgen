@@ -1,44 +1,47 @@
-[![TypeScript version][ts-badge]][typescript-31]
-[![Node.js version][nodejs-badge]][nodejs]
-
 # sketch-to-code-generator
 
-現状、sketch-to-code-generator は、sketch レイヤーの命名規則に従って、iOS アプリのビューを生成することのできる node 製コマンドラインツールです。今後 sketch プラグインにしたり、sketch 以外や Android にも対応できればいいな。
+現状、sketch-to-code-generator は、sketch ファイルをパースして、iOS のレイアウトコードを生成できるツールです。パース時は独自に定義した命名ルールに従ってパースします。今後は、sketch 以外のデザインファイル、iOS 以外のプラットフォーム(つまり Android)にも対応できればと思います。
 
 ## What you can do
 
-- [WIP]lint ... 指定した命名規則に則っているかをチェック。 (extract の方が進んでしまい今は out of date 状態)
-- extract ... 指定した命名規則で sketch をパースして要素を抽出し json ファイルに出力。同時に画像やアイコンなども抽出。
-- generate ... ectract した json から対象の OS のコードを生成する。
+- [WIP]lint ... 指定した命名規則に則っているかをチェックします。 (extract の方が進んでしまい今は out of date 状態)
+- extract ... 指定した命名規則で sketch をパースして要素を抽出し json ファイルに出力します。同時に画像やアイコンなども抽出します。
+- generate ... ectract した json から対象の OS のコードを生成します。
+
+### prerequisite
+
+1. node version `8.9.0` or over.
+2. Install [sketch](https://www.sketchapp.com/).
+3. check if `SKETCH_TOOL_PATH` is valid with command like `$ ls /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool`
+4. run `npm install` on project root directory.
 
 ## How to Use (in development phase)
 
-基本的なフローは、
+まだコマンド化していないのですが、基本的な使い方は、
 
 1. .env ファイルの各種パスを設定
-2. 抽出したい要素の名前を `stc.config.json` の `sketch.extraction.keywords[]` に追加していく
-3. 1 で追加した keyword をキーにして、その配下にぶら下がっている要素の名前と sketch 上でのクラス名オブジェクトを追加していく(以下 `stc.config.json` の項を参照)
-4. `cli-app`と`core`ディレクトリ配下で `tsc` でトランスパイル
-5. `cd cli-app` して `node index.js extract` でメタデータを sketch から抽出
-6. `node index.js -from sketch --to ios` でコードを所定の場所に生成
+2. `cli-app`と`core`ディレクトリ配下それぞれで `tsc -w` で watch しつつトランスパイル(すると`dist`ディレクトリに吐き出される)
+3. `cd cli-app` して `node index.js extract --input "../linterSample.sketch"` でメタデータを sketch から抽出
+4. `node index.js generate --project Foo` という形でコードを生成
 
-という流れ。
+という流れです。
 
 ## How it works
 
 - sketch ファイルを [node-sketch](https://github.com/oscarotero/node-sketch)を使ってすべての artboard と symbol をパース
-- パースした結果を json に出力、同時に画像やスライスも出力
-- 出力した結果に従って OS 別のコードやアセットファイルを生成
+- パースした結果を `tree.json`という階層構造を持った json と、`metadata.json`という各 view のプロパティ情報を持った json に出力、同時に画像やスライスも出力
+- 出力した結果に従って OS 別(今は iOS のみ)のソースコードやアセットファイル、プロジェクトファイル等を生成
 
 ### extract
 
-- それぞれの artboard に含まれる `group` は `View` に変換し、 `symbol` は要素の特徴によってクラス抽出
-- どの `symbol` を抽出するかは、名前で決める、その名前は config ファイルで定義する
-- また、どの `symbol` がどのクラスに対応するかも `stc.config.json` で定義する
+- それぞれの artboard に含まれる`group`は`View`に変換し、`symbol`は要素の特徴にしたがって抽出
+- どの`symbol`を抽出するかは`stc.config.json` でも定義できるし、ある程度は自動でも可能
+- アイコンの抽出などは、sketch.app に含まれる `sketch-tool` の slice コマンドを利用
 
-- sketch をパースする `node-sketch` モジュールを使って要素を抽出している
-- アイコンの抽出などは、sketch.app に含まれる `sketch-tool` の slice コマンドを使っていいる
-- iOS のコードテンプレートには `handlebars` を使っている(が、制約が大きいので変わるかもしれない..)
+### generate
+
+-
+- コードテンプレートには[handlebars](https://handlebarsjs.com/)を使っている
 
 ### stc.config.json
 
@@ -51,58 +54,7 @@ config ファイル中の `keywords` に 1:1 で対応するクラスに変換(�
 
 - group は Container(View)とし、symbol は命名規則に従って各種要素に変換
 - シンボルのレイヤ構造は `stc.config.json` に記載
--
-
-## to run (under development phase)
-
-### requirement
-
-1. [Install sketch](https://www.sketchapp.com/) first.
-2. fill `sketchToolPath` and `targetSketchFilePath` within `stc.config.json`.
-3. run `npm install` on project root directory.
-
-## development iteration
-
-1. run `cd cli-app && tsc -w` .
-2. run `cd core && tsc -w` .
-
-## to run extraction
-
-on `cli-app` dir, run `node index.js extract > result.json` .
-
-## to run code generation
-
-on `cli-app` dir, run `node converter.js` .
-
-## test with jest
-
-1. run `npn test` .
-
-by doing this, you can run tests of specs depends on `jest.config.js` .
 
 ## acknowlagement
 
 this project is originally boilerplated by https://github.com/jsynowiec/node-typescript-boilerplate
-
-## flow (memo)
-
-以下 1 -> 2 -> 3 といっきに実行もできるし、別々にも実行できるように
-
-1. linter 実行
-
-- stc.config.json の lint
-- sketch のメタデータ取得可否の lint
-
-2. extract の実行
-
-- 各種必要ファイルの取得可否チェック
-  - stc.config.json
-  - \*.sketch
-- ectract の実行
-  - sketch メタデータの抽出
-  - ベクターファイルの抽出
-
-3. generate の実行
-
-- generate config の取得可否チェックと取得
-- generate 実行
