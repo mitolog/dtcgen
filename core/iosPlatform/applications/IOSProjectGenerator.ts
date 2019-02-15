@@ -6,8 +6,7 @@ import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { ElementType } from '../../domain/entities/ElementType';
 import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
-import { TreeElement } from '../../domain/Entities';
-import { SketchView } from '../../sketchPlatform/entities/SketchView';
+import { TreeElement, View } from '../../domain/Entities';
 
 dotenv.config();
 if (dotenv.error) {
@@ -366,8 +365,8 @@ export class IOSProjectGenerator {
     let outputs: any[] = [];
     let containerNames: Object[] = [];
     for (const container of containers) {
-      const viewIds: [any?] = [];
-      const views: [SketchView?] = [];
+      const viewIds: [string?] = [];
+      const views: [View?] = [];
 
       // lookup views' uids belonging to the container
       for (const treeElement of treeJson) {
