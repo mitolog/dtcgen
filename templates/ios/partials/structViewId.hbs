@@ -1,0 +1,8 @@
+{{#each nodes}}
+    struct {{name}} {
+        static let value = "{{uid}}"
+    {{#if elements}}
+    {{> structViewId nodes=elements}}
+    {{/if}}
+    }
+{{/each}}

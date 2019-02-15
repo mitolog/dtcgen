@@ -10,8 +10,15 @@ class {{container.name}}ViewController: UIViewController {
         self.viewConfig = Dtc.config.{{container.name}}
         self.viewConfig!.adopt(on: self.view)
 
-        // todo: what if
-        //  - you want to add actions to each view
-        //  - you want to re-draw layout of each view
+        /*
+         * acknowledgement:
+         * // you can refer and customize each views as below.
+         * // todo: need to detect which class this view is,
+         * // otherwise the app may unexpectedly stopped.
+         * let viewId = Dtc.viewId.travelCities.cityList.city.title.value
+         * if let title = self.viewConfig?.getView(viewId) as? TextView {
+         *     title.text = "foo"
+         * }
+         */
     }
 }

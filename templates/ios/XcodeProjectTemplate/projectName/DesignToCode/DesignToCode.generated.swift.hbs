@@ -15,4 +15,13 @@ struct Dtc {
         }
         {{/forEach}}
     }
+
+    struct viewId {
+        {{#forEach tree}}
+        struct {{name}} {
+            static let value = "{{uid}}"
+        {{> structViewId nodes=elements}}
+        }
+        {{/forEach}}
+    }
 }

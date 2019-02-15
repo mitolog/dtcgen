@@ -12,7 +12,8 @@
         "Guide",
         "Background",
         "Tab Bar",
-        "Navigation Bar"
+        "Navigation Bar",
+        "Keyboard"
       ],
       "followOverrides": true,
       "symbols": {
