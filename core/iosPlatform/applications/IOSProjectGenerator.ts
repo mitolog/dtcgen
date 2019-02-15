@@ -5,6 +5,9 @@ import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { ElementType } from '../../domain/entities/ElementType';
+import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
+import { TreeElement } from '../../domain/Entities';
+import { SketchView } from '../../sketchPlatform/entities/SketchView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -37,6 +40,12 @@ export class IOSProjectGenerator {
       OSType.ios,
       'XcodeProjectTemplate',
     );
+    const partialTemplateRootDir = path.join(
+      templatePath,
+      OSType.ios,
+      'partials',
+    );
+    HandlebarsPartials.registerPartials(partialTemplateRootDir);
   }
 
   generate(projectName: string): void {
@@ -295,7 +304,8 @@ export class IOSProjectGenerator {
   }
 
   private generateSourceCodes(searchDir: string) {
-    const metadataJson = this.getMetadataJson();
+    const metadataJson = this.getJson(OutputType.metadata);
+    const treeJson = this.getJson(OutputType.tree);
 
     // Prepare needed pathes
     const templatePaths = new DesignToCodeTemplatePaths();
@@ -344,20 +354,38 @@ export class IOSProjectGenerator {
     }
     templatePaths.viewController = tmpPaths[0];
 
-    const containers: any[] = metadataJson.filter(
-      element =>
+    const containers: any[] = metadataJson.filter(element => {
+      return (
         element.id &&
         element.type &&
-        element.type === <string>ElementType.Container,
-    );
+        element.type === <string>ElementType.Container
+      );
+    });
 
     // iterate containers and adopt templates
     let outputs: any[] = [];
     let containerNames: Object[] = [];
     for (const container of containers) {
-      const views = metadataJson.filter(
-        element => element.containerId && element.containerId === container.id,
-      );
+      const viewIds: [any?] = [];
+      const views: [SketchView?] = [];
+
+      // lookup views' uids belonging to the container
+      for (const treeElement of treeJson) {
+        if (treeElement.uid === container.id) {
+          this.viewIdsForContainer(treeElement.elements, viewIds);
+          break;
+        }
+      }
+      // gather views that matches uids
+      for (const view of metadataJson) {
+        for (const viewId of viewIds) {
+          if (viewId === view.id) {
+            views.push(view);
+            break;
+          }
+        }
+      }
+
       let containerObj = {
         container: container,
         views: views,
@@ -414,7 +442,7 @@ export class IOSProjectGenerator {
     this.searchAndAdoptTemplate(
       path.parse(templatePaths.designToCodeGenerated).dir,
       `^DesignToCode\.generated\.swift\.hbs$`,
-      { names: containerNames },
+      { names: containerNames, tree: treeJson },
     );
 
     // remove templates itself
@@ -429,10 +457,17 @@ export class IOSProjectGenerator {
     }
   }
 
-  private getMetadataJson(): any {
-    const metadataJsonPath = this.pathManager.getOutputPath(
-      OutputType.metadata,
-    );
+  private viewIdsForContainer(treeElements: [TreeElement?], viewIds: [any?]) {
+    for (const aTreeElement of treeElements) {
+      viewIds.push(aTreeElement.uid);
+      if (aTreeElement.elements && aTreeElement.elements.length > 0) {
+        this.viewIdsForContainer(aTreeElement.elements, viewIds);
+      }
+    }
+  }
+
+  private getJson(outputType: OutputType): any {
+    const metadataJsonPath = this.pathManager.getOutputPath(outputType);
     if (!metadataJsonPath) {
       throw new Error('cannot find directory: ' + metadataJsonPath);
     }

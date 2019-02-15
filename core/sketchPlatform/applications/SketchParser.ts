@@ -1,27 +1,26 @@
-import { View } from '../../domain/entities/View';
-import { ElementType } from '../../domain/entities/ElementType';
-import { Constraints } from '../../domain/entities/Constraints';
 import * as _ from 'lodash';
-import { ButtonParser } from './ElementParsers/ButtonParser';
-import { Button } from '../../domain/entities/Button';
+
+import {
+  ElementType,
+  Constraints,
+  Button,
+  Image,
+  TreeElement,
+  TextView,
+  TextInput,
+} from '../../domain/Entities';
+
+import { SketchView } from '../entities/SketchView';
+import { TakeOverData } from '../entities/TakeOverData';
+
 import { IElementParser } from './ElementParsers/IElementParser';
+import { ButtonParser } from './ElementParsers/ButtonParser';
 import { TextViewParser } from './ElementParsers/TextViewParser';
-import { TextView } from '../../domain/entities/TextView';
 import { TextInputParser } from './ElementParsers/TextInputParser';
-import { TextInput } from '../../domain/entities/TextInput';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
-import { TakeOverData } from '../entities/TakeOverData';
-import { Image } from '../../domain/entities/Image';
 
-export interface ISketchParser {
-  parseLayer(node: any, hierarchy: number, outputs: any[]);
-  parseElement(node: any, view: View);
-  parseSymbol(takeOverData: TakeOverData, outputs: any[]);
-  parseConstraint(value: number, viewObj: object);
-}
-
-export class SketchParser implements ISketchParser {
+export class SketchParser {
   private sketch: Object;
   private config: Object;
   private outputDir?: string;
@@ -32,24 +31,26 @@ export class SketchParser implements ISketchParser {
     this.outputDir = outputDir;
   }
 
-  /**
-   * Interface methods below
-   */
-
-  parseLayer(node: any, hierarchy: number, outputs: any[]) {
+  parseLayer(
+    node: any,
+    views: [SketchView?],
+    parentTree: TreeElement,
+    parentId?: string,
+  ) {
     // assign default values, but these may be overridden latter procedure.
-    const view: View = new View(node, hierarchy);
+    const view: SketchView = new SketchView(node, parentId);
+    const treeElement: TreeElement = new TreeElement(view);
     this.parseConstraint(node.resizingConstraint, view);
 
     if (this.shouldExclude(node.name)) return;
 
     // `group` translated into `view` which holds various views on it
     if (node._class === 'group' && _.size(node.layers)) {
-      outputs.push(view);
-      hierarchy++;
+      views.push(view);
+      parentTree.addElement(treeElement);
       // parse underlying nodes
       node.layers.forEach(aNode => {
-        this.parseLayer(aNode, hierarchy, outputs);
+        this.parseLayer(aNode, views, treeElement, view.id);
       });
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
@@ -65,19 +66,25 @@ export class SketchParser implements ISketchParser {
         // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
         view.type = <ElementType>matches[matches.length - 1];
         this.parseElement(node, view);
-        outputs.push(view);
+        views.push(view);
+        treeElement.name = view.name.toLowerCamelCase(' ');
+        parentTree.addElement(treeElement);
       } else {
         // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
         // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
         // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
         // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
-        const takeOverData = new TakeOverData(node, hierarchy);
-        this.parseSymbol(takeOverData, outputs);
+        const takeOverData = new TakeOverData(node);
+        this.parseSymbol(takeOverData, views, parentTree, parentId);
       }
     }
   }
 
-  parseElement(node: any, view: View) {
+  /**
+   * Private methods below
+   */
+
+  private parseElement(node: any, view: SketchView) {
     let parser: IElementParser;
     switch (view.type) {
       case ElementType.Button:
@@ -101,9 +108,13 @@ export class SketchParser implements ISketchParser {
     }
   }
 
-  parseSymbol(takeOverData: TakeOverData, outputs: any[]) {
+  private parseSymbol(
+    takeOverData: TakeOverData,
+    views: [SketchView?],
+    parentTree: TreeElement,
+    parentId?: string,
+  ) {
     const node = takeOverData.node;
-    let hierarchy = takeOverData.hierarchy;
     if (!node._class || !node.name || this.shouldExclude(node.name)) return;
     const targetSymbol: any = this.symbolForNode(node);
     if (!targetSymbol) {
@@ -112,10 +123,9 @@ export class SketchParser implements ISketchParser {
       return;
     }
 
-    const view = new View(targetSymbol, hierarchy);
-    if (takeOverData.nodeOnArtboard) {
-      //console.log('parent: ', node.getParent()._class);
-    }
+    const view = new SketchView(targetSymbol, parentId);
+    const treeElement = new TreeElement(view);
+    treeElement.name = takeOverData.name.toLowerCamelCase(' ');
     this.parseConstraint(node.resizingConstraint, view);
     takeOverData.takeOverCommonProps(view);
 
@@ -131,21 +141,19 @@ export class SketchParser implements ISketchParser {
       if (takeOverData.textTitle) {
         (view as TextView).text = takeOverData.textTitle;
       }
-      outputs.push(view);
+      views.push(view);
+      parentTree.addElement(treeElement);
       return;
     }
 
-    outputs.push(view);
-    hierarchy++;
+    views.push(view);
+    parentTree.addElement(treeElement);
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
         layer,
-        hierarchy,
-        takeOverData.topSymbolHierarchy,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
-      //console.log('symbol node: ', newTakeOverData.node._class);
-      this.parseSymbol(newTakeOverData, outputs);
+      this.parseSymbol(newTakeOverData, views, treeElement, view.id);
     });
   }
 
@@ -155,7 +163,7 @@ export class SketchParser implements ISketchParser {
    * @param value bitmasked constraint value
    * @param view parsed view object
    */
-  parseConstraint(value: number, view: View) {
+  private parseConstraint(value: number, view: SketchView) {
     // https://medium.com/zendesk-engineering/reverse-engineering-sketchs-resizing-functionality-23f6aae2da1a
     const bitWiseAnd: number = parseInt(value.toString(2));
     const bitWiseAndPadded: string = ('0000000000' + bitWiseAnd).slice(-6);
@@ -170,10 +178,6 @@ export class SketchParser implements ISketchParser {
     } as Constraints;
     view.constraints = constraints;
   }
-
-  /**
-   * Private methods below
-   */
 
   /**
    * Retrieve corresponding symbol for a node(node-sketch) instance.

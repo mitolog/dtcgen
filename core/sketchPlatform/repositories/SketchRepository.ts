@@ -6,10 +6,13 @@ import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
-import { Container } from '../../domain/entities/Container';
+import '../../extensions/String.extensions';
+import { SketchContainer } from '../entities/SketchContainer';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
 import { PathManager, OutputType } from '../../utilities/PathManager';
+import { TreeElement } from '../../domain/entities/TreeElement';
+import { SketchView } from '../entities/SketchView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -79,26 +82,24 @@ export class SketchRepository implements ISketchRepository {
    * add constraint values(numbers) which represents relative position from parent view
    * @param outputs {any[]} An array of [ Container | View | subclass of View ]
    */
-  private addConstraintValues(outputs: any[]): void {
-    if (!outputs) return;
+  private addConstraintValues(props: [SketchView?]): void {
+    if (!props || props.length <= 0) return;
 
-    for (const output of outputs) {
-      if (!output.constraints) continue;
-      const baseView: any = outputs
-        .filter(
-          view =>
-            // todo: 現状、parentIdがある場合、同じartboardに属していて、親子関係にあるviewを親として認めているが、
-            // これだけだとかぶる場合が大いにあるので、ユニークさを保つために対応が必要。
-            output.parentId
-              ? view.id === output.parentId &&
-                (view.id === output.containerId ||
-                  view.containerId === output.containerId)
-              : view.id === output.containerId,
-        )
-        .reduce((acc, current) => current, null);
+    for (const output of props) {
+      if (!output.constraints || !output.parentId) continue;
+      let baseView: SketchContainer | SketchView;
+      let parentId = output.parentId;
+      for (const prop of props) {
+        if (prop.id === parentId) {
+          baseView = prop;
+          break;
+        }
+      }
       if (!baseView) continue;
       const originalRect: Rect =
-        baseView.type === 'Container' ? baseView.rect : baseView.originalRect;
+        baseView.type === 'Container'
+          ? baseView.rect
+          : (baseView as SketchView).originalRect;
       // calculate margins from each sides
       let newConstraints = {};
       if (output.constraints.top) {
@@ -126,6 +127,31 @@ export class SketchRepository implements ISketchRepository {
         newConstraints['height'] = output.rect.height.toString();
       }
       output.constraints = newConstraints;
+    }
+  }
+
+  private checkIntegrity(
+    treeElement: TreeElement,
+    views: [SketchView?],
+    matched: [string?],
+    errors: [string?],
+  ) {
+    let result = false;
+    for (const view of views) {
+      if (view.id === treeElement.uid) {
+        result = true;
+      }
+    }
+    if (result) {
+      matched.push(treeElement.uid);
+    } else {
+      errors.push(treeElement.uid);
+    }
+
+    if (treeElement.elements && treeElement.elements.length > 0) {
+      for (const aNode of treeElement.elements) {
+        this.checkIntegrity(aNode, views, matched, errors);
+      }
     }
   }
 
@@ -159,32 +185,45 @@ export class SketchRepository implements ISketchRepository {
 
     // extract all artboards
     const artboards = await this.getAll(inputPath);
-    const outputs: any[] = [];
+    const views: [SketchView?] = [];
+    const treeElements: [TreeElement?] = [];
     const sketchParser = new SketchParser(sketch, this.getConfig(), outputDir);
 
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
-      let artboardName = artboard['name'];
 
+      const container: SketchContainer = new SketchContainer(artboard);
+      const topTree: TreeElement = new TreeElement(container);
       // todo: パターンマッチによる名前の抽出
-      artboardName = artboardName
-        .split('/')
-        .map(str => str.trim())
-        .join('');
-
-      const container: Container = new Container(artboard);
-      container.name = artboardName;
-      outputs.push(container);
+      container.name = artboard['name'].toLowerCamelCase('/');
+      topTree.name = container.name;
+      views.push(container as SketchView);
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, 1, outputs);
+        sketchParser.parseLayer(node, views, topTree, container.id);
       });
+      treeElements.push(topTree);
     });
 
-    this.addConstraintValues(outputs);
+    this.addConstraintValues(views);
+
+    const errors: [string?] = [];
+    let matched: [string?] = [];
+    const elementTotalCount: number = views.length;
+    for (const element of treeElements) {
+      this.checkIntegrity(element, views, matched, errors);
+    }
+    if (matched.length !== elementTotalCount) {
+      throw new Error(
+        `extracted jsons have some unintegrity: ${errors.map(error => error)}`,
+      );
+    }
 
     const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
-    fs.writeFileSync(metadataPath, JSON.stringify(outputs));
+    fs.writeFileSync(metadataPath, JSON.stringify(views));
+
+    const treePath = pathManager.getOutputPath(OutputType.tree, true);
+    fs.writeFileSync(treePath, JSON.stringify(treeElements));
   }
 
   extractSlices(inputPath: string, outputDir?: string): void {

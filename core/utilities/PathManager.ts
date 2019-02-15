@@ -17,6 +17,7 @@ export enum OutputType {
   slices,
   images,
   metadata,
+  tree,
   sourcecodes,
   project,
 }
@@ -61,6 +62,18 @@ export class PathManager {
           fs.ensureDirSync(metadataDirName);
         }
         outputPath = path.join(metadataDirName, 'metadata.json');
+        break;
+
+      case OutputType.tree:
+        const treeDirName = path.join(
+          this.outputDir,
+          OutputMidDirName.extracted,
+          'metadata',
+        );
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(treeDirName);
+        }
+        outputPath = path.join(treeDirName, 'tree.json');
         break;
 
       case OutputType.images:
