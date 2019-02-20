@@ -6,6 +6,7 @@ export class HandlebarsHelpers {
     handlebars.registerHelper('eq', helpers().eq);
     handlebars.registerHelper('forEach', helpers().forEach);
     handlebars.registerHelper('stem', helpers().stem);
+    handlebars.registerHelper('filter', helpers().filter);
     return handlebars;
   }
 }

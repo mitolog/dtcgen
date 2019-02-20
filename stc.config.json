@@ -1,7 +1,7 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button", "TextView", "TextInput", "Image"],
+      "keywords": ["Button", "TextView", "TextInput", "Image", "List", "Cell"],
       "exceptions": [
         "iPhone X Frame",
         "Color",

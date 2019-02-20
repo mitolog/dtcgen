@@ -1,13 +1,16 @@
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
 import { SymbolParser } from './SymbolParser';
-import { View } from '../../../domain/entities/View';
-import { TextView } from '../../../domain/entities/TextView';
-import { Image } from '../../../domain/entities/Image';
-import { ElementType } from '../../../domain/entities/ElementType';
 import { OutputType } from '../../../utilities/PathManager';
+
+import {
+  Color,
+  ColorComponents,
+  View,
+  TextView,
+  Image,
+  ElementType,
+} from '../../../domain/Entities';
 
 dotenv.config();
 if (dotenv.error) {

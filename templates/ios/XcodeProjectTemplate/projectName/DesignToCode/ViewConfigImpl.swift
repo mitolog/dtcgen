@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class ViewConfigImpl : ViewConfig {
+class ViewConfigImpl : NSObject, ViewConfig {
 
     // each element should be UIView or subclasses
     var views: [String: UIView] = [:]

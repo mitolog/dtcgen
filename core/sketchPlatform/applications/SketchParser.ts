@@ -37,12 +37,25 @@ export class SketchParser {
     parentTree: TreeElement,
     parentId?: string,
   ) {
-    // assign default values, but these may be overridden latter procedure.
+    // assign default values, but these may be overridden on latter procedure.
     const view: SketchView = new SketchView(node, parentId);
     const treeElement: TreeElement = new TreeElement(view);
     this.parseConstraint(node.resizingConstraint, view);
 
     if (this.shouldExclude(node.name)) return;
+
+    const keywords: string[] = this.config['extraction'].keywords;
+    const matches: string[] = keywords.filter(keyword => {
+      const results = node.name.match(new RegExp(keyword, 'g'));
+      return results && results.length > 0 ? true : false;
+    });
+    const isKeywordMatched = matches && matches.length > 0 ? true : false;
+    if (isKeywordMatched) {
+      // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
+      // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
+      // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
+      view.type = <ElementType>matches[matches.length - 1];
+    }
 
     // `group` translated into `view` which holds various views on it
     if (node._class === 'group' && _.size(node.layers)) {
@@ -55,25 +68,12 @@ export class SketchParser {
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
     else if (node._class === 'symbolInstance') {
-      const keywords: string[] = this.config['extraction'].keywords;
-      const matches: string[] = keywords.filter(keyword => {
-        const results = node.name.match(new RegExp(keyword, 'g'));
-        return results && results.length > 0 ? true : false;
-      });
-      if (matches && matches.length > 0) {
-        // matchesは最後にマッチしたものを採用する。例えば keywords[]に `Button`, `View`があったとして
-        // node.nameが `Final View Button` とかだと、複数のkeywordsにマッチする。
-        // この時、英語文法的にこのnodeはボタンと想定されるので、最後にマッチした要素を利用するのが自然では。
-        view.type = <ElementType>matches[matches.length - 1];
+      if (isKeywordMatched) {
         this.parseElement(node, view);
         views.push(view);
         treeElement.name = view.name.toLowerCamelCase(' ');
         parentTree.addElement(treeElement);
       } else {
-        // 上記にマッチしないシンボルはsymbol(とその下層のsymbol)をパースし、outputに追加する。
-        // ただ、抽出したjsonはすべて階層構造を持たない(すべて階層1)ので、
-        // シンボルが属するartboardを識別するには、containerId(属するartboardのid)が必要
-        // また、symbolの座標やconstraintsはartboard上のものではないため、それらも引き継ぐ
         const takeOverData = new TakeOverData(node);
         this.parseSymbol(takeOverData, views, parentTree, parentId);
       }
