@@ -63,7 +63,7 @@ export class IOSProjectGenerator {
       'XcodeProject',
     );
 
-    // remove all files first
+    // remove all files on destination directory first
     fs.removeSync(templateDestDir);
 
     // copy directory to geenerated
@@ -390,6 +390,83 @@ export class IOSProjectGenerator {
         views: views,
       };
 
+      /* list related views
+      // cellだけのviewComponentIdsを作ってもいいけど、それには すべてのcellが含まれていない
+      // viewcontrollerでadoptする際にどのviewを除外してどのviewをaddするかが判断できない
+      // exceptionsで名前指定する?
+
+      // tree.jsonとそのcodableを生成 (quicktypeで再帰作れるかがキモ)
+      // 個別生成するviewのname配列を生成
+      // viewControllerにbaseviewを貼る際は、adopt(name:on:)を使うが、除外するviewsのnameをexceptions配列を
+      // 作らないといけない
+      // 除外する際は、nameが含まれるtree配下を除外
+      // 個別viewのinitでは、nameを指定してviewの配列を取得し、そこから生成(例えばCityCellにフルマッチしたもの)
+
+      //
+       * 1. ダミーデータ
+       * 2. {{artboardName}}Config.swiftのextension用にデータを追記
+       * 
+       * ダミーデータ:
+       * tree.jsonを走査して、`List`が含まれるviewを探す
+       * あれば、その配下のviewを走査して、listの.elementsに、xxCellというnameのやつがあればそれをすべて取得
+       * それらを2つのグループにカテゴライズしたい。
+       * xxCell見つけたら、同じ階層でxxCelが含まれるelementを探す、あれば、当該配列に追加
+       * 
+       * HogeCell 配下を走査して、typeがTextView, Imageのものを抽出
+       * nameをkeyに、textやimageNameをそれぞれvalueに設定する
+       * { 
+       *   cellName: [
+       *     {
+       *       {{name}}: cityCell,
+       *       subTitle: FRANCE,
+       *       imageName: DtcGenerated/images/xxxxxxxxx
+       *     },
+       *     {
+       *       {{name}}: {{}},
+       *       subTitle: FRANCE,
+       *       imageName: DtcGenerated/images/xxxxxxxxx
+       *     },
+       *   ],
+       *   cellName2: []
+       * }
+       */
+
+      // 1. gather cells per each list on a container
+      // const allCells: View[] = views.filter(
+      //   view => view.type === ElementType.Cell,
+      // );
+
+      // // 2. gather components of each cells
+      // allCells.forEach(cell => {
+      //   const components = this.getCellContent(cell);
+      // });
+
+      // if (allCells && allCells.length) {
+      //   const cellsPerList: { [k: string]: View[] } = {};
+      //   allCells.forEach(cell => {
+      //     const parentId = cell.parentId;
+      //     if (!parentId) return;
+      //     const cells: View[] = cellsPerList[parentId];
+      //     if (cells && cells.length > 0) {
+      //       cells.push(cell);
+      //       cellsPerList[parentId] = cells;
+      //     } else {
+      //       cellsPerList[parentId] = [cell];
+      //     }
+      //   });
+
+      // 2. gather components of each cells
+
+      // 3. separate cells depends on each classes.
+      // for(const key of Object.keys(cellsPerList)) {
+      //   const cells = cellsPerList[key];
+      //   const cellsPerClass = {}
+      //   for(const cell of cells) {
+      //     if ()
+      //   }
+      // }
+      // }
+
       // viewConfigs
       const configTemplate = this.compiledTemplate(
         templatePaths.containerNameConfig,
@@ -438,11 +515,25 @@ export class IOSProjectGenerator {
     );
 
     // generate DesignToCode
+    const designToCodeGeneratedDir = path.parse(
+      templatePaths.designToCodeGenerated,
+    ).dir;
     this.searchAndAdoptTemplate(
-      path.parse(templatePaths.designToCodeGenerated).dir,
+      designToCodeGeneratedDir,
       `^DesignToCode\.generated\.swift\.hbs$`,
-      { names: containerNames, tree: treeJson },
+      {
+        names: containerNames,
+        tree: treeJson,
+        dynamicClasses: ['cityCell', 'HotelCell'],
+      },
     );
+
+    // generate dynamic classes if presented.
+    //
+
+    // copy json
+    const treePath = path.join(designToCodeGeneratedDir, 'tree.json');
+    fs.writeFileSync(treePath, JSON.stringify(treeJson));
 
     // remove templates itself
     for (const key of Object.keys(templatePaths)) {
@@ -455,6 +546,9 @@ export class IOSProjectGenerator {
       }
     }
   }
+
+  // tree.jsonをパースして、
+  private getCellContent() {}
 
   private viewIdsForContainer(treeElements: [TreeElement?], viewIds: [any?]) {
     for (const aTreeElement of treeElements) {

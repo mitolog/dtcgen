@@ -129,25 +129,25 @@ export class SketchParser {
     this.parseConstraint(node.resizingConstraint, view);
     takeOverData.takeOverCommonProps(view);
 
-    const subLayers = _.get(targetSymbol, 'layers');
-    if (!subLayers || subLayers.length <= 0) {
-      // Parse this node(node-sketch), bevause it's an end of the tree structure.
-      const parser = new AutoParser(this.sketch, this.config, this.outputDir);
-      parser.parse(targetSymbol, view);
+    // AutoParse this node(node-sketch).
+    const parser = new AutoParser(this.sketch, this.config, this.outputDir);
+    parser.parse(targetSymbol, view);
 
-      if (takeOverData.imageName) {
-        (view as Image).imageName = takeOverData.imageName;
-      }
-      if (takeOverData.textTitle) {
-        (view as TextView).text = takeOverData.textTitle;
-      }
-      views.push(view);
-      parentTree.addElement(treeElement);
-      return;
+    if (takeOverData.imageName) {
+      (view as Image).imageName = takeOverData.imageName;
+    }
+    if (takeOverData.textTitle) {
+      (view as TextView).text = takeOverData.textTitle;
     }
 
     views.push(view);
     parentTree.addElement(treeElement);
+
+    const subLayers = _.get(targetSymbol, 'layers');
+    if (!subLayers || subLayers.length <= 0) {
+      return;
+    }
+
     subLayers.forEach(layer => {
       const newTakeOverData = new TakeOverData(
         layer,

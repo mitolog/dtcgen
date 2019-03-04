@@ -6,8 +6,9 @@ class {{container.name}}Config: ViewConfigImpl {
     override func configureViews() {
         self.views = [:]
         self.constraints = [:]
+        self.treeElement = self.getTreeElement(for: "{{container.name}}")
         var view: UIView? = nil
-        
+
         {{#views}}
         {{#eq type 'View'}}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
@@ -47,12 +48,12 @@ class {{container.name}}Config: ViewConfigImpl {
         view!.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/eq}}
         {{#eq type 'List'}}
-        do {
-            let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
-            layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-            layout.itemSize = CGSize(width: 60, height: 60)
-            view = UICollectionView(CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), layout)
-        }
+        view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! Container).name = "{{name}}"
+        {{/eq}}
+        {{#eq type 'Cell'}}
+        view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! Container).name = "{{name}}"
         {{/eq}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
@@ -73,10 +74,3 @@ class {{container.name}}Config: ViewConfigImpl {
         {{/views}}
     }
 }
-
-{{#filter views "List" property="type"}}
-extension travelCitiesConfig: UICollectionViewDataSource {
-
-}
-{{else}}
-{{/filter}}

@@ -8,7 +8,7 @@ class {{container.name}}ViewController: UIViewController {
         self.view.backgroundColor = UIColor.white
 
         self.viewConfig = Dtc.config.{{container.name}}
-        self.viewConfig!.adopt(on: self.view)
+        self.viewConfig!.adopt(name: Dtc.config.baseViewComponentName, on: self.view)
 
         /*
          * acknowledgement:
