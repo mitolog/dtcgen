@@ -1,12 +1,19 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as pluralize from 'pluralize';
+import { Container } from '../../domain/Entities';
 import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { ElementType } from '../../domain/entities/ElementType';
 import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
 import { TreeElement, View } from '../../domain/Entities';
+import {
+  ContainerConfig,
+  DataVariable,
+  ListSection,
+} from '../entities/ContainerConfig';
 
 dotenv.config();
 if (dotenv.error) {
@@ -391,54 +398,47 @@ export class IOSProjectGenerator {
       };
 
       /* list related views
-      // cellだけのviewComponentIdsを作ってもいいけど、それには すべてのcellが含まれていない
-      // viewcontrollerでadoptする際にどのviewを除外してどのviewをaddするかが判断できない
-      // exceptionsで名前指定する?
 
-      // tree.jsonとそのcodableを生成 (quicktypeで再帰作れるかがキモ)
-      // 個別生成するviewのname配列を生成
-      // viewControllerにbaseviewを貼る際は、adopt(name:on:)を使うが、除外するviewsのnameをexceptions配列を
-      // 作らないといけない
-      // 除外する際は、nameが含まれるtree配下を除外
-      // 個別viewのinitでは、nameを指定してviewの配列を取得し、そこから生成(例えばCityCellにフルマッチしたもの)
+      // quicktypeで作るもの
+      // Cities.json, Cities.swift
 
-      //
-       * 1. ダミーデータ
-       * 2. {{artboardName}}Config.swiftのextension用にデータを追記
-       * 
-       * ダミーデータ:
-       * tree.jsonを走査して、`List`が含まれるviewを探す
-       * あれば、その配下のviewを走査して、listの.elementsに、xxCellというnameのやつがあればそれをすべて取得
-       * それらを2つのグループにカテゴライズしたい。
-       * xxCell見つけたら、同じ階層でxxCelが含まれるelementを探す、あれば、当該配列に追加
-       * 
-       * HogeCell 配下を走査して、typeがTextView, Imageのものを抽出
-       * nameをkeyに、textやimageNameをそれぞれvalueに設定する
-       * { 
-       *   cellName: [
-       *     {
-       *       {{name}}: cityCell,
-       *       subTitle: FRANCE,
-       *       imageName: DtcGenerated/images/xxxxxxxxx
-       *     },
-       *     {
-       *       {{name}}: {{}},
-       *       subTitle: FRANCE,
-       *       imageName: DtcGenerated/images/xxxxxxxxx
-       *     },
-       *   ],
-       *   cellName2: []
-       * }
-       */
+      // cellNameCollectionViewCell.hbs
+      {
+        container: { name: "travelCities" },
+        treeName: "cityCell", // TreeElement.nameの名前
+        classPrefix: "City",  // 頭文字は大文字で
+        properties: [
+          { viewId: "zzzz",
+            propertyName: "name",
+            class: "UILabel",
+            classPropertyName: "text",
+          }
+        ]
+      }
 
-      // 1. gather cells per each list on a container
-      // const allCells: View[] = views.filter(
-      //   view => view.type === ElementType.Cell,
-      // );
+      {
+        viewId: "xxxxx",
+        propertyName: image,
+        class: UIImageView,
+        classPropertyName: "image"
+      }
+
+      */
+
+      // container中のすべてのcellを取得
+
+      // 種類(viewのname)ごとに分類
+
+      // // 種類ごとに
+      // for (const key of Object.keys(uniqueCells)) {
+      //   const cellViewId = uniqueCells[key];
+      //   this.getCellContent(cellViewId);
+      // }
 
       // // 2. gather components of each cells
+      // var cellContents: [] = [];
       // allCells.forEach(cell => {
-      //   const components = this.getCellContent(cell);
+      //   this.getCellContent(cell);
       // });
 
       // if (allCells && allCells.length) {
@@ -528,9 +528,6 @@ export class IOSProjectGenerator {
       },
     );
 
-    // generate dynamic classes if presented.
-    //
-
     // copy json
     const treePath = path.join(designToCodeGeneratedDir, 'tree.json');
     fs.writeFileSync(treePath, JSON.stringify(treeJson));
@@ -545,6 +542,81 @@ export class IOSProjectGenerator {
         fs.removeSync(templatePath);
       }
     }
+  }
+
+  private generateContainerConfig(
+    container: Container,
+    views: View[],
+  ): ContainerConfig {
+    /**
+     * Set ContainerConfig
+     */
+    const containerConfig = new ContainerConfig();
+
+    // prepare variables
+    const allLists: View[] = views.filter(
+      view => view.type === ElementType.List,
+    );
+    const dynamicClasses: string[] = [];
+
+    /// cell preparation from here ///
+    const allCells: View[] = views.filter(
+      view => view.type === ElementType.Cell,
+    );
+    const uniqueCells: { [name: string]: View } = allCells.reduce(
+      (acc, cur) => {
+        acc[`${cur.name}`] = cur; // override with latest cur.id
+        return acc;
+      },
+      {},
+    );
+    const cellClasses: string[] = Object.keys(uniqueCells).map(name =>
+      name.toLowerCamelCase(' '),
+    );
+    const cellPrefixes: string[] = cellClasses.map(className =>
+      className.replace('Cell', ''),
+    );
+    let cellVariables: DataVariable[] = [];
+    for (const cellPrefix of cellPrefixes) {
+      const pluralized: string = pluralize(cellPrefix);
+      if (!pluralized) continue;
+      let variable: DataVariable = {
+        name: pluralized,
+        type: pluralized.toUpperCamelCase(),
+      };
+      cellVariables.push(variable);
+    }
+    let listSections: ListSection[] = [];
+    for (const key of Object.keys(uniqueCells)) {
+      let view: View = uniqueCells[key];
+      const classPrefix: string = key.toUpperCamelCase(' ').replace('Cell', '');
+      if (!view || !classPrefix) continue;
+      let listSection: ListSection = {
+        classPrefix: classPrefix,
+        sectionName: classPrefix + 'Section',
+        variableName: pluralize(classPrefix).toLowerCamelCase(),
+        size: { width: view.rect.width, height: view.rect.height },
+        insets: { top: 0, left: 0, bottom: 0, right: 0 },
+      };
+      listSections.push(listSection);
+    }
+    /// cell preparation to here ///
+
+    // set container
+    containerConfig.container = container;
+    // set listName
+    if (allLists && allLists.length > 0) {
+      // todo: suppose only 1 list exists on 1 artboard.
+      containerConfig.listName = allLists[0].name.toUpperCamelCase(' ');
+    }
+    // set dynamicClasses
+    containerConfig.dynamicClasses = [...cellClasses]; // spread syntax
+    // set dataVariables
+    containerConfig.dataVariables = [...cellVariables];
+    // set listSections
+    containerConfig.listSections = listSections;
+
+    return containerConfig;
   }
 
   // tree.jsonをパースして、

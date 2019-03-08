@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{modelClassName}}> {
+class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{classPrefix}}> {
 
     var viewConfig: ViewConfig?
 
@@ -9,7 +9,7 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{modelClass
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.viewConfig = Dtc.config.{{container.name}}
-        viewConfig!.adopt(name:"{{classPrefix}}", on: self.contentView)
+        viewConfig!.adopt(name:"{{treeName}}", on: self.contentView)
     }
 
     // called via interface builder, but not initialize IBOutlets, IBActions
@@ -27,12 +27,11 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{modelClass
         super.prepareForInterfaceBuilder()
     }
 
-    override func bind(data: {{modelClassName}}) {
+    override func bind(data: {{classPrefix}}) {
         {{#properties}}
         do {
-            let viewId = Dtc.viewId.{{treePath}}
-            let view = self.viewConfig?.getView(viewId)
-            (view as? {{className}})?.{{classPropertyName}} = data.{{name}}
+            let view = self.viewConfig?.getView("{{viewId}}")
+            (view as? {{class}})?.{{classPropertyName}} = data.{{propertyName}}
         }
         {{/properties}}
     }

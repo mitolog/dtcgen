@@ -5,11 +5,6 @@ struct Dtc {
     struct config {
         
         static var baseViewComponentName = "BaseView"
-        static var dynamicViewClasses: [String] = [
-            {{#dynamicClasses}}
-            "{{.}}",
-            {{/dynamicClasses}}
-        ]
 
         {{#forEach names}}
         static var {{name}}: ViewConfig {
