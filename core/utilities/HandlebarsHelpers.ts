@@ -7,6 +7,8 @@ export class HandlebarsHelpers {
     handlebars.registerHelper('forEach', helpers().forEach);
     handlebars.registerHelper('stem', helpers().stem);
     handlebars.registerHelper('filter', helpers().filter);
+    handlebars.registerHelper('has', helpers().has);
+    handlebars.registerHelper('capitalize', helpers().capitalize);
     return handlebars;
   }
 }

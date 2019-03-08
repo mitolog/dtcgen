@@ -10,6 +10,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
     var views: [String: UIView] = [:]
     var constraints: [String: Constraint] = [:]
     var treeElement: TreeElement? = nil
+    var dynamicClasses: [String]? = nil
 
     /*
      * protocol methods below
@@ -32,6 +33,13 @@ class ViewConfigImpl : NSObject, ViewConfig {
         return self.views[viewId]
     }
 
+    func getJSONData(_ name: String) throws -> Data? {
+        guard let path = Bundle.main.path(forResource: name, ofType: "json") else { return nil }
+        let url = URL(fileURLWithPath: path)
+
+        return try Data(contentsOf: url)
+    }
+
     /// retrieve `TreeElement` matching with name, but not ** recursive **
     func getTreeElement(for name: String) -> TreeElement? {
         let data = try! getJSONData("tree")
@@ -41,6 +49,20 @@ class ViewConfigImpl : NSObject, ViewConfig {
             if elementName == name { return aElement }
         }
         return nil
+    }
+
+    func bindDummyData() {
+        // shuold be filled within subclasses
+    }
+
+    /*
+     * instance methods
+     */
+    func getJSONData(_ name: String) throws -> Data? {
+        guard let path = Bundle.main.path(forResource: name, ofType: "json") else { return nil }
+        let url = URL(fileURLWithPath: path)
+
+        return try Data(contentsOf: url)
     }
 
     /*
@@ -54,10 +76,10 @@ class ViewConfigImpl : NSObject, ViewConfig {
         guard
             let treeElement = treeElement,
             let treeElements = treeElement.elements else { return }
-        let dynamicClasses = Dtc.config.dynamicViewClasses
         let isBaseView = name == Dtc.config.baseViewComponentName
         for aElement in treeElements {
             guard let treeName = aElement.name else { continue }
+            let dynamicClasses: [String] = self.dynamicClasses ?? []
             var isDynamicClass = false
             dynamicClasses.forEach { (className) in
                 if treeName.contains(className) {
@@ -87,13 +109,6 @@ class ViewConfigImpl : NSObject, ViewConfig {
         for aElement in elements {
             self.getAllUid(treeElement: aElement, uids: &uids)
         }
-    }
-
-    private func getJSONData(_ name: String) throws -> Data? {
-        guard let path = Bundle.main.path(forResource: name, ofType: "json") else { return nil }
-        let url = URL(fileURLWithPath: path)
-
-        return try Data(contentsOf: url)
     }
 
     private func adopt(on onView: UIView, targets: [String], isExceptions: Bool) {
