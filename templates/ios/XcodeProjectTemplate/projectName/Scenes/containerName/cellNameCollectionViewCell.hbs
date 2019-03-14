@@ -4,12 +4,13 @@ import UIKit
 class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{classPrefix}}> {
 
     var viewConfig: ViewConfig?
+    var viewIdMap: [String: String] = [:]
 
     // called when the view is instantiated via code, not interface builder.
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.viewConfig = Dtc.config.{{container.name}}
-        viewConfig!.adopt(name:"{{treeName}}", on: self.contentView)
+        self.viewIdMap = viewConfig!.adopt(name:"{{treeName}}", on: self.contentView)
     }
 
     // called via interface builder, but not initialize IBOutlets, IBActions
@@ -28,11 +29,16 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<{{classPrefi
     }
 
     override func bind(data: {{classPrefix}}) {
-        {{#properties}}
-        do {
-            let view = self.viewConfig?.getView("{{viewId}}")
-            (view as? {{class}})?.{{classPropertyName}} = data.{{propertyName}}
+        for (uid, name) in self.viewIdMap {
+            let view = self.viewConfig?.getView(uid)
+            let propertyMap = data.getProperty(name)
+            (view as UIView).assign(propertyMap)
+            {{!-- // quicktypeで自動的に変換したものに、extension City { } みたいな感じで
+            // 別ファイルでextensinoを作成し、getPropertyを生やす            
+            // assginを extensionでUIViewにはやして、viewにpropertyMapのプロパティが存在すれば、アサインする
+            // ただし、viewはNSObjectである必要がある。理由は以下参照:
+            // https://stackoverflow.com/questions/35398909/how-to-check-if-an-object-has-a-stored-property
+            --}}            
         }
-        {{/properties}}
     }
 }

@@ -17,6 +17,7 @@ export enum OutputType {
   slices,
   images,
   metadata,
+  dynamicAttributes,
   tree,
   sourcecodes,
   project,
@@ -74,6 +75,19 @@ export class PathManager {
           fs.ensureDirSync(treeDirName);
         }
         outputPath = path.join(treeDirName, 'tree.json');
+        break;
+
+      case OutputType.dynamicAttributes:
+        const attributesPath = path.join(
+          this.outputDir,
+          OutputMidDirName.extracted,
+          'metadata/dynamicAttributes',
+          fileName || '',
+        );
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(path.dirname(attributesPath));
+        }
+        outputPath = attributesPath;
         break;
 
       case OutputType.images:

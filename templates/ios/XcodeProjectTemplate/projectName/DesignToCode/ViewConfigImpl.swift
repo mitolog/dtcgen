@@ -16,13 +16,14 @@ class ViewConfigImpl : NSObject, ViewConfig {
      * protocol methods below
      */
 
-    func adopt(name: String, on onView: UIView) {
+    func adopt(name: String, on onView: UIView) -> [String: String] {
 
-        var viewIds: [String] = []
+        var viewIdMap: [String:String] = [:]
         let isBaseView = name == Dtc.config.baseViewComponentName
         self.configureViews()
-        self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIds)
-        self.adopt(on: onView, targets: viewIds, isExceptions: isBaseView)
+        self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIdMap)
+        self.adopt(on: onView, targets: Array(viewIdMap.keys), isExceptions: isBaseView)
+        return viewIdMap;
     }
 
     func configureViews() {
@@ -70,8 +71,8 @@ class ViewConfigImpl : NSObject, ViewConfig {
      */
 
     // If the `name` parameter is not base view's, only first matched treeElement is used.
-    // Otherwise, search and collect all treeElements' uids that matches.
-    private func searchViewIds(for name: String, treeElement: TreeElement?, outputs: inout [String]) {
+    // Otherwise, search and collect all treeElements' uids(and names) that matches.
+    private func searchViewIds(for name: String, treeElement: TreeElement?, outputs: inout [String: String]) {
 
         guard
             let treeElement = treeElement,
@@ -89,8 +90,8 @@ class ViewConfigImpl : NSObject, ViewConfig {
             }
             let matched = (isBaseView && isDynamicClass) || (!isBaseView && treeName == name)
             if matched {
-                // get all uids of sucseeding tree elements
-                self.getAllUid(treeElement: aElement, uids: &outputs)
+                // get all uids(and dot connected names) of sucseeding tree elements
+                self.getAllUid(treeElement: aElement, uidMap: &outputs)
                 if isBaseView { continue } else { return }
             }
             // if element name doesn't match, dig deeper
@@ -99,15 +100,19 @@ class ViewConfigImpl : NSObject, ViewConfig {
     }
 
     /// recursively get all uids that treeElement.elements includes
-    private func getAllUid(treeElement: TreeElement, uids: inout [String]) {
-        guard let uid = treeElement.uid else { abort() }
-        uids.append(uid)
+    private func getAllUid(treeElement: TreeElement, uidMap: inout [String: String]) {
+        guard let uid = treeElement.uid, let name = treeElement.name else { abort() }
+        if let currentName = uidMap[uid] {
+            uidMap[uid] = currentName + name
+        } else {
+            uidMap[uid] = name
+        }
 
         guard let elements = treeElement.elements else { return }
         if elements.count <= 0 { return }
 
         for aElement in elements {
-            self.getAllUid(treeElement: aElement, uids: &uids)
+            self.getAllUid(treeElement: aElement, uidMap: &uidMap)
         }
     }
 

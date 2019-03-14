@@ -399,79 +399,24 @@ export class IOSProjectGenerator {
 
       /* list related views
 
-      // quicktypeで作るもの
-      // Cities.json, Cities.swift
-
       // cellNameCollectionViewCell.hbs
       {
         container: { name: "travelCities" },
         treeName: "cityCell", // TreeElement.nameの名前
         classPrefix: "City",  // 頭文字は大文字で
-        properties: [
-          { viewId: "zzzz",
-            propertyName: "name",
-            class: "UILabel",
-            classPropertyName: "text",
-          }
-        ]
       }
-
-      {
-        viewId: "xxxxx",
-        propertyName: image,
-        class: UIImageView,
-        classPropertyName: "image"
-      }
-
       */
 
-      // container中のすべてのcellを取得
-
-      // 種類(viewのname)ごとに分類
-
-      // // 種類ごとに
-      // for (const key of Object.keys(uniqueCells)) {
-      //   const cellViewId = uniqueCells[key];
-      //   this.getCellContent(cellViewId);
-      // }
-
-      // // 2. gather components of each cells
-      // var cellContents: [] = [];
-      // allCells.forEach(cell => {
-      //   this.getCellContent(cell);
-      // });
-
-      // if (allCells && allCells.length) {
-      //   const cellsPerList: { [k: string]: View[] } = {};
-      //   allCells.forEach(cell => {
-      //     const parentId = cell.parentId;
-      //     if (!parentId) return;
-      //     const cells: View[] = cellsPerList[parentId];
-      //     if (cells && cells.length > 0) {
-      //       cells.push(cell);
-      //       cellsPerList[parentId] = cells;
-      //     } else {
-      //       cellsPerList[parentId] = [cell];
-      //     }
-      //   });
-
-      // 2. gather components of each cells
-
-      // 3. separate cells depends on each classes.
-      // for(const key of Object.keys(cellsPerList)) {
-      //   const cells = cellsPerList[key];
-      //   const cellsPerClass = {}
-      //   for(const cell of cells) {
-      //     if ()
-      //   }
-      // }
-      // }
+      const containerConfig: ContainerConfig = this.generateContainerConfig(
+        container,
+        views,
+      );
 
       // viewConfigs
       const configTemplate = this.compiledTemplate(
         templatePaths.containerNameConfig,
       );
-      const configOutput = configTemplate(containerObj);
+      const configOutput = configTemplate(containerConfig);
       const configParsed = path.parse(templatePaths.containerNameConfig);
       const configName = container.name + 'Config.swift';
       const configOutputPath = path.join(configParsed.dir, configName);
@@ -548,9 +493,6 @@ export class IOSProjectGenerator {
     container: Container,
     views: View[],
   ): ContainerConfig {
-    /**
-     * Set ContainerConfig
-     */
     const containerConfig = new ContainerConfig();
 
     // prepare variables
@@ -602,19 +544,16 @@ export class IOSProjectGenerator {
     }
     /// cell preparation to here ///
 
-    // set container
+    /// set content from here ///
     containerConfig.container = container;
-    // set listName
     if (allLists && allLists.length > 0) {
       // todo: suppose only 1 list exists on 1 artboard.
       containerConfig.listName = allLists[0].name.toUpperCamelCase(' ');
     }
-    // set dynamicClasses
     containerConfig.dynamicClasses = [...cellClasses]; // spread syntax
-    // set dataVariables
     containerConfig.dataVariables = [...cellVariables];
-    // set listSections
     containerConfig.listSections = listSections;
+    /// set content to here ///
 
     return containerConfig;
   }
