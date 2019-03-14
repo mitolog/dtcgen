@@ -6,18 +6,21 @@ import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
+import * as pluralize from 'pluralize';
 import '../../extensions/String.extensions';
 import { SketchContainer } from '../entities/SketchContainer';
 import { SketchParser } from '../applications/SketchParser';
 import { Rect } from '../../domain/entities/Rect';
-import { PathManager, OutputType } from '../../utilities/PathManager';
 import { TreeElement } from '../../domain/entities/TreeElement';
+import { PathManager, OutputType } from '../../utilities/PathManager';
 import { SketchView } from '../entities/SketchView';
 
 dotenv.config();
 if (dotenv.error) {
   throw dotenv.error;
 }
+
+type DynamicAttribute = { [k: string]: [[TreeElement?]] };
 
 export interface ISketchRepository {
   getAll(inputPath: string): Promise<Node[]>;
@@ -155,6 +158,45 @@ export class SketchRepository implements ISketchRepository {
     }
   }
 
+  private gatherDynamicAttributes(
+    dynamicClasses: string[],
+    treeElement: TreeElement,
+    attribute: DynamicAttribute,
+  ) {
+    // treeElementsを走査して、dynamicClassesにマッチすれば、その配下を格納
+    const targetName = treeElement.name;
+    const matches: string[] = dynamicClasses.filter(className => {
+      const results = targetName.match(new RegExp(className, 'gi'));
+      return results && results.length > 0 ? true : false;
+    });
+    const isDynamic = matches && matches.length > 0 ? true : false;
+    if (!isDynamic) {
+      for (const element of treeElement.elements) {
+        this.gatherDynamicAttributes(dynamicClasses, element, attribute);
+      }
+      return;
+    }
+
+    const assignableClassName: string = matches[matches.length - 1];
+    // 末尾に近い方のclassNameのindexより前の部分の文字列を取得
+    const regExp = new RegExp(assignableClassName, 'gi');
+    let matchStartIndex: number = 0;
+    let match: RegExpExecArray;
+    while ((match = regExp.exec(targetName)) != null) {
+      if (match.index > matchStartIndex) {
+        matchStartIndex = match.index;
+      }
+    }
+    // `classPrefix` shuold be like "City", not "Cities"
+    let classPrefix: string =
+      targetName.substring(0, matchStartIndex) || targetName;
+    if (attribute[classPrefix]) {
+      attribute[classPrefix].push(treeElement.elements);
+    } else {
+      attribute[classPrefix] = [treeElement.elements];
+    }
+  }
+
   /**
    * interface implementation
    */
@@ -187,7 +229,13 @@ export class SketchRepository implements ISketchRepository {
     const artboards = await this.getAll(inputPath);
     const views: [SketchView?] = [];
     const treeElements: [TreeElement?] = [];
-    const sketchParser = new SketchParser(sketch, this.getConfig(), outputDir);
+    const sketchConfig: Object = this.getConfig();
+    const sketchParser = new SketchParser(sketch, sketchConfig, outputDir);
+    const dynamicClasses: string[] = _.get(
+      sketchConfig,
+      'extraction.dynamicClasses',
+    );
+    const attributesByArtboards: { [k: string]: DynamicAttribute } = {};
 
     artboards.forEach(artboard => {
       if (!artboard['name']) return; // same as continue
@@ -203,6 +251,10 @@ export class SketchRepository implements ISketchRepository {
         sketchParser.parseLayer(node, views, topTree, container.id);
       });
       treeElements.push(topTree);
+
+      const attribute: DynamicAttribute = {};
+      this.gatherDynamicAttributes(dynamicClasses, topTree, attribute);
+      attributesByArtboards[container.name] = attribute;
     });
 
     this.addConstraintValues(views);
@@ -218,6 +270,39 @@ export class SketchRepository implements ISketchRepository {
         `extracted jsons have some unintegrity: ${errors.map(error => error)}`,
       );
     }
+
+    for (const artboardName of Object.keys(attributesByArtboards)) {
+      const attribute: DynamicAttribute = attributesByArtboards[artboardName];
+      for (const classPrefix of Object.keys(attribute)) {
+        const classes: string = pluralize(classPrefix); // make plural(複数形)
+        if (!classes) continue;
+        const attributesPath = pathManager.getOutputPath(
+          OutputType.dynamicAttributes,
+          true,
+          null,
+          `${artboardName}/${classes}.json`,
+        );
+        const elements: [[TreeElement?]] = attribute[classPrefix];
+        fs.writeFileSync(attributesPath, JSON.stringify(elements));
+      }
+    }
+    // metadata用のdirにdynamicData用のdirを作り、更にartboard別にdirを作り、その配下に各jsonを出力する
+    /**
+     * {
+     *  travelCities: {
+     *   Cities: [ [TreeElement?], [TreeElement?] ... ],
+     *   Hotels: [ [TreeElement?], [TreeElement?] ... ]
+     *  },
+     *  hotelCity: {
+     *
+     *  }
+     * }
+     *
+     * -> /travelCities
+     *      Cities.json : [ [TreeElement?], [TreeElement?] ... ]
+     *      Hotels.json : [ [TreeElement?], [TreeElement?] ... ]
+     *
+     */
 
     const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
     fs.writeFileSync(metadataPath, JSON.stringify(views));
