@@ -31,12 +31,7 @@ export class SketchParser {
     this.outputDir = outputDir;
   }
 
-  parseLayer(
-    node: any,
-    views: [SketchView?],
-    parentTree: TreeElement,
-    parentId?: string,
-  ) {
+  parseLayer(node: any, parentTree: TreeElement, parentId?: string) {
     // assign default values, but these may be overridden on latter procedure.
     const view: SketchView = new SketchView(node, parentId);
     const treeElement: TreeElement = new TreeElement(view);
@@ -59,23 +54,21 @@ export class SketchParser {
 
     // `group` translated into `view` which holds various views on it
     if (node._class === 'group' && _.size(node.layers)) {
-      views.push(view);
       parentTree.addElement(treeElement);
       // parse underlying nodes
       node.layers.forEach(aNode => {
-        this.parseLayer(aNode, views, treeElement, view.id);
+        this.parseLayer(aNode, treeElement, view.id);
       });
     }
     // 'symbolInstance' should be translated into each elements depends on each view type
     else if (node._class === 'symbolInstance') {
       if (isKeywordMatched) {
         this.parseElement(node, view);
-        views.push(view);
         treeElement.name = view.name.toLowerCamelCase(' ');
         parentTree.addElement(treeElement);
       } else {
         const takeOverData = new TakeOverData(node);
-        this.parseSymbol(takeOverData, views, parentTree, parentId);
+        this.parseSymbol(takeOverData, parentTree, parentId);
       }
     }
   }
@@ -110,7 +103,6 @@ export class SketchParser {
 
   private parseSymbol(
     takeOverData: TakeOverData,
-    views: [SketchView?],
     parentTree: TreeElement,
     parentId?: string,
   ) {
@@ -140,7 +132,6 @@ export class SketchParser {
       (view as TextView).text = takeOverData.textTitle;
     }
 
-    views.push(view);
     parentTree.addElement(treeElement);
 
     const subLayers = _.get(targetSymbol, 'layers');
@@ -153,7 +144,7 @@ export class SketchParser {
         layer,
         takeOverData.nodeOnArtboard || takeOverData.node,
       );
-      this.parseSymbol(newTakeOverData, views, treeElement, view.id);
+      this.parseSymbol(newTakeOverData, treeElement, view.id);
     });
   }
 

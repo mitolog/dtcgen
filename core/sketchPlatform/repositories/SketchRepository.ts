@@ -14,6 +14,7 @@ import { Rect } from '../../domain/entities/Rect';
 import { TreeElement } from '../../domain/entities/TreeElement';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { SketchView } from '../entities/SketchView';
+import { isContainer } from '../../typeGuards';
 
 dotenv.config();
 if (dotenv.error) {
@@ -82,79 +83,61 @@ export class SketchRepository implements ISketchRepository {
   }
 
   /**
-   * add constraint values(numbers) which represents relative position from parent view
-   * @param outputs {any[]} An array of [ Container | View | subclass of View ]
+   * Recursively add constraint values(numbers) which represents relative position from parent view
+   * @param currentTreeElement {TreeElement} representing current view during recursive search
+   * @param topElement {TreeElement} representing artboard
    */
-  private addConstraintValues(props: [SketchView?]): void {
-    if (!props || props.length <= 0) return;
-
-    for (const output of props) {
-      if (!output.constraints || !output.parentId) continue;
-      let baseView: SketchContainer | SketchView;
-      let parentId = output.parentId;
-      for (const prop of props) {
-        if (prop.id === parentId) {
-          baseView = prop;
-          break;
-        }
+  private addConstraintValues(
+    currentTreeElement: TreeElement,
+    topElement: TreeElement,
+  ): void {
+    for (const treeElement of currentTreeElement.elements) {
+      if (treeElement.elements.length > 0) {
+        this.addConstraintValues(treeElement, topElement);
       }
+
+      //if (isContainer(treeElement.properties)) continue;
+      const view = treeElement.properties as SketchView;
+      if (!view.constraints || !view.parentId) continue;
+      // TBD: `searchElement` can be bottleneck of speed because it's recursive.
+      const parentTreeElement = topElement.searchElement(view.parentId);
+      if (!parentTreeElement) continue;
+      let baseView: SketchContainer | SketchView = parentTreeElement.properties;
       if (!baseView) continue;
+
       const originalRect: Rect =
         baseView.type === 'Container'
           ? baseView.rect
           : (baseView as SketchView).originalRect;
       // calculate margins from each sides
       let newConstraints = {};
-      if (output.constraints.top) {
-        newConstraints['top'] = output.rect.y.toString();
+      if (view.constraints.top) {
+        newConstraints['top'] = view.rect.y.toString();
       }
-      if (output.constraints.right) {
+      if (view.constraints.right) {
         newConstraints['right'] = (-(
           originalRect.width -
-          (output.rect.x + output.rect.width)
+          (view.rect.x + view.rect.width)
         )).toString();
       }
-      if (output.constraints.bottom) {
+      if (view.constraints.bottom) {
         newConstraints['bottom'] = (-(
           originalRect.height -
-          (output.rect.y + output.rect.height)
+          (view.rect.y + view.rect.height)
         )).toString();
       }
-      if (output.constraints.left) {
-        newConstraints['left'] = output.rect.x.toString();
+      if (view.constraints.left) {
+        newConstraints['left'] = view.rect.x.toString();
       }
-      if (output.constraints.width) {
-        newConstraints['width'] = output.rect.width.toString();
+      if (view.constraints.width) {
+        newConstraints['width'] = view.rect.width.toString();
       }
-      if (output.constraints.height) {
-        newConstraints['height'] = output.rect.height.toString();
+      if (view.constraints.height) {
+        newConstraints['height'] = view.rect.height.toString();
       }
-      output.constraints = newConstraints;
-    }
-  }
 
-  private checkIntegrity(
-    treeElement: TreeElement,
-    views: [SketchView?],
-    matched: [string?],
-    errors: [string?],
-  ) {
-    let result = false;
-    for (const view of views) {
-      if (view.id === treeElement.uid) {
-        result = true;
-      }
-    }
-    if (result) {
-      matched.push(treeElement.uid);
-    } else {
-      errors.push(treeElement.uid);
-    }
-
-    if (treeElement.elements && treeElement.elements.length > 0) {
-      for (const aNode of treeElement.elements) {
-        this.checkIntegrity(aNode, views, matched, errors);
-      }
+      view.constraints = newConstraints;
+      treeElement.properties = view;
     }
   }
 
@@ -227,7 +210,6 @@ export class SketchRepository implements ISketchRepository {
 
     // extract all artboards
     const artboards = await this.getAll(inputPath);
-    const views: [SketchView?] = [];
     const treeElements: [TreeElement?] = [];
     const sketchConfig: Object = this.getConfig();
     const sketchParser = new SketchParser(sketch, sketchConfig, outputDir);
@@ -242,34 +224,17 @@ export class SketchRepository implements ISketchRepository {
 
       const container: SketchContainer = new SketchContainer(artboard);
       const topTree: TreeElement = new TreeElement(container);
-      // todo: パターンマッチによる名前の抽出
-      container.name = artboard['name'].toLowerCamelCase('/');
-      topTree.name = container.name;
-      views.push(container as SketchView);
 
       artboard['layers'].forEach(node => {
-        sketchParser.parseLayer(node, views, topTree, container.id);
+        sketchParser.parseLayer(node, topTree, container.id);
       });
+      this.addConstraintValues(topTree, topTree);
       treeElements.push(topTree);
 
       const attribute: DynamicAttribute = {};
       this.gatherDynamicAttributes(dynamicClasses, topTree, attribute);
-      attributesByArtboards[container.name] = attribute;
+      attributesByArtboards[topTree.name] = attribute;
     });
-
-    this.addConstraintValues(views);
-
-    const errors: [string?] = [];
-    let matched: [string?] = [];
-    const elementTotalCount: number = views.length;
-    for (const element of treeElements) {
-      this.checkIntegrity(element, views, matched, errors);
-    }
-    if (matched.length !== elementTotalCount) {
-      throw new Error(
-        `extracted jsons have some unintegrity: ${errors.map(error => error)}`,
-      );
-    }
 
     for (const artboardName of Object.keys(attributesByArtboards)) {
       const attribute: DynamicAttribute = attributesByArtboards[artboardName];
@@ -303,9 +268,6 @@ export class SketchRepository implements ISketchRepository {
      *      Hotels.json : [ [TreeElement?], [TreeElement?] ... ]
      *
      */
-
-    const metadataPath = pathManager.getOutputPath(OutputType.metadata, true);
-    fs.writeFileSync(metadataPath, JSON.stringify(views));
 
     const treePath = pathManager.getOutputPath(OutputType.tree, true);
     fs.writeFileSync(treePath, JSON.stringify(treeElements));

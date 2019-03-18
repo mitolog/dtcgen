@@ -1,14 +1,18 @@
 import { Container } from './Container';
-
+import { View } from './View';
+import { isContainer } from '../../typeGuards';
 export class TreeElement {
   public uid: string;
   public name: string;
+  public properties: View | Container;
   public elements: [TreeElement?];
 
-  constructor(container: Container, elements?: [TreeElement]) {
-    this.uid = container.id;
-    this.name = container.name.toLowerCamelCase(' ');
+  constructor(containerOrView: Container | View, elements?: [TreeElement]) {
+    this.uid = containerOrView.id;
+    const splitter = isContainer(containerOrView) ? '/' : ' ';
+    this.name = containerOrView.name.toLowerCamelCase(splitter);
     this.elements = elements || [];
+    this.properties = containerOrView;
   }
 
   /**
@@ -53,5 +57,21 @@ export class TreeElement {
       }
     }
     return max;
+  }
+
+  /**
+   * lookup treeElement that matches `uid` parameter
+   * @param uid {string}
+   */
+  searchElement(uid: string): TreeElement {
+    if (this.uid === uid) {
+      return this;
+    }
+    for (const element of this.elements) {
+      const matched = element.searchElement(uid);
+      if (matched) {
+        return matched;
+      }
+    }
   }
 }
