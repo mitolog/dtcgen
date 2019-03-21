@@ -12,7 +12,7 @@ protocol ViewConfig {
     /// addSubView and layout views that matches to name on specific view
     ///
     /// - Parameters:
-    ///   - name: shuold be same as `Dtc.config.baseViewComponentName` or a string that matches within `Dtc.config.dynamicViewClasses`
+    ///   - name: shuold be same as `Dtc.config.baseViewComponentName` or a `name` of treeElement.
     ///   - onView: the view where all views matching `name` are added
     /// - Returns: adopted view ids
     func adopt(name: String, on onView: UIView) -> [String: String]

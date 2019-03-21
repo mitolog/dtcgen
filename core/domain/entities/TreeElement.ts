@@ -1,6 +1,7 @@
 import { Container } from './Container';
 import { View } from './View';
 import { isContainer } from '../../typeGuards';
+
 export class TreeElement {
   public uid: string;
   public name: string;

@@ -251,23 +251,6 @@ export class SketchRepository implements ISketchRepository {
         fs.writeFileSync(attributesPath, JSON.stringify(elements));
       }
     }
-    // metadata用のdirにdynamicData用のdirを作り、更にartboard別にdirを作り、その配下に各jsonを出力する
-    /**
-     * {
-     *  travelCities: {
-     *   Cities: [ [TreeElement?], [TreeElement?] ... ],
-     *   Hotels: [ [TreeElement?], [TreeElement?] ... ]
-     *  },
-     *  hotelCity: {
-     *
-     *  }
-     * }
-     *
-     * -> /travelCities
-     *      Cities.json : [ [TreeElement?], [TreeElement?] ... ]
-     *      Hotels.json : [ [TreeElement?], [TreeElement?] ... ]
-     *
-     */
 
     const treePath = pathManager.getOutputPath(OutputType.tree, true);
     fs.writeFileSync(treePath, JSON.stringify(treeElements));

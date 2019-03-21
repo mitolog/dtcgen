@@ -10,6 +10,7 @@ typealias Tree = [TreeElement]
 struct TreeElement: Codable {
     let uid, name: String?
     let elements: [TreeElement]?
+    let properties: PropertiesWrapper?
 }
 
 // MARK: Convenience initializers and mutators
@@ -33,12 +34,14 @@ extension TreeElement {
     func with(
         uid: String?? = nil,
         name: String?? = nil,
-        elements: [TreeElement]?? = nil
+        elements: [TreeElement]?? = nil,
+        properties: PropertiesWrapper?? = nil
         ) -> TreeElement {
         return TreeElement(
             uid: uid ?? self.uid,
             name: name ?? self.name,
-            elements: elements ?? self.elements
+            elements: elements ?? self.elements,
+            properties: properties ?? self.properties
         )
     }
 

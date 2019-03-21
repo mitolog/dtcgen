@@ -24,7 +24,7 @@ export enum OutputType {
 }
 
 export class PathManager {
-  private outputDir: string;
+  outputDir: string;
 
   constructor(outputDir?: string) {
     if (outputDir) {
