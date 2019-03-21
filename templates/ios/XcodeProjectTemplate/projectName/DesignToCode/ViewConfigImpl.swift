@@ -30,15 +30,25 @@ class ViewConfigImpl : NSObject, ViewConfig {
         // shuold be filled within subclasses
     }
 
-    func getView(_ viewId: String) -> UIView? {
-        return self.views[viewId]
+    /// recursively search and retrieve first matched view corresponding `name` on `treeElement`.
+    /// but it can be multiple views which has same name. so need to be considered.
+    func getView(name: String, treeElement: TreeElement?) -> UIView? {
+        guard
+            let treeElement = treeElement,
+            let uid = treeElement.uid else { return nil }
+        if treeElement.name == name {
+            return getView(uid)
+        }
+        guard let elements = treeElement.elements else { return nil }
+        var targetView: UIView?
+        for element in elements {
+            targetView = self.getView(name: name, treeElement: element)
+        }
+        return targetView
     }
 
-    func getJSONData(_ name: String) throws -> Data? {
-        guard let path = Bundle.main.path(forResource: name, ofType: "json") else { return nil }
-        let url = URL(fileURLWithPath: path)
-
-        return try Data(contentsOf: url)
+    func getView(_ viewId: String) -> UIView? {
+        return self.views[viewId]
     }
 
     /// retrieve `TreeElement` matching with name, but not ** recursive **

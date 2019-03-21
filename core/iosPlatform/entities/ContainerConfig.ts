@@ -1,6 +1,11 @@
-import { Container } from '../../domain/Entities';
+import { Container, View, ElementType } from '../../domain/Entities';
 
-export type DataVariable = { type: string; name: string };
+export type DataVariable = {
+  type: ElementType;
+  variableName: string;
+  treeName: string;
+  classPrefix: string;
+};
 export type Size = { width: number; height: number };
 export type Insets = {
   top: number;
@@ -20,7 +25,9 @@ export class ContainerConfig {
   dataVariables?: DataVariable[];
   dynamicClasses?: string[];
   listName?: string;
+  listViewId: string;
   listSections?: ListSection[];
+  views?: View[];
 }
 
 /**

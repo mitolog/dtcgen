@@ -3,7 +3,6 @@ import { Constraints } from './Constraints';
 import { Container } from './Container';
 import { Rect } from './Rect';
 import { Color } from './Color';
-import { ColorComponents } from './ColorComponents';
 
 export class View extends Container {
   isVisible: boolean;

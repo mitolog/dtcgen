@@ -5,15 +5,19 @@ class {{container.name}}Config: ViewConfigImpl {
 
     {{#has "dataVariables"}}
     {{#dataVariables}}
-    var {{name}}: {{type}}?
+    var {{variableName}}: [[PropertiesWrapper]]?
     {{/dataVariables}}
 
     private func loadDummyData() {
         {{#dataVariables}}
         do {
-            let data = try! getJSONData("{{type}}")
-            self.{{name}} = try! {{type}}.init(data: data!)
+            let data = try getJSONData("{{variableName}}")
+            let props = try JSONDecoder().decode([[PropertiesWrapper]].self, from:data!)
+            self.{{variableName}} = props
+        } catch let error {
+            print(error)
         }
+        
         {{/dataVariables}}
     }
 
@@ -21,9 +25,8 @@ class {{container.name}}Config: ViewConfigImpl {
         self.loadDummyData()
 
         {{#has "listSections"}}
-        if let view = self.getView("xxx") as? UICollectionView,
-            let dataSource = self as? UICollectionViewDataSource {
-            view.dataSource = dataSource
+        if let view = self.getView("{{listViewId}}") as? UICollectionView {
+            view.dataSource = self
         }
         {{/has}}
     }
@@ -33,12 +36,13 @@ class {{container.name}}Config: ViewConfigImpl {
         self.views = [:]
         self.constraints = [:]
         self.treeElement = self.getTreeElement(for: "{{container.name}}")
-        self.dynamicViewClasses = [
+        {{#has "dynamicClasses"}}
+        self.dynamicClasses = [
             {{#dynamicClasses}}
             "{{.}}",
             {{/dynamicClasses}}
         ]
-
+        {{/has}}
         var view: UIView? = nil
 
         {{#views}}
@@ -121,6 +125,7 @@ extension {{container.name}}Config: UICollectionViewDataSource {
         switch section {
         {{#listSections}}
         case {{../listName}}Section.{{sectionName}}.rawValue:
+            guard let {{variableName}} = self.{{variableName}} else { break }
             itemCount = {{variableName}}.count
         {{/listSections}}
         default:
@@ -134,8 +139,9 @@ extension {{container.name}}Config: UICollectionViewDataSource {
         switch indexPath.section {
         {{#listSections}}
         case {{../listName}}Section.{{sectionName}}.rawValue:
+            guard let {{variableName}} = self.{{variableName}} else { break }
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "{{classPrefix}}CollectionViewCell", for: indexPath)
-            cell.bind(data: {{variableName}}[indexPath.row])
+            (cell as! {{classPrefix}}CollectionViewCell).bind(data: {{variableName}}[indexPath.row])
         {{/listSections}}
         default:
             break
@@ -173,7 +179,6 @@ extension {{container.name}}Config: UICollectionViewDelegateFlowLayout {
         return insets
     }
 
-    /*
     // セクションごとの行間(縦)のマージン
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 0
@@ -183,5 +188,5 @@ extension {{container.name}}Config: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0
     }
-    */
 }
+{{/has}}
