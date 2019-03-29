@@ -119,8 +119,18 @@ fileprivate func newJSONEncoder() -> JSONEncoder {
     return encoder
 }
 
-extension TreeElement {
-    func getProperty() {
-        
+// Utility
+extension Array where Element == Tree.Element {
+    /// lookup TreeElement that matches uid, and returns DtcProperties the element has
+    func getProperty(_ uid: String) -> DtcProperties? {
+        for element in self {
+            if element.uid == uid {
+                return element.properties
+            }
+            if let elements = element.elements, let props = elements.getProperty(uid) {
+                return props
+            }
+        }
+        return nil
     }
 }

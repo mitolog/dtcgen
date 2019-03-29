@@ -7,6 +7,7 @@ protocol DtcProperties: Codable {
     var id: String { get }
     var name: String { get }
     var rect: Rect { get }
+    func assign(to view: UIView)
 }
 
 struct Rect: Codable {
@@ -80,6 +81,10 @@ enum TextAlignment: Int, Codable {
  * each attributes classes that is defined within DesignToCode
  */
 class ContainerProps: DtcProperties {
+
+    func assign(to view: UIView) {
+    }
+
     // Container Props
     var type: PropertyType
     var id: String
@@ -88,6 +93,7 @@ class ContainerProps: DtcProperties {
 }
 
 class ViewProps: DtcProperties {
+
     // Container Props
     var type: PropertyType
     var id: String
@@ -97,6 +103,16 @@ class ViewProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
+
+    func assign(to view: UIView) {
+        guard let view = view as? Container else { return }
+        do {
+            let viewPath: ReferenceWritableKeyPath<Container, String> = \Container.name
+            view[keyPath: viewPath] = self.name
+        }
+    }
 }
 
 class ButtonProps: DtcProperties {
@@ -115,6 +131,10 @@ class ButtonProps: DtcProperties {
     var fontSize: Int?
     var fontColor: Color?
     var hasIcon: Bool?
+
+    func assign(to view: UIView) {
+    }
+
 }
 
 class TextViewProps: DtcProperties {
@@ -135,6 +155,10 @@ class TextViewProps: DtcProperties {
     var backgroundColor: Color?
     var text: String?
     var alignment: TextAlignment?
+
+    func assign(to view: UIView) {
+    }
+
 }
 
 class TextInputProps: DtcProperties {
@@ -156,6 +180,10 @@ class TextInputProps: DtcProperties {
     var text: String?
     var placeHolder: String?
     var alignment: TextAlignment?
+
+    func assign(to view: UIView) {
+    }
+
 }
 
 class ImageProps: DtcProperties {
@@ -171,6 +199,9 @@ class ImageProps: DtcProperties {
 
     // Image props
     var imageName: String?
+
+    func assign(to view: UIView) {
+    }
 }
 
 class CardProps: DtcProperties {
@@ -188,6 +219,9 @@ class CardProps: DtcProperties {
     var imageName: String?
     var title: String?
     var description: String?
+
+    func assign(to view: UIView) {
+    }
 }
 
 class ListProps: DtcProperties {
@@ -200,6 +234,9 @@ class ListProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+
+    func assign(to view: UIView) {
+    }
 }
 
 class CellProps: DtcProperties {
@@ -212,6 +249,9 @@ class CellProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+
+    func assign(to view: UIView) {
+    }
 }
 
 /* same as ElementType of DesignToCode entity */
