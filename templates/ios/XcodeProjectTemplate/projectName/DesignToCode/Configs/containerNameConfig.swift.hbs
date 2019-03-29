@@ -5,14 +5,14 @@ class {{container.name}}Config: ViewConfigImpl {
 
     {{#has "dataVariables"}}
     {{#dataVariables}}
-    var {{variableName}}: [[PropertiesWrapper]]?
+    var {{variableName}}: [[TreeElement]]?
     {{/dataVariables}}
 
     private func loadDummyData() {
         {{#dataVariables}}
         do {
             let data = try getJSONData("{{variableName}}")
-            let props = try JSONDecoder().decode([[PropertiesWrapper]].self, from:data!)
+            let props = try JSONDecoder().decode([[TreeElement]].self, from:data!)
             self.{{variableName}} = props
         } catch let error {
             print(error)
@@ -84,8 +84,21 @@ class {{container.name}}Config: ViewConfigImpl {
         view!.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/eq}}
         {{#eq type 'List'}}
-        view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! Container).name = "{{name}}"
+        let collectionView: UICollectionView = {
+            let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+            layout.scrollDirection = .vertical
+            layout.minimumInteritemSpacing = 0
+            layout.minimumLineSpacing = 0
+
+            let collectionView = UICollectionView( frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), collectionViewLayout: layout)
+            collectionView.backgroundColor = UIColor.white
+            {{#each ../listSections}}
+            collectionView.register({{classPrefix}}CollectionViewCell.self, forCellWithReuseIdentifier: "{{classPrefix}}CollectionViewCell")
+            {{/each}}
+            collectionView.delegate = self
+            return collectionView
+        }()
+        view = collectionView
         {{/eq}}
         {{#eq type 'Cell'}}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))

@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[PropertiesWrapper]> {
+class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement]> {
 
     var viewConfig: ViewConfig?
     var viewIdMap: [String: String] = [:]
@@ -28,14 +28,15 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[PropertiesW
         super.prepareForInterfaceBuilder()
     }
 
-    override func bind(data: [PropertiesWrapper]) {
-        for (uid, name) in self.viewIdMap {
+    override func bind(data: [TreeElement]) {
+        for (uid, _) in self.viewIdMap {
             let view = self.viewConfig?.getView(uid)
-            let propertyMap = data.getProperty(name)
+            print(view)
+            // let propertyMap = data.getProperty(name)
             // propertyMapは例えば { text: "hoge", backgroundColor: UIColor(xxx) } とか
-            (view as UIView).assign(propertyMap)
-            {{!-- // quicktypeで自動的に変換したものに、extension City { } みたいな感じで
-            // 別ファイルでextensinoを作成し、getPropertyを生やす            
+            // (view as UIView).assign(propertyMap)
+            {{!--
+            // 別ファイルでextensinoを作成し、getPropertyを生やす
             // assginを extensionでUIViewにはやして、viewにpropertyMapのプロパティが存在すれば、アサインする
             // ただし、viewはNSObjectである必要がある。理由は以下参照:
             // https://stackoverflow.com/questions/35398909/how-to-check-if-an-object-has-a-stored-property
