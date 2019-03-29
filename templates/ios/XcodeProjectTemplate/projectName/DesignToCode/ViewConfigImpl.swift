@@ -21,12 +21,19 @@ class ViewConfigImpl : NSObject, ViewConfig {
         var viewIdMap: [String:String] = [:]
         let isBaseView = name == Dtc.config.baseViewComponentName
         self.configureViews()
+        if (isBaseView) {
+            self.bindDummyData()
+        }
         self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIdMap)
-        self.adopt(on: onView, targets: Array(viewIdMap.keys), isExceptions: isBaseView)
+        self.adopt(on: onView, targets: Array(viewIdMap.keys), isExceptions: isBaseView)    // <- should be after configureViews
         return viewIdMap;
     }
 
     func configureViews() {
+        // shuold be filled within subclasses
+    }
+
+    func bindDummyData() {
         // shuold be filled within subclasses
     }
 
@@ -60,10 +67,6 @@ class ViewConfigImpl : NSObject, ViewConfig {
             if elementName == name { return aElement }
         }
         return nil
-    }
-
-    func bindDummyData() {
-        // shuold be filled within subclasses
     }
 
     /*
@@ -112,11 +115,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
     /// recursively get all uids that treeElement.elements includes
     private func getAllUid(treeElement: TreeElement, uidMap: inout [String: String]) {
         guard let uid = treeElement.uid, let name = treeElement.name else { abort() }
-        if let currentName = uidMap[uid] {
-            uidMap[uid] = currentName + name
-        } else {
-            uidMap[uid] = name
-        }
+        uidMap[uid] = name
 
         guard let elements = treeElement.elements else { return }
         if elements.count <= 0 { return }
