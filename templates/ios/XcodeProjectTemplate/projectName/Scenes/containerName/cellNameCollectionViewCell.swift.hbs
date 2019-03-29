@@ -30,17 +30,10 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement
 
     override func bind(data: [TreeElement]) {
         for (uid, _) in self.viewIdMap {
-            let view = self.viewConfig?.getView(uid)
-            print(view)
-            // let propertyMap = data.getProperty(name)
-            // propertyMapは例えば { text: "hoge", backgroundColor: UIColor(xxx) } とか
-            // (view as UIView).assign(propertyMap)
-            {{!--
-            // 別ファイルでextensinoを作成し、getPropertyを生やす
-            // assginを extensionでUIViewにはやして、viewにpropertyMapのプロパティが存在すれば、アサインする
-            // ただし、viewはNSObjectである必要がある。理由は以下参照:
-            // https://stackoverflow.com/questions/35398909/how-to-check-if-an-object-has-a-stored-property
-            --}}            
+            guard
+                let view = self.viewConfig?.getView(uid),
+                let props = data.getProperty(uid) else { continue }
+            props.assign(to: view)
         }
     }
 }
