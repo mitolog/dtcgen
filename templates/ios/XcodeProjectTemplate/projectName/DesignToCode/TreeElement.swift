@@ -33,7 +33,7 @@ extension TreeElement {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try container.encode(uid, forKey: .uid)
         try container.encode(name, forKey: .name)
         try container.encode(elements, forKey: .elements)
@@ -78,6 +78,7 @@ extension TreeElement {
     }
 }
 
+// Codable related
 extension Array where Element == Tree.Element {
     init(data: Data) throws {
         self = try newJSONDecoder().decode(Tree.self, from: data)
@@ -122,12 +123,16 @@ fileprivate func newJSONEncoder() -> JSONEncoder {
 // Utility
 extension Array where Element == Tree.Element {
     /// lookup TreeElement that matches uid, and returns DtcProperties the element has
-    func getProperty(_ uid: String) -> DtcProperties? {
+    func getProperty(_ pathName: String, _ parentName: String? = nil) -> DtcProperties? {
         for element in self {
-            if element.uid == uid {
+            guard let name = element.name else { continue }
+            let currentName: String = parentName != nil ? parentName! + "." + name : name
+            if currentName == pathName {
                 return element.properties
             }
-            if let elements = element.elements, let props = elements.getProperty(uid) {
+            if
+                let elements = element.elements,
+                let props = elements.getProperty(pathName, currentName) {
                 return props
             }
         }

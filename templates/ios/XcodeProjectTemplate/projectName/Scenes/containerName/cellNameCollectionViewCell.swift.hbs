@@ -29,11 +29,30 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement
     }
 
     override func bind(data: [TreeElement]) {
-        for (uid, _) in self.viewIdMap {
+        for (uid, name) in self.viewIdMap {
+            let targetName = self.trimIfNeeded(name)
             guard
                 let view = self.viewConfig?.getView(uid),
-                let props = data.getProperty(uid) else { continue }
+                let props = data.getProperty(targetName) else { continue }
             props.assign(to: view)
         }
+    }
+}
+
+extension {{classPrefix}}CollectionViewCell {
+    func trimIfNeeded(_ name: String) -> String {
+
+        // you need to exclude dynamic classes itself.
+        // because all `data`'s treeElements are belongings of the dynamic classes,
+        // so both `name` and `name within the data` will never match on `getProperty(name)`.
+        // that's why I need to exclude here.
+        var targetName = name
+        if let matchedRange = name.range(of: "^{{treeName}}", options: .regularExpression) {
+            let removed = targetName.replacingCharacters(in: matchedRange, with: "")
+            targetName = removed.prefix(1) == "."
+                ? String(removed[removed.index(after: removed.startIndex)..<removed.endIndex])
+                : removed
+        }
+        return targetName
     }
 }

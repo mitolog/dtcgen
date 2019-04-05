@@ -18,14 +18,17 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
     func adopt(name: String, on onView: UIView) -> [String: String] {
 
+        // [uid: name]
         var viewIdMap: [String:String] = [:]
         let isBaseView = name == Dtc.config.baseViewComponentName
         self.configureViews()
+
+        // do not place code below upper than configureViews()
         if (isBaseView) {
             self.bindDummyData()
         }
         self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIdMap)
-        self.adopt(on: onView, targets: Array(viewIdMap.keys), isExceptions: isBaseView)    // <- should be after configureViews
+        self.adopt(on: onView, viewIdMap: viewIdMap, isExceptions: isBaseView)
         return viewIdMap;
     }
 
@@ -113,39 +116,54 @@ class ViewConfigImpl : NSObject, ViewConfig {
     }
 
     /// recursively get all uids that treeElement.elements includes
-    private func getAllUid(treeElement: TreeElement, uidMap: inout [String: String]) {
+    private func getAllUid(treeElement: TreeElement, uidMap: inout [String: String], parentName: String? = nil) {
         guard let uid = treeElement.uid, let name = treeElement.name else { abort() }
-        uidMap[uid] = name
+        let currentElementName: String = parentName != nil ? parentName! + "." + name : name
+        uidMap[uid] = currentElementName
 
         guard let elements = treeElement.elements else { return }
         if elements.count <= 0 { return }
 
         for aElement in elements {
-            self.getAllUid(treeElement: aElement, uidMap: &uidMap)
+            self.getAllUid(treeElement: aElement, uidMap: &uidMap, parentName: currentElementName)
         }
     }
 
-    private func adopt(on onView: UIView, targets: [String], isExceptions: Bool) {
+    private func adopt(on onView: UIView, viewIdMap: [String: String], isExceptions: Bool) {
 
+        let viewIds = Array(viewIdMap.keys)
         for (key, view) in self.views {
-            let isMatched = targets.contains(key)
+            let isMatched = viewIds.contains(key)
             let isBase = isExceptions && !isMatched
             let isView = !isExceptions && isMatched
             if(isBase || isView) {
-                self.add(view, onView)
+                if let name = viewIdMap[key], let dynamicClasses = self.dynamicClasses,
+                    dynamicClasses.contains(name) {
+                    continue
+                }
+                self.add(view, onView, viewIdMap)
             }
         }
-        self.layoutViews(onView, viewIds: targets, isExceptions: isExceptions)
+        self.layoutViews(onView, viewIdMap: viewIdMap, isExceptions: isExceptions)
     }
 
-    private func layoutViews(_ onView: UIView, viewIds: [String], isExceptions: Bool) {
+    private func layoutViews(_ onView: UIView, viewIdMap: [String: String], isExceptions: Bool) {
         var anchors: [NSLayoutConstraint] = []
 
+        let viewIds = Array(viewIdMap.keys)
         for (key, view) in self.views {
             let isMatched = viewIds.contains(key)
             let isBase = isExceptions && !isMatched
             let isView = !isExceptions && isMatched
             if(!isBase && !isView) { continue }
+
+            if isMatched {
+                if let viewName = viewIdMap[key],
+                    let dynamicClasses = self.dynamicClasses,
+                    dynamicClasses.contains(viewName) {
+                    continue
+                }
+            }
 
             let superview = view.superview ?? onView
             guard let constraint = constraints[key] else { continue }
@@ -172,18 +190,40 @@ class ViewConfigImpl : NSObject, ViewConfig {
         NSLayoutConstraint.activate(anchors)
     }
 
-    private func add(_ targetView: UIView, _ onView: UIView) {
-        var hasParentView = false
-        for (key, view) in self.views {
-            guard let parentId = targetView.parentId else { continue }
-            if parentId == key {
-                view.addSubview(targetView)
-                hasParentView = true
-                break
-            }
+    private func add(_ targetView: UIView,
+                     _ onView: UIView,
+                     _ viewIdNameMap: [String: String]) {
+        /* ここのviewsには、viewControllerに紐づくすべてのviewが入るので、
+         * parentId == key とすると、add対象がcellの場合、cellに貼り付けるのではなく
+         * 貼り付けられていないparent viewに貼り付けてしまうので、だめです。
+         */
+        // If there are no parent, just add to base `onView`
+        guard
+            let parentId = targetView.parentId,
+            let parentView = self.views[parentId] else {
+                onView.addSubview(targetView)
+                return
         }
-        if !hasParentView {
+
+        /* here certified `parentView` exists */
+
+        // If there are no entry of dynamicClasses on current adoptation,
+        // just add onto `parentView` we attained above
+        guard
+            let parentName = viewIdNameMap[parentId],
+            let dynamicClasses = self.dynamicClasses else {
+                parentView.addSubview(targetView)
+                return
+        }
+
+        // If there exist dynamicClasses on current adoptation,
+        // add it onto base `onView`, not to `parentView`,
+        // which is dynamicClass(i.e. "cell" class)
+        if dynamicClasses.contains(parentName) {
             onView.addSubview(targetView)
+            return
         }
+
+        parentView.addSubview(targetView)
     }
 }
