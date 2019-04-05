@@ -108,10 +108,10 @@ class ViewProps: DtcProperties {
 
     func assign(to view: UIView) {
         guard let view = view as? Container else { return }
-        do {
-            let viewPath: ReferenceWritableKeyPath<Container, String> = \Container.name
-            view[keyPath: viewPath] = self.name
-        }
+
+        view.isHidden = !isVisible
+        view.containerColor = backgroundColor?.uiColor ?? UIColor.clear
+        view.cornerRadius = radius ?? 0
     }
 }
 
@@ -125,6 +125,8 @@ class ButtonProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
 
     // Button props
     var fontName: String?
@@ -133,6 +135,14 @@ class ButtonProps: DtcProperties {
     var hasIcon: Bool?
 
     func assign(to view: UIView) {
+        guard let view = view as? UIButton else { return }
+
+        view.isHidden = !isVisible
+        view.backgroundColor = backgroundColor?.uiColor
+        view.layer.cornerRadius = radius ?? 0
+
+        view.setTitleColor(fontColor?.uiColor, for: .normal)
+        // todo: font related assign
     }
 
 }
@@ -147,16 +157,27 @@ class TextViewProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
 
     // TextView props
     var fontName: String
     var fontSize: Int
     var fontColor: Color
-    var backgroundColor: Color?
     var text: String?
     var alignment: TextAlignment?
 
     func assign(to view: UIView) {
+        guard let view = view as? TextView else { return }
+
+        view.isHidden = !isVisible
+        view.backgroundColor = backgroundColor?.uiColor
+        view.layer.cornerRadius = radius ?? 0
+
+        view.text = text
+        view.font = UIFont(name: fontName, size: CGFloat(fontSize))
+        view.textColor = fontColor.uiColor
+        // todo: alignment
     }
 
 }
@@ -182,6 +203,7 @@ class TextInputProps: DtcProperties {
     var alignment: TextAlignment?
 
     func assign(to view: UIView) {
+        // todo: assignment
     }
 
 }
@@ -196,11 +218,34 @@ class ImageProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
 
     // Image props
     var imageName: String?
 
+    func getAssetPath() -> String? {
+        guard var imageName = imageName else { return nil }
+
+        if let pngRng = imageName.range(of: ".(png|jpg|jpeg|pdf|PNG|JPG|JPEG|PDF)$", options: .regularExpression) {
+            imageName.replaceSubrange(pngRng, with: "")
+        }
+        if imageName.range(of: "^DtcGenerated/", options: .regularExpression) == nil {
+            imageName = "DtcGenerated/" + imageName
+        }
+        return imageName
+    }
+
     func assign(to view: UIView) {
+        guard let view = view as? UIImageView else { return }
+
+        view.isHidden = !isVisible
+        view.backgroundColor = backgroundColor?.uiColor
+        view.layer.cornerRadius = radius ?? 0
+
+        if let imageName = self.getAssetPath() {
+            view.image = UIImage(named: imageName)
+        }
     }
 }
 

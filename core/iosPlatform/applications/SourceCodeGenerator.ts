@@ -12,6 +12,7 @@ import {
   ContainerConfig,
   DataVariable,
   ListSection,
+  Size,
 } from '../entities/ContainerConfig';
 import { isString } from 'util';
 import { isContainer } from '../../typeGuards';
@@ -199,6 +200,12 @@ export class SourceCodeGenerator {
     const allLists: View[] = views.filter(
       view => view.type === ElementType.List,
     );
+    let targetList: View = null;
+    if (allLists && allLists.length > 0) {
+      // todo: suppose only 1 list exists on 1 artboard.
+      targetList = allLists[0];
+    }
+
     const dynamicClasses: string[] = [];
 
     /// cell preparation from here ///
@@ -232,12 +239,15 @@ export class SourceCodeGenerator {
     for (const key of Object.keys(uniqueCells)) {
       let view: View = uniqueCells[key];
       const classPrefix: string = key.toUpperCamelCase(' ').replace('Cell', '');
+      const cellSize: Size = targetList
+        ? { width: targetList.rect.width, height: view.rect.height }
+        : { width: view.rect.width, height: view.rect.height };
       if (!view || !classPrefix) continue;
       let listSection: ListSection = {
         classPrefix: classPrefix,
         sectionName: classPrefix + 'Section',
         variableName: pluralize(classPrefix).toLowerCamelCase(),
-        size: { width: view.rect.width, height: view.rect.height },
+        size: cellSize,
         insets: { top: 0, left: 0, bottom: 0, right: 0 },
       };
       listSections.push(listSection);
@@ -247,14 +257,13 @@ export class SourceCodeGenerator {
     /// set content from here ///
     containerConfig.container = container;
     containerConfig.views = views;
-    if (allLists && allLists.length > 0) {
-      // todo: suppose only 1 list exists on 1 artboard.
-      containerConfig.listName = allLists[0].name.toUpperCamelCase(' ');
-      containerConfig.listViewId = allLists[0].id;
+    if (targetList) {
+      containerConfig.listName = targetList.name.toUpperCamelCase(' ');
+      containerConfig.listViewId = targetList.id;
+      containerConfig.listSections = listSections;
     }
     containerConfig.dynamicClasses = [...cellClassNames]; // spread syntax
     containerConfig.dataVariables = [...cellVariables];
-    containerConfig.listSections = listSections;
     /// set content to here ///
 
     return containerConfig;
