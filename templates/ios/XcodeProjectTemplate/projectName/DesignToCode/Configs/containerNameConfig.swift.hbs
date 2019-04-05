@@ -133,6 +133,10 @@ extension {{container.name}}Config: UICollectionViewDataSource {
         {{/listSections}}
     }
 
+   func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return {{length listSections}}
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         var itemCount: Int = 0
         switch section {
