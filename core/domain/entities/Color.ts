@@ -2,7 +2,7 @@ import { ColorComponents } from './ColorComponents';
 
 export class Color {
   fill: ColorComponents;
-  name?: number;
+  name?: string;
 
   constructor(color: Color) {
     this.fill = color.fill;

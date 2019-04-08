@@ -1,63 +1,79 @@
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
 import { SymbolParser } from './SymbolParser';
-import { View } from '../../../domain/entities/View';
-import { TextView } from '../../../domain/entities/TextView';
-import { Image } from '../../../domain/entities/Image';
-import { ElementType } from '../../../domain/entities/ElementType';
 import { OutputType } from '../../../utilities/PathManager';
+
+import {
+  Color,
+  ColorComponents,
+  View,
+  TextView,
+  Image,
+  ElementType,
+} from '../../../domain/Entities';
 
 dotenv.config();
 if (dotenv.error) {
   throw dotenv.error;
 }
 
-enum PrimitiveType {
+enum AutoDetectType {
   Text = 'text',
   Image = 'image',
   View = 'view',
+  Cell = 'Cell',
 }
 
 export class AutoParser extends SymbolParser {
+  // `node` shuold be symbol's node (not artboard's).
+  // `view` should have been already assigned takeOver data.
   parse(node: any, view: View) {
-    const type: PrimitiveType = this.distinctType(node);
+    const type: AutoDetectType | null = this.distinctType(node, view);
     if (!type) return;
     switch (type) {
-      case PrimitiveType.Text:
+      case AutoDetectType.Text:
         view.type = ElementType.TextView;
         this.parseText(node, <TextView>view);
         break;
-      case PrimitiveType.Image:
+      case AutoDetectType.Image:
         view.type = ElementType.Image;
         this.parseImage(node, <Image>view);
         break;
-      case PrimitiveType.View:
+      case AutoDetectType.View:
         this.parseBackground(node, view);
+        break;
+      case AutoDetectType.Cell:
+        view.type = ElementType.Cell;
         break;
     }
   }
 
-  distinctType(node: any): PrimitiveType {
+  distinctType(node: any, view: View): AutoDetectType | null {
     const className = _.get(node, '_class');
     if (!className) return null;
 
-    let type: PrimitiveType;
+    let type: AutoDetectType;
     switch (className) {
       case 'text':
-        type = PrimitiveType.Text;
+        type = AutoDetectType.Text;
         break;
       case 'rectangle':
         const fillType = _.get(node, 'style.fills[0].fillType');
         type =
-          fillType && fillType === 4 ? PrimitiveType.Image : PrimitiveType.View;
+          fillType && fillType === 4
+            ? AutoDetectType.Image
+            : AutoDetectType.View;
         break;
       default:
-        type = PrimitiveType.View;
+        // distinct with view name on artboard
+        const typeByView = this.typeByViewName(view);
+        type = typeByView || AutoDetectType.View;
+        // todo: 名前で検出したtypeごとに自動パースしたほうがよさげでは。symbol配下の要素まで命名規則が決められてしまうと
+        // - 制約事項が多くてデザイナのタスクが増える
+        // - 要素が多くなった場合に、大量に命名規則が発生してしまう、すると stc.config.jsonで定義すべきものも同時に増えてとても大変
+
         break;
     }
-
     return type;
   }
 
@@ -120,6 +136,22 @@ export class AutoParser extends SymbolParser {
   }
 
   //   /* Private methods below */
+
+  private typeByViewName(view: View): AutoDetectType | null {
+    if (!view.name) return null;
+    let type: AutoDetectType | null = null;
+    // todo: auto detect keywords shuold be placed somewhere around
+    // should be name on artboard
+    const autoDetectKeywords: string[] = ['Cell'];
+    const matches: string[] = autoDetectKeywords.filter(keyword => {
+      const results = view.name.match(new RegExp(keyword, 'g'));
+      return results && results.length > 0 ? true : false;
+    });
+    if (matches && matches.length > 0) {
+      type = AutoDetectType[matches[matches.length - 1]];
+    }
+    return type;
+  }
 
   private parseText(node: any, view: TextView) {
     // prettier-ignore

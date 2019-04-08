@@ -5,7 +5,7 @@ export { ColorComponents } from './entities/ColorComponents';
 export { Constraints } from './entities/Constraints';
 export { Container } from './entities/Container';
 export { DesignToolType } from './entities/DesignToolType';
-export { ElementType } from './entities/ElementType';
+export { ElementType, ElementTypes } from './entities/ElementType';
 export { Image } from './entities/Image';
 export { OSType } from './entities/OSType';
 export { Rect } from './entities/Rect';
