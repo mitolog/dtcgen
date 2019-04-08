@@ -3,11 +3,48 @@ import UIKit
 
 class {{container.name}}Config: ViewConfigImpl {
 
+    {{#has "dataVariables"}}
+    {{#dataVariables}}
+    var {{variableName}}: [[TreeElement]]?
+    {{/dataVariables}}
+
+    private func loadDummyData() {
+        {{#dataVariables}}
+        do {
+            let data = try getJSONData("{{variableName}}")
+            let props = try JSONDecoder().decode([[TreeElement]].self, from:data!)
+            self.{{variableName}} = props
+        } catch let error {
+            print(error)
+        }
+        
+        {{/dataVariables}}
+    }
+
+    override func bindDummyData() {
+        self.loadDummyData()
+
+        {{#has "listSections"}}
+        if let view = self.getView("{{listViewId}}") as? UICollectionView {
+            view.dataSource = self
+        }
+        {{/has}}
+    }
+    {{/has}}
+
     override func configureViews() {
         self.views = [:]
         self.constraints = [:]
+        self.treeElement = self.getTreeElement(for: "{{container.name}}")
+        {{#has "dynamicClasses"}}
+        self.dynamicClasses = [
+            {{#dynamicClasses}}
+            "{{.}}",
+            {{/dynamicClasses}}
+        ]
+        {{/has}}
         var view: UIView? = nil
-        
+
         {{#views}}
         {{#eq type 'View'}}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
@@ -46,6 +83,27 @@ class {{container.name}}Config: ViewConfigImpl {
         view!.contentMode = .scaleAspectFill
         view!.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/eq}}
+        {{#eq type 'List'}}
+        let collectionView: UICollectionView = {
+            let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+            layout.scrollDirection = .vertical
+            layout.minimumInteritemSpacing = 0
+            layout.minimumLineSpacing = 0
+
+            let collectionView = UICollectionView( frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), collectionViewLayout: layout)
+            collectionView.backgroundColor = UIColor.white
+            {{#each ../listSections}}
+            collectionView.register({{classPrefix}}CollectionViewCell.self, forCellWithReuseIdentifier: "{{classPrefix}}CollectionViewCell")
+            {{/each}}
+            collectionView.delegate = self
+            return collectionView
+        }()
+        view = collectionView
+        {{/eq}}
+        {{#eq type 'Cell'}}
+        view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! Container).name = "{{name}}"
+        {{/eq}}
         {{#if parentId }}
         view!.parentId = "{{parentId}}"
         {{/if}}
@@ -65,3 +123,87 @@ class {{container.name}}Config: ViewConfigImpl {
         {{/views}}
     }
 }
+
+{{#has "listSections"}}
+extension {{container.name}}Config: UICollectionViewDataSource {
+
+    enum {{listName}}Section: Int {
+        {{#listSections}}
+        case {{sectionName}}
+        {{/listSections}}
+    }
+
+   func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return {{length listSections}}
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        var itemCount: Int = 0
+        switch section {
+        {{#listSections}}
+        case {{../listName}}Section.{{sectionName}}.rawValue:
+            guard let {{variableName}} = self.{{variableName}} else { break }
+            itemCount = {{variableName}}.count
+        {{/listSections}}
+        default:
+            break
+        }
+        return itemCount        
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        var cell: UICollectionViewCell = UICollectionViewCell()
+        switch indexPath.section {
+        {{#listSections}}
+        case {{../listName}}Section.{{sectionName}}.rawValue:
+            guard let {{variableName}} = self.{{variableName}} else { break }
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: "{{classPrefix}}CollectionViewCell", for: indexPath)
+            (cell as! {{classPrefix}}CollectionViewCell).bind(data: {{variableName}}[indexPath.row])
+        {{/listSections}}
+        default:
+            break
+        }
+        return cell
+    }
+}
+
+extension {{container.name}}Config: UICollectionViewDelegateFlowLayout {
+    // Set size for each cell
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        var size: CGSize = CGSize.zero
+        switch indexPath.section {
+        {{#listSections}}
+        case {{../listName}}Section.{{sectionName}}.rawValue:
+            size = CGSize(width: {{size.width}}, height: {{size.height}})
+        {{/listSections}}
+        default:
+            break
+        }
+        return size
+    }
+    
+    // セクションごとのインセット
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        var insets: UIEdgeInsets = UIEdgeInsets.zero
+        switch section {
+        {{#listSections}}
+        case {{../listName}}Section.{{sectionName}}.rawValue:
+            insets = UIEdgeInsets(top: {{insets.top}}, left: {{insets.left}}, bottom: {{insets.bottom}}, right: {{insets.right}})
+        {{/listSections}}
+        default:
+            break
+        }
+        return insets
+    }
+
+    // セクションごとの行間(縦)のマージン
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
+    // セクションごとのアイテム間(横)のマージン
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+}
+{{/has}}

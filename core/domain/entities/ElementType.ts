@@ -6,6 +6,8 @@ export enum ElementType {
   TextInput = 'TextInput',
   Image = 'Image',
   Card = 'Card',
+  List = 'List',
+  Cell = 'Cell',
 }
 export const ElementTypes: string[] = [
   ElementType[0],
@@ -15,4 +17,6 @@ export const ElementTypes: string[] = [
   ElementType[4],
   ElementType[5],
   ElementType[6],
+  ElementType[7],
+  ElementType[8],
 ];

@@ -1,0 +1,58 @@
+import Foundation
+import UIKit
+
+class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement]> {
+
+    var viewConfig: ViewConfig?
+    var viewIdMap: [String: String] = [:]
+
+    // called when the view is instantiated via code, not interface builder.
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.viewConfig = Dtc.config.{{container.name}}
+        self.viewIdMap = viewConfig!.adopt(name:"{{treeName}}", on: self.contentView)
+    }
+
+    // called via interface builder, but not initialize IBOutlets, IBActions
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+
+    // called after all the nib objects initialized
+    override func awakeFromNib() {
+        super.awakeFromNib()
+    }
+
+    // called after designable object is instantiated by Interface Builder.
+    override func prepareForInterfaceBuilder() {
+        super.prepareForInterfaceBuilder()
+    }
+
+    override func bind(data: [TreeElement]) {
+        for (uid, name) in self.viewIdMap {
+            let targetName = self.trimIfNeeded(name)
+            guard
+                let view = self.viewConfig?.getView(uid),
+                let props = data.getProperty(targetName) else { continue }
+            props.assign(to: view)
+        }
+    }
+}
+
+extension {{classPrefix}}CollectionViewCell {
+    func trimIfNeeded(_ name: String) -> String {
+
+        // you need to exclude dynamic classes itself.
+        // because all `data`'s treeElements are belongings of the dynamic classes,
+        // so both `name` and `name within the data` will never match on `getProperty(name)`.
+        // that's why I need to exclude here.
+        var targetName = name
+        if let matchedRange = name.range(of: "^{{treeName}}", options: .regularExpression) {
+            let removed = targetName.replacingCharacters(in: matchedRange, with: "")
+            targetName = removed.prefix(1) == "."
+                ? String(removed[removed.index(after: removed.startIndex)..<removed.endIndex])
+                : removed
+        }
+        return targetName
+    }
+}

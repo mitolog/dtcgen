@@ -4,9 +4,8 @@ import * as path from 'path';
 import { OSType } from '../../domain/entities/OSType';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
-import { ElementType } from '../../domain/entities/ElementType';
 import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
-import { TreeElement, View } from '../../domain/Entities';
+import { SourceCodeGenerator } from './SourceCodeGenerator';
 
 dotenv.config();
 if (dotenv.error) {
@@ -18,19 +17,14 @@ class XcAssetJsonPaths {
   last: string;
 }
 
-class DesignToCodeTemplatePaths {
-  containerNameConfig: string;
-  designToCodeGenerated: string;
-  containerNameViewController: string;
-  viewController: string;
-}
-
 export class IOSProjectGenerator {
   private pathManager: PathManager;
   private projectTemplateRootDir: string;
+  private templateHelpers: HandlebarsHelpers;
 
   constructor(outputDir?: string) {
     this.pathManager = new PathManager(outputDir);
+    this.templateHelpers = new HandlebarsHelpers(this.pathManager);
     const templatePath = path.isAbsolute(process.env.TEMPLATE_DIR)
       ? process.env.TEMPLATE_DIR
       : path.resolve(process.cwd(), process.env.TEMPLATE_DIR);
@@ -63,7 +57,7 @@ export class IOSProjectGenerator {
       'XcodeProject',
     );
 
-    // remove all files first
+    // remove all files on destination directory first
     fs.removeSync(templateDestDir);
 
     // copy directory to geenerated
@@ -75,14 +69,14 @@ export class IOSProjectGenerator {
     const projectNameData = { projectName: trimedProjectName };
 
     // deal with project.yml
-    this.searchAndAdoptTemplate(
+    this.templateHelpers.searchAndAdoptTemplate(
       templateDestDir,
       `project\.yml\.hbs`,
       projectNameData,
     );
 
     // deal with *Tests directories
-    this.searchAndAdoptTemplate(
+    this.templateHelpers.searchAndAdoptTemplate(
       templateDestDir,
       'Tests.*hbs$',
       projectNameData,
@@ -92,7 +86,10 @@ export class IOSProjectGenerator {
     this.generateAssets(templateDestDir);
 
     // deal with sourcecodes
-    this.generateSourceCodes(templateDestDir);
+    let sourceCodeGenerator = new SourceCodeGenerator(
+      this.pathManager.outputDir,
+    );
+    sourceCodeGenerator.generateSourceCodes(templateDestDir);
   }
 
   /**
@@ -156,37 +153,6 @@ export class IOSProjectGenerator {
         const newFile = path.join(directory, newFileName);
         fs.moveSync(origFile, newFile, { overwrite: true });
       });
-  }
-
-  /**
-   * lookup deeper from `searchDir` and check if file or directory exists
-   * matched to `regExpStr`. then adopt `data`.
-   * If exists, remove matched files, then create new one sliced last extension.
-   * @param searchDir
-   * @param regExpStr
-   * @param data
-   */
-  private searchAndAdoptTemplate(
-    searchDir: string,
-    regExpStr: string,
-    data: Object,
-  ): void {
-    const templatePaths = this.pathManager.searchDirsOrFiles(
-      searchDir,
-      regExpStr,
-      true,
-    );
-    if (!templatePaths || templatePaths.length <= 0) return;
-
-    templatePaths.forEach(filePath => {
-      const template = this.compiledTemplate(filePath);
-      const output = template(data);
-      const sliceCnt = path.parse(filePath).ext.length;
-      const newPath = filePath.slice(0, -sliceCnt);
-
-      fs.removeSync(filePath);
-      fs.writeFileSync(newPath, output);
-    });
   }
 
   private generateAssets(searchDir: string): void {
@@ -262,7 +228,9 @@ export class IOSProjectGenerator {
         dirname/
         dirname/Contents.json (namespace記載のやつ)
     */
-    const lastJsonTemplate = this.compiledTemplate(templatePaths.last);
+    const lastJsonTemplate = this.templateHelpers.compiledTemplate(
+      templatePaths.last,
+    );
 
     /* deal with directory pathes below */
     if (PathManager.isDir(originPath)) {
@@ -302,181 +270,6 @@ export class IOSProjectGenerator {
     fs.copyFileSync(originPath, path.join(imageSetDir, parsed.base));
   }
 
-  private generateSourceCodes(searchDir: string) {
-    const metadataJson = this.getJson(OutputType.metadata);
-    const treeJson = this.getJson(OutputType.tree);
-
-    // Prepare needed pathes
-    const templatePaths = new DesignToCodeTemplatePaths();
-
-    let tmpRegExpStr = `^containerNameConfig\.swift\.hbs$`;
-    let tmpPaths = this.pathManager.searchDirsOrFiles(
-      searchDir,
-      tmpRegExpStr,
-      true,
-    );
-    if (!tmpPaths || tmpPaths.length <= 0) {
-      throw new Error(`${tmpRegExpStr} is not found`);
-    }
-    templatePaths.containerNameConfig = tmpPaths[0];
-
-    tmpRegExpStr = `^DesignToCode\.generated\.swift\.hbs$`;
-    tmpPaths = this.pathManager.searchDirsOrFiles(
-      searchDir,
-      tmpRegExpStr,
-      true,
-    );
-    if (!tmpPaths || tmpPaths.length <= 0) {
-      throw new Error(`${tmpRegExpStr} is not found`);
-    }
-    templatePaths.designToCodeGenerated = tmpPaths[0];
-
-    tmpRegExpStr = `^containerNameViewController\.swift\.hbs$`;
-    tmpPaths = this.pathManager.searchDirsOrFiles(
-      searchDir,
-      tmpRegExpStr,
-      true,
-    );
-    if (!tmpPaths || tmpPaths.length <= 0) {
-      throw new Error(`${tmpRegExpStr} is not found`);
-    }
-    templatePaths.containerNameViewController = tmpPaths[0];
-
-    tmpRegExpStr = `^viewController\.swift\.hbs$`;
-    tmpPaths = this.pathManager.searchDirsOrFiles(
-      searchDir,
-      tmpRegExpStr,
-      true,
-    );
-    if (!tmpPaths || tmpPaths.length <= 0) {
-      throw new Error(`${tmpRegExpStr} is not found`);
-    }
-    templatePaths.viewController = tmpPaths[0];
-
-    const containers: any[] = metadataJson.filter(element => {
-      return (
-        element.id &&
-        element.type &&
-        element.type === <string>ElementType.Container
-      );
-    });
-
-    // iterate containers and adopt templates
-    let outputs: any[] = [];
-    let containerNames: Object[] = [];
-    for (const container of containers) {
-      const viewIds: [string?] = [];
-      const views: [View?] = [];
-
-      // lookup views' uids belonging to the container
-      for (const treeElement of treeJson) {
-        if (treeElement.uid === container.id) {
-          this.viewIdsForContainer(treeElement.elements, viewIds);
-          break;
-        }
-      }
-      // gather views that matches uids
-      for (const view of metadataJson) {
-        for (const viewId of viewIds) {
-          if (viewId === view.id) {
-            views.push(view);
-            break;
-          }
-        }
-      }
-
-      let containerObj = {
-        container: container,
-        views: views,
-      };
-
-      // viewConfigs
-      const configTemplate = this.compiledTemplate(
-        templatePaths.containerNameConfig,
-      );
-      const configOutput = configTemplate(containerObj);
-      const configParsed = path.parse(templatePaths.containerNameConfig);
-      const configName = container.name + 'Config.swift';
-      const configOutputPath = path.join(configParsed.dir, configName);
-
-      outputs.push({ filePath: configOutputPath, content: configOutput });
-
-      // viewControllers
-      const vcTemplate = this.compiledTemplate(
-        templatePaths.containerNameViewController,
-      );
-      const vcOutput = vcTemplate(containerObj);
-      const vcParsed = path.parse(templatePaths.containerNameViewController);
-      const vcName = container.name + 'ViewController.swift';
-      const vcOutputPath = path.join(
-        vcParsed.dir,
-        '../',
-        container.name,
-        vcName,
-      );
-
-      outputs.push({ filePath: vcOutputPath, content: vcOutput });
-
-      // for viewController.swift.hbs and
-      containerNames.push({ name: container.name });
-    }
-
-    // generate iterated files
-    for (const output of outputs) {
-      fs.ensureFileSync(output.filePath);
-      fs.writeFileSync(output.filePath, output.content);
-    }
-
-    // generate base view controller
-    const viewControllerNames = containerNames.map(obj => {
-      return { name: obj['name'] + 'ViewController' };
-    });
-    this.searchAndAdoptTemplate(
-      path.parse(templatePaths.viewController).dir,
-      `^viewController\.swift\.hbs$`,
-      { names: viewControllerNames },
-    );
-
-    // generate DesignToCode
-    this.searchAndAdoptTemplate(
-      path.parse(templatePaths.designToCodeGenerated).dir,
-      `^DesignToCode\.generated\.swift\.hbs$`,
-      { names: containerNames, tree: treeJson },
-    );
-
-    // remove templates itself
-    for (const key of Object.keys(templatePaths)) {
-      const templatePath = templatePaths[key];
-      if (key === 'containerNameViewController') {
-        // remove `containerName` directory
-        fs.removeSync(path.join(templatePath, '../'));
-      } else {
-        fs.removeSync(templatePath);
-      }
-    }
-  }
-
-  private viewIdsForContainer(treeElements: [TreeElement?], viewIds: [any?]) {
-    for (const aTreeElement of treeElements) {
-      viewIds.push(aTreeElement.uid);
-      if (aTreeElement.elements && aTreeElement.elements.length > 0) {
-        this.viewIdsForContainer(aTreeElement.elements, viewIds);
-      }
-    }
-  }
-
-  private getJson(outputType: OutputType): any {
-    const metadataJsonPath = this.pathManager.getOutputPath(outputType);
-    if (!metadataJsonPath) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
-    }
-    const json: any[] = JSON.parse(this.pathManager.read(metadataJsonPath));
-    if (!json) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
-    }
-    return json;
-  }
-
   private getAssetJsonTemplatePaths(): XcAssetJsonPaths {
     const assetsDir = this.pathManager.searchDirsOrFiles(
       this.projectTemplateRootDir,
@@ -502,13 +295,5 @@ export class IOSProjectGenerator {
     templatePaths.intermediate = interMediateJsonPath;
     templatePaths.last = lastJsonPath;
     return templatePaths;
-  }
-
-  private compiledTemplate(templatePath: string): any {
-    const templateStr = this.pathManager.read(templatePath);
-    if (!templateStr) {
-      throw new Error("couldn't get template: " + templatePath);
-    }
-    return HandlebarsHelpers.handlebars().compile(String(templateStr));
   }
 }

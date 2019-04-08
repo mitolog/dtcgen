@@ -7,7 +7,7 @@ class Container: UIView {
             backgroundColor = containerColor
         }
     }
-    @IBInspectable var name: String?
+    @IBInspectable var name: String = ""
     @IBInspectable var cornerRadius: CGFloat = 0
     @IBInspectable var shadowRadius: CGFloat = 0
     @IBInspectable var shadowColor: UIColor = .clear
