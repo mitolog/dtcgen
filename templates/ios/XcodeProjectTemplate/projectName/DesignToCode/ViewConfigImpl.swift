@@ -40,23 +40,6 @@ class ViewConfigImpl : NSObject, ViewConfig {
         // shuold be filled within subclasses
     }
 
-    /// recursively search and retrieve first matched view corresponding `name` on `treeElement`.
-    /// but it can be multiple views which has same name. so need to be considered.
-    func getView(name: String, treeElement: TreeElement?) -> UIView? {
-        guard
-            let treeElement = treeElement,
-            let uid = treeElement.uid else { return nil }
-        if treeElement.name == name {
-            return getView(uid)
-        }
-        guard let elements = treeElement.elements else { return nil }
-        var targetView: UIView?
-        for element in elements {
-            targetView = self.getView(name: name, treeElement: element)
-        }
-        return targetView
-    }
-
     func getView(_ viewId: String) -> UIView? {
         return self.views[viewId]
     }
@@ -88,8 +71,9 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
     // If the `name` parameter is not base view's, only first matched treeElement is used.
     // Otherwise, search and collect all treeElements' uids(and names) that matches.
-    private func searchViewIds(for name: String, treeElement: TreeElement?, outputs: inout [String: String]) {
-
+    private func searchViewIds(for name: String,
+                               treeElement: TreeElement?,
+                               outputs: inout [String: String]) {
         guard
             let treeElement = treeElement,
             let treeElements = treeElement.elements else { return }
@@ -131,72 +115,98 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
     private func adopt(on onView: UIView, viewIdMap: [String: String], isExceptions: Bool) {
 
-        let viewIds = Array(viewIdMap.keys)
-        for (key, view) in self.views {
-            let isMatched = viewIds.contains(key)
-            let isBase = isExceptions && !isMatched
-            let isView = !isExceptions && isMatched
-            if(isBase || isView) {
-                if let name = viewIdMap[key], let dynamicClasses = self.dynamicClasses,
-                    dynamicClasses.contains(name) {
-                    continue
-                }
-                self.add(view, onView, viewIdMap)
-            }
+        // add views onto super view BEFORE layouts, otherwise it crashes
+        self.lookupViews(onView,
+                         viewIdMap: viewIdMap,
+                         isExceptions: isExceptions) { [weak self] (view, uid) in
+            guard let weakSelf = self else { return }
+            weakSelf.add(view, onView, viewIdMap)
         }
-        self.layoutViews(onView, viewIdMap: viewIdMap, isExceptions: isExceptions)
+
+        // layout views
+        var anchors: [NSLayoutConstraint] = []
+        self.lookupViews(onView,
+                         viewIdMap: viewIdMap,
+                         isExceptions: isExceptions) { [weak self] (view, uid) in
+            guard let weakSelf = self else { return }
+            weakSelf.layoutViews(view, on: onView, uid: uid, anchors: &anchors)
+        }
+        NSLayoutConstraint.activate(anchors)
     }
 
-    private func layoutViews(_ onView: UIView, viewIdMap: [String: String], isExceptions: Bool) {
-        var anchors: [NSLayoutConstraint] = []
+    private func lookupViews(_ onView: UIView,
+                             viewIdMap: [String: String],
+                             isExceptions: Bool,
+                             found: (_ view: UIView, _ uid: String) -> Void) {
 
-        let viewIds = Array(viewIdMap.keys)
-        for (key, view) in self.views {
-            let isMatched = viewIds.contains(key)
+        /* 
+            Here we are aiming to retrieve view instances linked to each uid of viewIdMap.
+            So, originally we shuold do like this:
+
+            ```
+            for (uid, _) in viewIdMap {
+                if let view = self.views[uid] {
+                    /* some process here */
+                }
+            }
+            ```
+
+            but the problem is `viewIdMap` iteration CANNOT BE IN ORDER because it's dictionary, not an array.
+            So, we prepared uid array `uids` which is lined up in order, then do matching.
+            But if you do that, complexity becomes O(n). So, potencially we shuold make Ordered hash map like:
+            https://github.com/omochi/OrderedDictionary/tree/25c754ff4fd48942dbc43df90234eec8243b44b9
+        */
+
+        guard let treeElement = self.treeElement else { return }
+        var uids: [String] = []
+        treeElement.getUids(&uids)
+        for uid in uids {
+            let isMatched = viewIdMap[uid] != nil
             let isBase = isExceptions && !isMatched
             let isView = !isExceptions && isMatched
             if(!isBase && !isView) { continue }
 
-            if isMatched {
-                if let viewName = viewIdMap[key],
-                    let dynamicClasses = self.dynamicClasses,
-                    dynamicClasses.contains(viewName) {
-                    continue
-                }
+            if let viewName = viewIdMap[uid],
+                let dynamicClasses = self.dynamicClasses,
+                dynamicClasses.contains(viewName) {
+                continue
             }
 
-            let superview = view.superview ?? onView
-            guard let constraint = constraints[key] else { continue }
+            guard let view = self.views[uid] else { continue }
 
-            if let top = constraint.top {
-                anchors.append(view.topAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.topAnchor, constant: top))
-            }
-            if let right = constraint.right {
-                anchors.append(view.rightAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.rightAnchor, constant: right))
-            }
-            if let bottom = constraint.bottom {
-                anchors.append(view.bottomAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.bottomAnchor, constant: bottom))
-            }
-            if let left = constraint.left {
-                anchors.append(view.leftAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.leftAnchor, constant: left))
-            }
-            if let width = constraint.width {
-                anchors.append(view.widthAnchor.constraint(equalToConstant: width))
-            }
-            if let height = constraint.height {
-                anchors.append(view.heightAnchor.constraint(equalToConstant: height))
-            }
+            found(view, uid)
         }
-        NSLayoutConstraint.activate(anchors)
+    }
+
+    private func layoutViews(_ view: UIView,
+                             on onView: UIView,
+                             uid: String,
+                             anchors: inout [NSLayoutConstraint]) {
+        guard let constraint = self.constraints[uid] else { return }
+        let superview = view.superview ?? onView
+        if let top = constraint.top {
+            anchors.append(view.topAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.topAnchor, constant: top))
+        }
+        if let right = constraint.right {
+            anchors.append(view.rightAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.rightAnchor, constant: right))
+        }
+        if let bottom = constraint.bottom {
+            anchors.append(view.bottomAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.bottomAnchor, constant: bottom))
+        }
+        if let left = constraint.left {
+            anchors.append(view.leftAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.leftAnchor, constant: left))
+        }
+        if let width = constraint.width {
+            anchors.append(view.widthAnchor.constraint(equalToConstant: width))
+        }
+        if let height = constraint.height {
+            anchors.append(view.heightAnchor.constraint(equalToConstant: height))
+        }
     }
 
     private func add(_ targetView: UIView,
                      _ onView: UIView,
                      _ viewIdNameMap: [String: String]) {
-        /* ここのviewsには、viewControllerに紐づくすべてのviewが入るので、
-         * parentId == key とすると、add対象がcellの場合、cellに貼り付けるのではなく
-         * 貼り付けられていないparent viewに貼り付けてしまうので、だめです。
-         */
         // If there are no parent, just add to base `onView`
         guard
             let parentId = targetView.parentId,

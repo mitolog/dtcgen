@@ -76,6 +76,17 @@ extension TreeElement {
     func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
         return String(data: try self.jsonData(), encoding: encoding)
     }
+
+    func getUids(_ uids: inout [String]) {
+        if let uid = self.uid {
+            uids.append(uid)
+        }
+        if let elements = self.elements, !elements.isEmpty {
+            for element in elements {
+                element.getUids(&uids)
+            }
+        }
+    }
 }
 
 // Codable related
