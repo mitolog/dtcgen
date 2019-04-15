@@ -99,19 +99,15 @@ class ViewProps: DtcProperties {
     var id: String
     var name: String
     var rect: Rect
-
+    
     // View props
     var isVisible: Bool
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
-        guard let view = view as? Container else { return }
-
-        view.isHidden = !isVisible
-        view.containerColor = backgroundColor?.uiColor ?? UIColor.clear
-        view.cornerRadius = radius ?? 0
     }
 }
 
@@ -127,6 +123,7 @@ class ButtonProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     // Button props
     var fontName: String?
@@ -159,6 +156,7 @@ class TextViewProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     // TextView props
     var fontName: String
@@ -192,6 +190,7 @@ class TextInputProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     // TextInput props
     var fontName: String
@@ -220,6 +219,7 @@ class ImageProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     // Image props
     var imageName: String?
@@ -259,6 +259,7 @@ class CardProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     // Card props
     var imageName: String?
@@ -279,6 +280,7 @@ class ListProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
     }
@@ -294,6 +296,7 @@ class CellProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
     }

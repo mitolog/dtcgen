@@ -18,7 +18,7 @@ export class TextInputParser extends SymbolParser {
           this.parseInput(node, view, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, view, aLayer);
+          this.parseBackground(aLayer, view, node);
           break;
       }
     }
@@ -94,16 +94,5 @@ export class TextInputParser extends SymbolParser {
     view.fontSize = fontAttribute.attributes.size;
     const comps = new ColorComponents(<ColorComponents>colorAttribute);
     view.fontColor = new Color(<Color>{ fill: comps });
-  }
-
-  private parseBackground(node: any, view: TextInput, aLayer: any) {
-    view.radius = aLayer.fixedRadius;
-    const comps = new ColorComponents(<ColorComponents>(
-      aLayer.style.fills[0].color
-    ));
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
-    }
   }
 }

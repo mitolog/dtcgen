@@ -14,3 +14,11 @@ export { TextInput } from './entities/TextInput';
 export { TextView } from './entities/TextView';
 export { TreeElement } from './entities/TreeElement';
 export { View } from './entities/View';
+export { ColorFill, FillType, FillTypeValues } from './entities/ColorFill';
+export { Point } from './entities/Point';
+export {
+  Gradient,
+  GradientType,
+  GradientTypeValues,
+  GradientStop,
+} from './entities/Gradient';
