@@ -8,6 +8,8 @@ import {
   TreeElement,
   TextView,
   TextInput,
+  View,
+  ElementTypes,
 } from '../../domain/Entities';
 
 import { SketchView } from '../entities/SketchView';
@@ -37,7 +39,8 @@ export class SketchParser {
     const treeElement: TreeElement = new TreeElement(view);
     this.parseConstraint(node.resizingConstraint, view);
 
-    if (this.shouldExclude(node.name)) return;
+    this.assignToAbove(view, parentTree); // shuold be placed AHEAD of `shouldExclude`
+    if (this.shouldExclude(node.name, parentTree)) return;
 
     const keywords: string[] = this.config['extraction'].keywords;
     const matches: string[] = keywords.filter(keyword => {
@@ -70,6 +73,10 @@ export class SketchParser {
         const takeOverData = new TakeOverData(node);
         this.parseSymbol(takeOverData, parentTree, parentId);
       }
+    } else {
+      const parser = new AutoParser(this.sketch, this.config, this.outputDir);
+      parser.parse(node, view);
+      parentTree.addElement(treeElement);
     }
   }
 
@@ -86,15 +93,15 @@ export class SketchParser {
         break;
       case ElementType.TextView:
         parser = new TextViewParser(this.sketch, this.config);
-        parser.parse(node, <TextView>view);
+        parser.parse(node, <TextView>(<unknown>view));
         break;
       case ElementType.TextInput:
         parser = new TextInputParser(this.sketch, this.config);
-        parser.parse(node, <TextInput>view);
+        parser.parse(node, <TextInput>(<unknown>view));
         break;
       case ElementType.Image:
         parser = new ImageParser(this.sketch, this.config, this.outputDir);
-        parser.parse(node, <TextInput>view);
+        parser.parse(node, <TextInput>(<unknown>view));
         break;
       default:
         break;
@@ -107,7 +114,9 @@ export class SketchParser {
     parentId?: string,
   ) {
     const node = takeOverData.node;
-    if (!node._class || !node.name || this.shouldExclude(node.name)) return;
+    if (!node._class || !node.name) {
+      return;
+    }
     const targetSymbol: any = this.symbolForNode(node);
     if (!targetSymbol) {
       // todo: symbolMaster, symbolInstanceでパースしたが、マッチするシンボルがない場合。
@@ -116,6 +125,9 @@ export class SketchParser {
     }
 
     const view = new SketchView(targetSymbol, parentId);
+    this.assignToAbove(view, parentTree); // shuold be placed AHEAD of `shouldExclude`
+    if (this.shouldExclude(node.name, parentTree)) return;
+
     const treeElement = new TreeElement(view);
     treeElement.name = takeOverData.name.toLowerCamelCase(' ');
     this.parseConstraint(node.resizingConstraint, view);
@@ -123,13 +135,13 @@ export class SketchParser {
 
     // AutoParse this node(node-sketch).
     const parser = new AutoParser(this.sketch, this.config, this.outputDir);
-    parser.parse(targetSymbol, view);
+    parser.parse(targetSymbol, view, takeOverData.nodeOnArtboard);
 
     if (takeOverData.imageName) {
       (view as Image).imageName = takeOverData.imageName;
     }
     if (takeOverData.textTitle) {
-      (view as TextView).text = takeOverData.textTitle;
+      ((view as unknown) as TextView).text = takeOverData.textTitle;
     }
 
     parentTree.addElement(treeElement);
@@ -189,16 +201,49 @@ export class SketchParser {
     return targetSymbol;
   }
 
-  private shouldExclude(targetName: string) {
+  private shouldExclude(targetName: string, parentTree?: TreeElement) {
     // exclude node that is listed on setting config.
     const excludeNames: string[] = _.get(this.config, 'extraction.exceptions');
     if (excludeNames && excludeNames.length > 0) {
       const found = excludeNames.find(name => {
-        const matched = targetName.match(new RegExp(name, 'g'));
-        return matched ? true : false;
+        let layeredNames = name.split('/');
+        if (layeredNames.length === 2) {
+          const childMatched = targetName.match(
+            new RegExp(layeredNames[1], 'gi'),
+          );
+          const parentMatched = parentTree.name.match(
+            new RegExp(layeredNames[0], 'gi'),
+          );
+          return childMatched && parentMatched ? true : false;
+        }
+        return targetName.match(new RegExp(name, 'gi')) ? true : false;
       });
       return found ? true : false;
     }
     return false;
+  }
+
+  /// 親viewのtypeがxxだったら、yyの名前の子viewを探して、あればその子viewのzzプロパティを親のzzプロパティに適用する
+  private assignToAbove(view: SketchView, parentTree: TreeElement) {
+    // { 親要素のType : {小要素の名前: プロパティ名 } }
+    // 例) List配下にある、Background要素があったら、その要素のbackgroundColorをListのそれに適用する
+    const assignAboves: { [s: string]: { [s: string]: string } } = {
+      List: {
+        Background: 'backgroundColor',
+      },
+    };
+
+    if (!parentTree || !assignAboves) return;
+
+    for (let parentName of Object.keys(assignAboves)) {
+      if (parentName !== parentTree.properties.type) continue;
+      let viewPropPairs = assignAboves[parentName];
+      for (let viewName of Object.keys(viewPropPairs)) {
+        if (view.name !== viewName) continue;
+        let propName = viewPropPairs[viewName];
+        // todo: `View`以外のプロパティにも対応できるように改善
+        (parentTree.properties as View)[propName] = view[propName];
+      }
+    }
   }
 }

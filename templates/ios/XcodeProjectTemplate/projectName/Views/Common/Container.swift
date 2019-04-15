@@ -14,6 +14,8 @@ class Container: UIView {
     @IBInspectable var shadowOffset: CGSize = .zero
     @IBInspectable var shadowOpacity: Float = 0
 
+    var props: ViewProps?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
@@ -33,6 +35,12 @@ class Container: UIView {
         commonInit()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // need to redraw after subviews are autoresized
+        self.adoptFillsIfNeeded()
+    }
+
     private func commonInit() {
         isExclusiveTouch = true
         
@@ -42,5 +50,66 @@ class Container: UIView {
         layer.shadowOffset = shadowOffset
         layer.shadowRadius = shadowRadius
         backgroundColor = containerColor
+    }
+
+    func adoptFillsIfNeeded() {
+        guard let fills = self.props?.fills else { return }
+        var subLayers: [CALayer]? = []
+        for fill in fills {
+            if !fill.isEnabled { continue }
+            // ここでCALayerでfillを設定していく
+            let layer = self.layerFor(fill)
+            layer.frame = self.frame
+            subLayers?.append(layer)
+        }
+        // update subLayers
+        self.layer.sublayers = nil
+        self.layer.sublayers = subLayers
+    }
+
+    func assign(props: ViewProps?) {
+        self.props = props
+        guard let props = self.props else { return }
+
+        self.isHidden = !props.isVisible
+        self.containerColor = props.backgroundColor?.uiColor ?? UIColor.clear
+        self.cornerRadius = props.radius ?? 0
+
+        self.adoptFillsIfNeeded()
+    }
+
+    func layerFor(_ fill: ColorFill) -> CALayer {
+        var layer = CALayer()
+        // fillタイプを見る
+        switch fill.fillType {
+        case .fill:
+            layer.backgroundColor = fill.color.uiColor.cgColor
+            layer.opacity = Float(fill.opacity)
+        case .gradient:
+            layer = self.gradientLayer(for: fill.gradient)
+            layer.opacity = Float(fill.opacity)
+        default:
+            break
+        }
+        return layer
+    }
+
+    func gradientLayer(for gradient: Gradient) -> CAGradientLayer {
+        let gradientLayer = CAGradientLayer()
+
+        switch gradient.type {
+        case .linear:
+            let colors = gradient.stops.map { $0.color.uiColor.cgColor }
+            let locations = gradient.stops.map { NSNumber(value: Float($0.position)) }
+            gradientLayer.colors = colors
+            gradientLayer.locations = locations
+            gradientLayer.startPoint = gradient.from.cgPoint()
+            gradientLayer.endPoint = gradient.to.cgPoint()
+        //case .radial, .angular:
+        default:
+            break
+        }
+
+        return gradientLayer
     }
 }

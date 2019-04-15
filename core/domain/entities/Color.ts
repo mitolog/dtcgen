@@ -10,4 +10,8 @@ export class Color {
       this.name = color.name;
     }
   }
+
+  static withFill(colorComponents: ColorComponents): Color {
+    return new Color({ fill: colorComponents });
+  }
 }

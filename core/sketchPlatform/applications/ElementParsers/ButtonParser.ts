@@ -19,7 +19,7 @@ export class ButtonParser extends SymbolParser {
           button.hasIcon = true;
           break;
         case 'background':
-          this.parseBackground(node, button, aLayer);
+          this.parseBackground(aLayer, button, node);
           break;
         case 'label':
           this.parseLabel(node, button, aLayer);
@@ -80,17 +80,6 @@ export class ButtonParser extends SymbolParser {
 
       default:
         break;
-    }
-  }
-
-  private parseBackground(node: any, button: Button, aLayer: any) {
-    button.radius = aLayer.fixedRadius;
-    const comps = new ColorComponents(<ColorComponents>(
-      aLayer.style.fills[0].color
-    ));
-    button.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', button);
     }
   }
 

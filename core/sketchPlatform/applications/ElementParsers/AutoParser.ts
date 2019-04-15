@@ -10,7 +10,11 @@ import {
   TextView,
   Image,
   ElementType,
+  FillType,
+  ColorFill,
+  Gradient,
 } from '../../../domain/Entities';
+import { isFillType } from '../../../typeGuards';
 
 dotenv.config();
 if (dotenv.error) {
@@ -25,9 +29,12 @@ enum AutoDetectType {
 }
 
 export class AutoParser extends SymbolParser {
-  // `node` shuold be symbol's node (not artboard's).
-  // `view` should have been already assigned takeOver data.
-  parse(node: any, view: View) {
+  /// `node` shuold be symbol's node (not artboard's).
+  /// `view` should have been already assigned takeOver data.
+  /// `parentNode` can be node on artboard's.
+  parse(node: any, view: View, parentNode?: any) {
+    // doesn't need any initialized properties on super.parse().
+    //super.parse(node, view, parentNode);
     const type: AutoDetectType | null = this.distinctType(node, view);
     if (!type) return;
     switch (type) {
@@ -40,7 +47,7 @@ export class AutoParser extends SymbolParser {
         this.parseImage(node, <Image>view);
         break;
       case AutoDetectType.View:
-        this.parseBackground(node, view);
+        this.parseBackground(node, view, parentNode);
         break;
       case AutoDetectType.Cell:
         view.type = ElementType.Cell;
@@ -142,7 +149,7 @@ export class AutoParser extends SymbolParser {
     let type: AutoDetectType | null = null;
     // todo: auto detect keywords shuold be placed somewhere around
     // should be name on artboard
-    const autoDetectKeywords: string[] = ['Cell'];
+    const autoDetectKeywords: string[] = super.dynamicClasses();
     const matches: string[] = autoDetectKeywords.filter(keyword => {
       const results = view.name.match(new RegExp(keyword, 'g'));
       return results && results.length > 0 ? true : false;
@@ -165,6 +172,8 @@ export class AutoParser extends SymbolParser {
     } else {
       view.name = node.name;
     }
+    this.parseBackground(node, view);
+
     // prettier-ignore
     view.fontName = fontAttribute.attributes.name;
     view.fontSize = fontAttribute.attributes.size;
@@ -176,6 +185,8 @@ export class AutoParser extends SymbolParser {
     // prettier-ignore
     const fillObj = _.get(node, 'style.fills[0]');
     const fillType = _.get(fillObj, 'fillType');
+
+    this.parseBackground(node, view);
 
     if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
     if (this.followOverrides && node.overrideValues) {
@@ -194,19 +205,6 @@ export class AutoParser extends SymbolParser {
         true,
       );
       imageRefNode.export(imagePathName);
-    }
-  }
-
-  private parseBackground(node: any, view: View) {
-    const color = _.get(node, 'style.fills[0].color');
-    view.radius = node.fixedRadius;
-    if (!color) {
-      return;
-    }
-    const comps = new ColorComponents(<ColorComponents>color);
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
     }
   }
 }
