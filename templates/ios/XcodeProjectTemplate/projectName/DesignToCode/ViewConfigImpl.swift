@@ -55,6 +55,18 @@ class ViewConfigImpl : NSObject, ViewConfig {
         return nil
     }
 
+    func trimClassPrefix(_ name: String, classPrefix: String) -> String {
+
+        var targetName = name
+        if let matchedRange = name.range(of: "^\(classPrefix)", options: .regularExpression) {
+            let removed = targetName.replacingCharacters(in: matchedRange, with: "")
+            targetName = removed.prefix(1) == "."
+                ? String(removed[removed.index(after: removed.startIndex)..<removed.endIndex])
+                : removed
+        }
+        return targetName
+    }
+
     /*
      * instance methods
      */
