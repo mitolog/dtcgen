@@ -10,6 +10,12 @@ protocol DtcProperties: Codable {
     func assign(to view: UIView)
 }
 
+protocol DtcViewProtocol {
+    associatedtype PropType
+    var props: PropType? { get }
+    func assign(props: PropType?)
+}
+
 struct Rect: Codable {
     var x: CGFloat
     var y: CGFloat
@@ -237,15 +243,6 @@ class ImageProps: DtcProperties {
     }
 
     func assign(to view: UIView) {
-        guard let view = view as? UIImageView else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        if let imageName = self.getAssetPath() {
-            view.image = UIImage(named: imageName)
-        }
     }
 }
 

@@ -36,9 +36,11 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement
                 let props = data.getProperty(targetName) else { continue }
             switch view {
             case is Container:
-                if let props = props as? ViewProps {
-                    (view as! Container).assign(props: props)
-                }
+                guard let props = props as? ViewProps else { break }
+                (view as! Container).assign(props: props)
+            case is ImageView:
+                guard let props = props as? ImageProps else { break }
+                (view as! ImageView).assign(props: props)
             default:
                 props.assign(to: view)
                 break
