@@ -227,9 +227,9 @@ export class SketchParser {
   private assignToAbove(view: SketchView, parentTree: TreeElement) {
     // { 親要素のType : {小要素の名前: プロパティ名 } }
     // 例) List配下にある、Background要素があったら、その要素のbackgroundColorをListのそれに適用する
-    const assignAboves: { [s: string]: { [s: string]: string } } = {
+    const assignAboves: { [s: string]: { [s: string]: string[] } } = {
       List: {
-        Background: 'backgroundColor',
+        Background: ['fills', 'backgroundColor'],
       },
     };
 
@@ -240,9 +240,11 @@ export class SketchParser {
       let viewPropPairs = assignAboves[parentName];
       for (let viewName of Object.keys(viewPropPairs)) {
         if (view.name !== viewName) continue;
-        let propName = viewPropPairs[viewName];
+        let propNames = viewPropPairs[viewName];
         // todo: `View`以外のプロパティにも対応できるように改善
-        (parentTree.properties as View)[propName] = view[propName];
+        for (let propName of propNames) {
+          (parentTree.properties as View)[propName] = view[propName];
+        }
       }
     }
   }

@@ -38,8 +38,8 @@ export class SketchView extends View {
     //this.parseBackground(node);
   }
 
-  // AutoParserで行う parseBackgroundと同じものをここでもやってもいいが、
-  // 本Viewをinstanciateした後に、HogeParser.parse() にて背景をパースするので、ここでは
-  // デフォの値を入れなくてもいいっちゃいいとは思う
+  // 後段のassignToAboveメソッドでbackgroundプロパティを利用する可能性があるので、
+  // symbolParserとほぼ同じものをここでも定義しないといけないかも。。ただ、sharedStyleIdにも対応しないといけない、
+  // 且つoverrideにも対応しないといけず、symbolParser上のparseBackgroundでもうまく処理できてないので一旦パス
   private parseBackground(node: any) {}
 }
