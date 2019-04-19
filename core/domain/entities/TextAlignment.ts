@@ -1,6 +1,12 @@
 export enum TextAlignment {
-  Right = 0,
-  Center = 1,
-  Left = 2,
-  EqualWidth = 3,
+  EqualWidth = 0,
+  Right = 1,
+  Center = 2,
+  Left = 3,
+}
+
+export enum VerticalTextAlignment {
+  up = 0,
+  middle,
+  bottom,
 }
