@@ -89,7 +89,7 @@ export class SketchParser {
     switch (view.type) {
       case ElementType.Button:
         parser = new ButtonParser(this.sketch, this.config);
-        parser.parse(node, <Button>view);
+        parser.parse(node, <Button>(<unknown>view));
         break;
       case ElementType.TextView:
         parser = new TextViewParser(this.sketch, this.config);

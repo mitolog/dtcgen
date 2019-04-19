@@ -1,7 +1,8 @@
-import { Button } from '../../../domain/entities/Button';
+import * as _ from 'lodash';
+import { Button, TextStyle, ButtonType } from '../../../domain/entities/Button';
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { SymbolParser } from './SymbolParser';
+import { SymbolParser, SymbolElement } from './SymbolParser';
 import { ElementType } from '../../../domain/entities/ElementType';
 
 export class ButtonParser extends SymbolParser {
@@ -9,6 +10,8 @@ export class ButtonParser extends SymbolParser {
     super.parse(node, button);
 
     const elements = this.getSymbolElements(ElementType.Button);
+
+    button.buttonType = this.distinctButtonType(elements);
 
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
@@ -83,27 +86,62 @@ export class ButtonParser extends SymbolParser {
     }
   }
 
+  private distinctButtonType(elements: SymbolElement<string>): ButtonType {
+    if (!elements) return ButtonType.unknown;
+
+    let buttonType: ButtonType = ButtonType.unknown;
+    const matchedkeys: string[] = [];
+    for (const key of Object.keys(elements)) {
+      const aLayer: any = this.getSubLayerFor(key, elements);
+      if (!aLayer) continue;
+      matchedkeys.push(key.toLowerCase());
+    }
+
+    const iconMatched = matchedkeys.filter(key => key === 'icon');
+    const textMatched = matchedkeys.filter(key => key === 'label');
+
+    if (iconMatched.length > 0 && textMatched.length > 0) {
+      buttonType = ButtonType.iconAndText;
+    } else if (iconMatched.length > 0 && textMatched.length <= 0) {
+      buttonType = ButtonType.icon;
+    } else if (iconMatched.length <= 0 && textMatched.length > 0) {
+      buttonType = ButtonType.text;
+    }
+    console.log(buttonType);
+    return buttonType;
+  }
+
   private parseLabel(node: any, button: Button, aLayer: any) {
-    // prettier-ignore
-    if (
-      !aLayer.style ||
-      !aLayer.style.textStyle ||
-      !aLayer.style.textStyle.encodedAttributes ||
-      !aLayer.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute
-    )
-      return;
     if (this.followOverrides) {
       this.parseOverride(node, 'stringValue', button);
     }
-    const textAttribute = aLayer.style.textStyle.encodedAttributes;
-    // prettier-ignore
-    const fontObj = aLayer.style.textStyle.encodedAttributes.MSAttributedStringFontAttribute;
-    button.fontName = fontObj.attributes.name;
-    button.fontSize = fontObj.attributes.size;
-    const fontColorAttribute = textAttribute.MSAttributedStringColorAttribute;
-    if (fontColorAttribute) {
-      const comps = new ColorComponents(<ColorComponents>fontColorAttribute);
-      button.fontColor = new Color(<Color>{ fill: comps });
+
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
     }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    button.textStyle = textStyle;
   }
 }

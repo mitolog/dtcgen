@@ -9,7 +9,7 @@ export { ElementType, ElementTypes } from './entities/ElementType';
 export { Image } from './entities/Image';
 export { OSType } from './entities/OSType';
 export { Rect } from './entities/Rect';
-export { TextAlignment } from './entities/TextAlignment';
+export { TextAlignment, VerticalTextAlignment } from './entities/TextAlignment';
 export { TextInput } from './entities/TextInput';
 export { TextView } from './entities/TextView';
 export { TreeElement } from './entities/TreeElement';
