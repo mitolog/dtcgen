@@ -78,7 +78,7 @@ export class ButtonParser extends SymbolParser {
         break;
 
       case 'stringValue':
-        button.name = targetOverride['value'];
+        button.text = targetOverride['value'];
         break;
 
       default:

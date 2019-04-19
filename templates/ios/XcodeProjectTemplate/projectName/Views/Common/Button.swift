@@ -90,8 +90,8 @@ class Button: UIButton, DtcViewProtocol {
 
         self.setTitle(props.text, for: .normal)
 
-        if let hasIcon = props.hasIcon, hasIcon == true {
-            self.iconImage = UIImage(named: "DtcGenerated/Icon")
+        if let hasIcon = props.hasIcon {
+            self.iconImage = hasIcon ? UIImage(named: "DtcGenerated/Icon") : nil
         }
 
         if let textStyle = props.textStyle {
@@ -101,13 +101,13 @@ class Button: UIButton, DtcViewProtocol {
             if let alignment = textStyle.alignment {
                 var hAlign: UIControl.ContentHorizontalAlignment = .center
                 switch alignment {
-                case .Right:
+                case .right:
                     hAlign = .right
-                case .Center:
+                case .center:
                     hAlign = .center
-                case .Left:
+                case .left:
                     hAlign = .left
-                case .EqualWidth:
+                case .equalWidth:
                     hAlign = .fill
                 }
                 self.contentHorizontalAlignment = hAlign

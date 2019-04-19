@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 enum TextAlignment: Int, Codable {
-    case Right = 0, Center, Left, EqualWidth
+    case equalWidth = 0, right, center, left
 }
 
 enum VerticalTextAlignment: Int, Codable {
