@@ -12,7 +12,7 @@ export enum ButtonType {
 
 export class TextStyle {
   fontName?: string;
-  fontSize?: string;
+  fontSize?: number;
   fontColor?: Color;
   alignment?: TextAlignment;
   verticalAlignment?: VerticalTextAlignment;
@@ -22,6 +22,5 @@ export class Button extends View {
   buttonType: ButtonType;
   textStyle?: TextStyle;
   text?: string;
-
   hasIcon?: boolean;
 }

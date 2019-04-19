@@ -107,7 +107,6 @@ export class ButtonParser extends SymbolParser {
     } else if (iconMatched.length <= 0 && textMatched.length > 0) {
       buttonType = ButtonType.text;
     }
-    console.log(buttonType);
     return buttonType;
   }
 
