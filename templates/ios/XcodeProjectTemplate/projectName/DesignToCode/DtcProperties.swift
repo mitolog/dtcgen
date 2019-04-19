@@ -16,10 +16,6 @@ protocol DtcViewProtocol {
     func assign(props: PropType?)
 }
 
-enum TextAlignment: Int, Codable {
-    case Right = 0, Center, Left, EqualWidth
-}
-
 /**
  * each attributes classes that is defined within DesignToCode
  */
@@ -68,23 +64,18 @@ class ButtonProps: DtcProperties {
     var radius: CGFloat?
     var fills: [ColorFill]?
 
-    // Button props
-    var fontName: String?
-    var fontSize: Int?
-    var fontColor: Color?
-    var hasIcon: Bool?
-
-    func assign(to view: UIView) {
-        guard let view = view as? UIButton else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        view.setTitleColor(fontColor?.uiColor, for: .normal)
-        // todo: font related assign
+    enum ButtonType: Int, Codable {
+        case text, icon, iconAndText, toggle, unknown
     }
 
+    // Button props
+    var buttonType: ButtonType
+    var hasIcon: Bool?
+    var textStyle: TextStyle?
+    var text: String?
+
+    func assign(to view: UIView) {
+    }
 }
 
 class TextViewProps: DtcProperties {

@@ -1,7 +1,10 @@
 import UIKit
 
 @IBDesignable
-class ContainedButton: UIButton {
+class Button: UIButton, DtcViewProtocol {
+    typealias PropType = ButtonProps
+    var props: PropType?
+    
     @IBInspectable var containerColor: UIColor = UIColor(red: 242/255, green: 97/255, blue: 97/255, alpha: 1) {
         didSet {
             setBackgroundImage(containerColor.image(), for: .normal)
@@ -28,6 +31,12 @@ class ContainedButton: UIButton {
         }
     }
 
+    @IBInspectable var iconImage: UIImage? = UIImage(named: "iconPlaceHolder") {
+        didSet {
+            setImage(iconImage, for: .normal)
+        }
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
@@ -51,7 +60,13 @@ class ContainedButton: UIButton {
         }
     }
 
-    private func commonInit() {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // need to redraw after subviews are autoresized
+        self.adoptFillsIfNeeded(self.props?.fills)
+    }
+
+    public func commonInit() {
         isExclusiveTouch = true
 
         layer.cornerRadius = cornerRadius
@@ -61,6 +76,57 @@ class ContainedButton: UIButton {
         setBackgroundImage(highlightedContainerColor.image(), for: .highlighted)
         setBackgroundImage(selectedContainerColor.image(), for: .selected)
         setBackgroundImage(disabledContainerColor.image(), for: .disabled)
+    }
+
+    func assign(props: PropType?) {
+        self.props = props
+        guard let props = self.props else { return }
+
+        self.isHidden = !props.isVisible
+        self.containerColor = props.backgroundColor?.uiColor ?? UIColor.clear
+        self.cornerRadius = props.radius ?? 0
+
+        self.adoptFillsIfNeeded(props.fills)
+
+        self.setTitle(props.text, for: .normal)
+
+        if let hasIcon = props.hasIcon, hasIcon == true {
+            self.iconImage = UIImage(named: "DtcGenerated/Icon")
+        }
+
+        if let textStyle = props.textStyle {
+            self.titleLabel?.font = textStyle.uiFont
+            self.setTitleColor(textStyle.fontColor?.uiColor, for: .normal)
+
+            if let alignment = textStyle.alignment {
+                var hAlign: UIControl.ContentHorizontalAlignment = .center
+                switch alignment {
+                case .Right:
+                    hAlign = .right
+                case .Center:
+                    hAlign = .center
+                case .Left:
+                    hAlign = .left
+                case .EqualWidth:
+                    hAlign = .fill
+                }
+                self.contentHorizontalAlignment = hAlign
+            }
+
+            if let vAlignment = textStyle.verticalAlignment {
+                var vAlign: UIControl.ContentVerticalAlignment = .center
+                switch vAlignment {
+                case .up:
+                    vAlign = .top
+                case .middle:
+                    vAlign = .center
+                case .bottom:
+                    vAlign = .bottom
+                }
+                self.contentVerticalAlignment = vAlign
+            }
+
+        }
     }
 }
 

@@ -54,15 +54,10 @@ class {{container.name}}Config: ViewConfigImpl {
         {{/if}}
         {{/eq}}
         {{#eq type 'Button'}}
-        {{#if hasIcon }}
-        view = IconButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! IconButton).iconImage = UIImage(named: "DtcGenerated/Icon")
-        {{else}}
-        view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! ContainedButton).setTitle("{{name}}", for: .normal)
-        {{/if}}
+        view = Button(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! Button).setTitle("{{name}}", for: .normal)
         {{#if backgroundColor }}
-        (view as! ContainedButton).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        (view as! Button).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/if}}
         {{/eq}}
         {{#eq type 'TextView'}}

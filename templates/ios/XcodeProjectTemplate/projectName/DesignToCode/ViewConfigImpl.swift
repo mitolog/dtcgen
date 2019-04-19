@@ -96,6 +96,9 @@ class ViewConfigImpl : NSObject, ViewConfig {
             case is Container:
                 guard let viewProps = props as? ViewProps else { break }
                 (view as! Container).assign(props: viewProps)
+            case is Button:
+                guard let buttonProps = props as? ButtonProps else { break }
+                (view as! Button).assign(props: buttonProps)
             default:
                 break
             }
