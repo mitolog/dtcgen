@@ -1,11 +1,14 @@
 import { View } from './View';
-import { Color } from './Color';
-import { TextAlignment } from './TextAlignment';
+import { TextStyle } from './TextStyle';
 
+export enum TextViewType {
+  label = 0,
+  input,
+  textView,
+}
 export class TextView extends View {
-  fontName: string;
-  fontSize: number;
-  fontColor: Color;
+  textViewType: TextViewType;
   text?: string;
-  alignment?: TextAlignment;
+  placeHolder?: string;
+  textStyle?: TextStyle;
 }

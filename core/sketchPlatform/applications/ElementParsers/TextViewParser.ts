@@ -1,10 +1,11 @@
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { TextView } from '../../../domain/entities/TextView';
+import {
+  Color,
+  ColorComponents,
+  TextView,
+  ElementType,
+} from '../../../domain/Entities';
 import * as _ from 'lodash';
-import { TextAlignment } from '../../../domain/entities/TextAlignment';
 import { SymbolParser } from './SymbolParser';
-import { ElementType } from '../../../domain/entities/ElementType';
 
 export class TextViewParser extends SymbolParser {
   parse(node: any, textView: TextView) {
@@ -91,9 +92,9 @@ export class TextViewParser extends SymbolParser {
       this.parseOverride(node, 'stringValue', textView);
     }
     // prettier-ignore
-    textView.fontName = fontAttribute.attributes.name;
-    textView.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    textView.fontColor = new Color(<Color>{ fill: comps });
+    // textView.fontName = fontAttribute.attributes.name;
+    // textView.fontSize = fontAttribute.attributes.size;
+    // const comps = new ColorComponents(<ColorComponents>colorAttribute);
+    // textView.fontColor = new Color(<Color>{ fill: comps });
   }
 }

@@ -10,11 +10,9 @@ import {
   TextView,
   Image,
   ElementType,
-  FillType,
-  ColorFill,
-  Gradient,
+  TextStyle,
 } from '../../../domain/Entities';
-import { isFillType } from '../../../typeGuards';
+import { TextViewType } from '../../../domain/entities/TextView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -40,7 +38,7 @@ export class AutoParser extends SymbolParser {
     switch (type) {
       case AutoDetectType.Text:
         view.type = ElementType.TextView;
-        this.parseText(node, <TextView>view);
+        this.parseLabel(node, <TextView>view);
         break;
       case AutoDetectType.Image:
         view.type = ElementType.Image;
@@ -160,25 +158,45 @@ export class AutoParser extends SymbolParser {
     return type;
   }
 
-  private parseText(node: any, view: TextView) {
-    // prettier-ignore
-    const fontAttribute = _.get(node, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(node, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
+  private parseLabel(aLayer: any, view: TextView) {
+    // we treat all autoParsed textview as label. The other types will be dealt
+    // within parseElement() on SketchParser, where each text types are detected by keywords.
+    view.textViewType = TextViewType.label;
 
-    if (!fontAttribute || !colorAttribute) return;
     if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', view);
+      this.parseOverride(aLayer, 'stringValue', view);
     } else {
-      view.name = node.name;
+      view.name = aLayer.name;
     }
-    this.parseBackground(node, view);
+    this.parseBackground(aLayer, view);
 
-    // prettier-ignore
-    view.fontName = fontAttribute.attributes.name;
-    view.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    view.fontColor = new Color(<Color>{ fill: comps });
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
+    }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    view.textStyle = textStyle;
   }
 
   private parseImage(node: any, view: Image) {

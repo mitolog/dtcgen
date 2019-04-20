@@ -1,9 +1,13 @@
 import * as _ from 'lodash';
-import { Button, TextStyle, ButtonType } from '../../../domain/entities/Button';
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
+import {
+  ElementType,
+  ColorComponents,
+  Color,
+  Button,
+  ButtonType,
+  TextStyle,
+} from '../../../domain/Entities';
 import { SymbolParser, SymbolElement } from './SymbolParser';
-import { ElementType } from '../../../domain/entities/ElementType';
 
 export class ButtonParser extends SymbolParser {
   parse(node: any, button: Button) {

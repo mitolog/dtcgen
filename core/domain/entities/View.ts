@@ -1,4 +1,3 @@
-import { ElementType } from './ElementType';
 import { Constraints } from './Constraints';
 import { Container } from './Container';
 import { Rect } from './Rect';

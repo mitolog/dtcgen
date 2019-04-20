@@ -1,6 +1,5 @@
 import { View } from './View';
-import { Color } from './Color';
-import { TextAlignment, VerticalTextAlignment } from './TextAlignment';
+import { TextStyle } from './TextStyle';
 
 export enum ButtonType {
   text = 0,
@@ -8,14 +7,6 @@ export enum ButtonType {
   iconAndText,
   toggle, // not implemented yet
   unknown,
-}
-
-export class TextStyle {
-  fontName?: string;
-  fontSize?: number;
-  fontColor?: Color;
-  alignment?: TextAlignment;
-  verticalAlignment?: VerticalTextAlignment;
 }
 
 export class Button extends View {

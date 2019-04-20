@@ -92,51 +92,17 @@ class TextViewProps: DtcProperties {
     var radius: CGFloat?
     var fills: [ColorFill]?
 
-    // TextView props
-    var fontName: String
-    var fontSize: Int
-    var fontColor: Color
-    var text: String?
-    var alignment: TextAlignment?
-
-    func assign(to view: UIView) {
-        guard let view = view as? TextView else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        view.text = text
-        view.font = UIFont(name: fontName, size: CGFloat(fontSize))
-        view.textColor = fontColor.uiColor
-        // todo: alignment
+    enum TextViewType: Int, Codable {
+        case label, input, textView
     }
 
-}
-
-class TextInputProps: DtcProperties {
-    // Container Props
-    var type: PropertyType
-    var id: String
-    var name: String
-    var rect: Rect
-
-    // View props
-    var isVisible: Bool
-    var originalRect: Rect
-    var fills: [ColorFill]?
-
-    // TextInput props
-    var fontName: String
-    var fontSize: Int
-    var fontColor: Color
-    var backgroundColor: Color?
+    // TextView props
+    var textViewType: TextViewType
     var text: String?
     var placeHolder: String?
-    var alignment: TextAlignment?
+    var textStyle: TextStyle?
 
     func assign(to view: UIView) {
-        // todo: assignment
     }
 
 }
@@ -240,10 +206,8 @@ enum PropertyType: String, Codable {
             return ViewProps.self
         case .Button:
             return ButtonProps.self
-        case .TextView:
+        case .TextView, .TextInput:
             return TextViewProps.self
-        case .TextInput:
-            return TextInputProps.self
         case .Image:
             return ImageProps.self
         case .Card:
