@@ -170,6 +170,11 @@ export class AutoParser extends SymbolParser {
     }
     this.parseBackground(aLayer, view);
 
+    // If there are no `view.text`, we can assign symbol's default text, if needed.
+    // if (!view.text) {
+    //   view.text = _.get(aLayer, 'attributedString.string', null);
+    // }
+
     const textStyle: TextStyle = new TextStyle();
 
     const textAttribute = _.get(

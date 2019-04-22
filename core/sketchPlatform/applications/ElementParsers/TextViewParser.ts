@@ -3,6 +3,7 @@ import {
   ColorComponents,
   TextView,
   ElementType,
+  TextStyle,
 } from '../../../domain/Entities';
 import * as _ from 'lodash';
 import { SymbolParser } from './SymbolParser';
@@ -81,20 +82,39 @@ export class TextViewParser extends SymbolParser {
 
   /* Private methods below */
 
-  private parseDescription(node: any, textView: TextView, aLayer: any) {
-    // prettier-ignore
-    const fontAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
-
-    if (!fontAttribute || !colorAttribute) return;
+  private parseDescription(node: any, view: TextView, aLayer: any) {
     if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', textView);
+      this.parseOverride(node, 'stringValue', view);
+    } else {
+      view.name = aLayer.name;
     }
-    // prettier-ignore
-    // textView.fontName = fontAttribute.attributes.name;
-    // textView.fontSize = fontAttribute.attributes.size;
-    // const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    // textView.fontColor = new Color(<Color>{ fill: comps });
+
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
+    }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    view.textStyle = textStyle;
   }
 }
