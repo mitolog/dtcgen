@@ -46,6 +46,12 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement
             case is ImageView:
                 guard let props = props as? ImageProps else { break }
                 (view as! ImageView).assign(props: props)
+            case is Label:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! Label).assign(props: textViewProps)
+            case is TextView:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! TextView).assign(props: textViewProps)
             default:
                 props.assign(to: view)
                 break

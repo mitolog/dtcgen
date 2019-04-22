@@ -99,6 +99,12 @@ class ViewConfigImpl : NSObject, ViewConfig {
             case is Button:
                 guard let buttonProps = props as? ButtonProps else { break }
                 (view as! Button).assign(props: buttonProps)
+            case is Label:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! Label).assign(props: textViewProps)
+            case is TextView:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! TextView).assign(props: textViewProps)
             default:
                 break
             }
