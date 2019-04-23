@@ -21,7 +21,7 @@
                             <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gco-63-BbN">
                                 <rect key="frame" x="27.5" y="225.5" width="320" height="216"/>
                             </pickerView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lah-SH-iir" customClass="ContainedButton" customModule="SampleProject" customModuleProvider="target">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lah-SH-iir" customClass="Button" customModule="SampleProject" customModuleProvider="target">
                                 <rect key="frame" x="16" y="80" width="343" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="To9-yj-ShE"/>

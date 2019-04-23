@@ -1,7 +1,8 @@
 import UIKit
 
 @IBDesignable
-class Container: UIView {
+class Container: UIView, DtcViewProtocol {
+    typealias PropType = ViewProps
     @IBInspectable var containerColor: UIColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1) {
         didSet {
             backgroundColor = containerColor
@@ -13,6 +14,8 @@ class Container: UIView {
     @IBInspectable var shadowColor: UIColor = .clear
     @IBInspectable var shadowOffset: CGSize = .zero
     @IBInspectable var shadowOpacity: Float = 0
+
+    var props: PropType?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,6 +36,12 @@ class Container: UIView {
         commonInit()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // need to redraw after subviews are autoresized
+        self.adoptFillsIfNeeded(self.props?.fills)
+    }
+
     private func commonInit() {
         isExclusiveTouch = true
         
@@ -42,5 +51,16 @@ class Container: UIView {
         layer.shadowOffset = shadowOffset
         layer.shadowRadius = shadowRadius
         backgroundColor = containerColor
+    }
+
+    func assign(props: PropType?) {
+        self.props = props
+        guard let props = self.props else { return }
+
+        self.isHidden = !props.isVisible
+        self.containerColor = props.backgroundColor?.uiColor ?? UIColor.clear
+        self.cornerRadius = props.radius ?? 0
+
+        self.adoptFillsIfNeeded(props.fills)
     }
 }

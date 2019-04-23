@@ -23,6 +23,11 @@ class ViewConfigImpl : NSObject, ViewConfig {
         let isBaseView = name == Dtc.config.baseViewComponentName
         self.configureViews()
 
+        // ここでstaticなviewにpropsをアサインしていく
+        if let treeElement = self.treeElement {
+            self.assignProps(treeElement: treeElement)
+        }
+
         // do not place code below upper than configureViews()
         if (isBaseView) {
             self.bindDummyData()
@@ -55,6 +60,18 @@ class ViewConfigImpl : NSObject, ViewConfig {
         return nil
     }
 
+    func trimClassPrefix(_ name: String, classPrefix: String) -> String {
+
+        var targetName = name
+        if let matchedRange = name.range(of: "^\(classPrefix)", options: .regularExpression) {
+            let removed = targetName.replacingCharacters(in: matchedRange, with: "")
+            targetName = removed.prefix(1) == "."
+                ? String(removed[removed.index(after: removed.startIndex)..<removed.endIndex])
+                : removed
+        }
+        return targetName
+    }
+
     /*
      * instance methods
      */
@@ -68,6 +85,39 @@ class ViewConfigImpl : NSObject, ViewConfig {
     /*
      * private methods below
      */
+
+    private func assignProps(treeElement: TreeElement) {
+        guard
+            let uid = treeElement.uid,
+            let props = treeElement.properties else { return }
+
+        if let view = self.views[uid] {
+            switch view {
+            case is Container:
+                guard let viewProps = props as? ViewProps else { break }
+                (view as! Container).assign(props: viewProps)
+            case is Button:
+                guard let buttonProps = props as? ButtonProps else { break }
+                (view as! Button).assign(props: buttonProps)
+            case is Label:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! Label).assign(props: textViewProps)
+            case is TextView:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! TextView).assign(props: textViewProps)
+            case is TextField:
+                guard let textInputProps = props as? TextInputProps else { break }
+                (view as! TextField).assign(props: textInputProps)
+            default:
+                break
+            }
+        }
+
+        guard let elements = treeElement.elements else { return }
+        for element in elements {
+            self.assignProps(treeElement: element)
+        }
+    }
 
     // If the `name` parameter is not base view's, only first matched treeElement is used.
     // Otherwise, search and collect all treeElements' uids(and names) that matches.

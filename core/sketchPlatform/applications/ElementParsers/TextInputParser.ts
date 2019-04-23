@@ -1,24 +1,33 @@
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { TextInput } from '../../../domain/entities/TextInput';
+import {
+  Color,
+  ColorComponents,
+  TextInput,
+  ElementType,
+  TextStyle,
+  View,
+} from '../../../domain/Entities';
 import * as _ from 'lodash';
-import { TextAlignment } from '../../../domain/entities/TextAlignment';
 import { SymbolParser } from './SymbolParser';
-import { ElementType } from '../../../domain/entities/ElementType';
 
 export class TextInputParser extends SymbolParser {
-  parse(node: any, view: TextInput) {
-    super.parse(node, view);
+  parse(node: any, textInput: TextInput) {
+    super.parse(node, textInput);
+
+    // set default
+    textInput.isEditable = true;
+    textInput.showsLabel = false;
+    textInput.showsUnderline = false;
+
     const elements = this.getSymbolElements(ElementType.TextInput);
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);
       if (!aLayer) continue;
       switch (key.toLowerCase()) {
         case 'placeholder':
-          this.parseInput(node, view, aLayer);
+          this.parsePlaecholder(node, textInput, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, view, aLayer);
+          this.parseBackground(aLayer, textInput, node);
           break;
       }
     }
@@ -79,31 +88,35 @@ export class TextInputParser extends SymbolParser {
 
   /* Private methods below */
 
-  private parseInput(node: any, view: TextInput, aLayer: any) {
-    // prettier-ignore
-    const fontAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
-
-    if (!fontAttribute || !colorAttribute) return;
+  private parsePlaecholder(node: any, view: TextInput, aLayer: any) {
     if (this.followOverrides) {
       this.parseOverride(node, 'stringValue', view);
+    } else {
+      view.name = aLayer.name;
     }
-    // prettier-ignore
-    view.fontName = fontAttribute.attributes.name;
-    view.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    view.fontColor = new Color(<Color>{ fill: comps });
-  }
 
-  private parseBackground(node: any, view: TextInput, aLayer: any) {
-    view.radius = aLayer.fixedRadius;
-    const comps = new ColorComponents(<ColorComponents>(
-      aLayer.style.fills[0].color
-    ));
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
     }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+
+    view.textStyle = textStyle;
   }
 }

@@ -1,12 +1,14 @@
 import { View } from './View';
-import { Color } from './Color';
-import { TextAlignment } from './TextAlignment';
+import { TextStyle } from './TextStyle';
 
 export class TextInput extends View {
-  fontName: string;
-  fontSize: number;
-  fontColor: Color;
+  isEditable: boolean;
+  showsUnderline: boolean;
+  showsLabel: boolean;
+
   text?: string;
   placeHolder?: string;
-  alignment?: TextAlignment;
+  assistiveText?: string;
+  errorText?: string;
+  textStyle?: TextStyle;
 }

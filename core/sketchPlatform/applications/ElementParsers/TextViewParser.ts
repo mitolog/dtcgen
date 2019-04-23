@@ -1,14 +1,19 @@
-import { Color } from '../../../domain/entities/Color';
-import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { TextView } from '../../../domain/entities/TextView';
+import {
+  Color,
+  ColorComponents,
+  TextView,
+  ElementType,
+  TextStyle,
+} from '../../../domain/Entities';
 import * as _ from 'lodash';
-import { TextAlignment } from '../../../domain/entities/TextAlignment';
 import { SymbolParser } from './SymbolParser';
-import { ElementType } from '../../../domain/entities/ElementType';
 
 export class TextViewParser extends SymbolParser {
   parse(node: any, textView: TextView) {
     super.parse(node, textView);
+
+    // set default
+    textView.isEditable = false;
 
     const elements = this.getSymbolElements(ElementType.TextView);
     for (const key of Object.keys(elements)) {
@@ -19,7 +24,7 @@ export class TextViewParser extends SymbolParser {
           this.parseDescription(node, textView, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, textView, aLayer);
+          this.parseBackground(aLayer, textView, node);
           break;
       }
     }
@@ -80,31 +85,39 @@ export class TextViewParser extends SymbolParser {
 
   /* Private methods below */
 
-  private parseDescription(node: any, textView: TextView, aLayer: any) {
-    // prettier-ignore
-    const fontAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(aLayer, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
-
-    if (!fontAttribute || !colorAttribute) return;
+  private parseDescription(node: any, view: TextView, aLayer: any) {
     if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', textView);
+      this.parseOverride(node, 'stringValue', view);
+    } else {
+      view.name = aLayer.name;
     }
-    // prettier-ignore
-    textView.fontName = fontAttribute.attributes.name;
-    textView.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    textView.fontColor = new Color(<Color>{ fill: comps });
-  }
 
-  private parseBackground(node: any, view: TextView, aLayer: any) {
-    view.radius = aLayer.fixedRadius;
-    const comps = new ColorComponents(<ColorComponents>(
-      aLayer.style.fills[0].color
-    ));
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
     }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    view.textStyle = textStyle;
   }
 }

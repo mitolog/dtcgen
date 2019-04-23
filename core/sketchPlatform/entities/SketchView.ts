@@ -1,9 +1,6 @@
 import * as uuidv4 from 'uuid/v4';
-import { View } from '../../domain/entities/View';
-import { ElementType } from '../../domain/entities/ElementType';
-import { Rect } from '../../domain/entities/Rect';
-import { Color } from '../../domain/entities/Color';
-import { ColorComponents } from '../../domain/entities/ColorComponents';
+import * as _ from 'lodash';
+import { View, ElementType, Rect } from '../../domain/Entities';
 
 export class SketchView extends View {
   constructor(node: any, parentId?: string) {
@@ -34,9 +31,15 @@ export class SketchView extends View {
       this.parentId = parentId;
     }
 
-    // todo: just for testing. randomly adopt background.
-    this.backgroundColor = new Color(<Color>{
-      fill: ColorComponents.randomColor(),
-    });
+    //todo: just for testing. randomly adopt background.
+    // this.backgroundColor = new Color(<Color>{
+    //   fill: ColorComponents.randomColor(),
+    // });
+    //this.parseBackground(node);
   }
+
+  // 後段のassignToAboveメソッドでbackgroundプロパティを利用する可能性があるので、
+  // symbolParserとほぼ同じものをここでも定義しないといけないかも。。ただ、sharedStyleIdにも対応しないといけない、
+  // 且つoverrideにも対応しないといけず、symbolParser上のparseBackgroundでもうまく処理できてないので一旦パス
+  private parseBackground(node: any) {}
 }
