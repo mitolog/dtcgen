@@ -10,71 +10,10 @@ protocol DtcProperties: Codable {
     func assign(to view: UIView)
 }
 
-struct Rect: Codable {
-    var x: CGFloat
-    var y: CGFloat
-    var width: CGFloat
-    var height: CGFloat
-
-    var rect: CGRect {
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-
-    init(rect: CGRect) {
-        x = rect.origin.x
-        y = rect.origin.y
-        width = rect.size.width
-        height = rect.size.height
-    }
-}
-
-struct Color: Codable {
-    var red : CGFloat = 0.0, green: CGFloat = 0.0, blue: CGFloat = 0.0, alpha: CGFloat = 0.0
-    var name: String?
-
-    // retrieve UIColor from `Color`
-    var uiColor : UIColor {
-        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case red, green, blue, alpha, fill, name
-    }
-
-    private enum FillInfoKeys: String, CodingKey {
-        case red, green, blue, alpha
-    }
-
-    // assign red, green, blue, alpha from UIColor. name leave it nil
-    init(uiColor : UIColor) {
-        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        name = try container.decodeIfPresent(String.self, forKey: .name)
-
-        let fillInfo = try container.nestedContainer(keyedBy: FillInfoKeys.self, forKey: .fill)
-        red = try fillInfo.decode(CGFloat.self, forKey: .red)
-        green = try fillInfo.decode(CGFloat.self, forKey: .green)
-        blue = try fillInfo.decode(CGFloat.self, forKey: .blue)
-        alpha = try fillInfo.decode(CGFloat.self, forKey: .alpha)
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(name, forKey: .name)
-
-        var fillInfo = container.nestedContainer(keyedBy: FillInfoKeys.self, forKey: .fill)
-        try fillInfo.encode(red, forKey: .red)
-        try fillInfo.encode(green, forKey: .green)
-        try fillInfo.encode(blue, forKey: .blue)
-        try fillInfo.encode(alpha, forKey: .alpha)
-    }
-}
-
-enum TextAlignment: Int, Codable {
-    case Right = 0, Center, Left, EqualWidth
+protocol DtcViewProtocol {
+    associatedtype PropType
+    var props: PropType? { get }
+    func assign(props: PropType?)
 }
 
 /**
@@ -99,19 +38,15 @@ class ViewProps: DtcProperties {
     var id: String
     var name: String
     var rect: Rect
-
+    
     // View props
     var isVisible: Bool
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
-        guard let view = view as? Container else { return }
-
-        view.isHidden = !isVisible
-        view.containerColor = backgroundColor?.uiColor ?? UIColor.clear
-        view.cornerRadius = radius ?? 0
     }
 }
 
@@ -127,24 +62,20 @@ class ButtonProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
-    // Button props
-    var fontName: String?
-    var fontSize: Int?
-    var fontColor: Color?
-    var hasIcon: Bool?
-
-    func assign(to view: UIView) {
-        guard let view = view as? UIButton else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        view.setTitleColor(fontColor?.uiColor, for: .normal)
-        // todo: font related assign
+    enum ButtonType: Int, Codable {
+        case text, icon, iconAndText, toggle, unknown
     }
 
+    // Button props
+    var buttonType: ButtonType
+    var hasIcon: Bool?
+    var textStyle: TextStyle?
+    var text: String?
+
+    func assign(to view: UIView) {
+    }
 }
 
 class TextViewProps: DtcProperties {
@@ -159,25 +90,20 @@ class TextViewProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
+    var isEditable: Bool?
+    
+    enum TextViewType: Int, Codable {
+        case label, input, textView
+    }
 
     // TextView props
-    var fontName: String
-    var fontSize: Int
-    var fontColor: Color
+    var textViewType: TextViewType
     var text: String?
-    var alignment: TextAlignment?
+    var placeHolder: String?
+    var textStyle: TextStyle?
 
     func assign(to view: UIView) {
-        guard let view = view as? TextView else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        view.text = text
-        view.font = UIFont(name: fontName, size: CGFloat(fontSize))
-        view.textColor = fontColor.uiColor
-        // todo: alignment
     }
 
 }
@@ -192,20 +118,24 @@ class TextInputProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
+    var fills: [ColorFill]?
 
     // TextInput props
-    var fontName: String
-    var fontSize: Int
-    var fontColor: Color
-    var backgroundColor: Color?
+    var isEditable: Bool
+    var showsLabel: Bool
+    var showsUnderline: Bool
+
     var text: String?
     var placeHolder: String?
-    var alignment: TextAlignment?
+    var assistiveText: String?
+    var errorText: String?
+
+    var textStyle: TextStyle?
 
     func assign(to view: UIView) {
-        // todo: assignment
     }
-
 }
 
 class ImageProps: DtcProperties {
@@ -220,6 +150,7 @@ class ImageProps: DtcProperties {
     var originalRect: Rect
     var backgroundColor: Color?
     var radius: CGFloat?
+    var fills: [ColorFill]?
 
     // Image props
     var imageName: String?
@@ -237,15 +168,6 @@ class ImageProps: DtcProperties {
     }
 
     func assign(to view: UIView) {
-        guard let view = view as? UIImageView else { return }
-
-        view.isHidden = !isVisible
-        view.backgroundColor = backgroundColor?.uiColor
-        view.layer.cornerRadius = radius ?? 0
-
-        if let imageName = self.getAssetPath() {
-            view.image = UIImage(named: imageName)
-        }
     }
 }
 
@@ -259,6 +181,7 @@ class CardProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     // Card props
     var imageName: String?
@@ -279,6 +202,7 @@ class ListProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
     }
@@ -294,6 +218,7 @@ class CellProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var fills: [ColorFill]?
 
     func assign(to view: UIView) {
     }

@@ -1,6 +1,6 @@
 # {{projectName}}
 
-## prerequisite 
+## prerequisite
 
 1. Install [XcodeGen](https://github.com/yonaskolb/XcodeGen#installing)
 2. run `xcodegen generate` on directory where `project.yml` is exists.
@@ -38,7 +38,7 @@ XcodeProjectTemplate
 │   ├── Views
 │   │   ├── Common
 │   │   │   ├── Constraint.swift
-│   │   │   ├── ContainedButton.swift
+│   │   │   ├── Button.swift
 │   │   │   ├── Container.swift
 │   │   │   ├── Label.swift
 │   │   │   ├── OutlinedButton.swift
@@ -59,6 +59,4 @@ XcodeProjectTemplate
 └── projectNameUITests
     ├── Info.plist
     └── SampleProjectUITests.swift
-
 ```
-

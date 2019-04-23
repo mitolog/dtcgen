@@ -29,30 +29,37 @@ class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement
     }
 
     override func bind(data: [TreeElement]) {
+        guard let viewConfig = self.viewConfig else { return }
         for (uid, name) in self.viewIdMap {
-            let targetName = self.trimIfNeeded(name)
+            // you need to exclude dynamic classes itself.
+            // because all `data`'s treeElements are belongings of the dynamic classes,
+            // so both `name` and `name within the data` will never match on `getProperty(name)`.
+            // that's why I need to exclude here.
+            let targetName = viewConfig.trimClassPrefix(name, classPrefix: "{{treeName}}")
             guard
                 let view = self.viewConfig?.getView(uid),
                 let props = data.getProperty(targetName) else { continue }
-            props.assign(to: view)
-        }
-    }
-}
+            switch view {
+            case is Container:
+                guard let props = props as? ViewProps else { break }
+                (view as! Container).assign(props: props)
+            case is ImageView:
+                guard let props = props as? ImageProps else { break }
+                (view as! ImageView).assign(props: props)
+            case is Label:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! Label).assign(props: textViewProps)
+            case is TextView:
+                guard let textViewProps = props as? TextViewProps else { break }
+                (view as! TextView).assign(props: textViewProps)
+            case is TextField:
+                guard let textInputProps = props as? TextInputProps else { break }
+                (view as! TextField).assign(props: textInputProps)
+            default:
+                props.assign(to: view)
+                break
+            }
 
-extension {{classPrefix}}CollectionViewCell {
-    func trimIfNeeded(_ name: String) -> String {
-
-        // you need to exclude dynamic classes itself.
-        // because all `data`'s treeElements are belongings of the dynamic classes,
-        // so both `name` and `name within the data` will never match on `getProperty(name)`.
-        // that's why I need to exclude here.
-        var targetName = name
-        if let matchedRange = name.range(of: "^{{treeName}}", options: .regularExpression) {
-            let removed = targetName.replacingCharacters(in: matchedRange, with: "")
-            targetName = removed.prefix(1) == "."
-                ? String(removed[removed.index(after: removed.startIndex)..<removed.endIndex])
-                : removed
         }
-        return targetName
     }
 }

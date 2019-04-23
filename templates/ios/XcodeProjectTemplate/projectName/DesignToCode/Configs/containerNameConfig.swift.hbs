@@ -54,34 +54,30 @@ class {{container.name}}Config: ViewConfigImpl {
         {{/if}}
         {{/eq}}
         {{#eq type 'Button'}}
-        {{#if hasIcon }}
-        view = IconButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! IconButton).iconImage = UIImage(named: "DtcGenerated/Icon")
-        {{else}}
-        view = ContainedButton(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! ContainedButton).setTitle("{{name}}", for: .normal)
-        {{/if}}
+        view = Button(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! Button).setTitle("{{name}}", for: .normal)
         {{#if backgroundColor }}
-        (view as! ContainedButton).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        (view as! Button).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
         {{/if}}
         {{/eq}}
         {{#eq type 'TextView'}}
-        view = TextView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}),
+        {{#compare textViewType "===" 0 }}
+        view = Label(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        {{else}}
+        view = TextView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), 
         textContainer: nil)
-        view!.backgroundColor = UIColor.clear
-        (view as! TextView).text = "{{text}}"
-        {{!-- (view as! TextView).textAlignment = {{alignment}} --}}
-        (view as! TextView).font = UIFont(name: "{{fontName}}", size: {{fontSize}})
-        (view as! TextView).textColor = UIColor(red: {{fontColor.fill.red}}, green: {{fontColor.fill.green}}, blue: {{fontColor.fill.blue}}, alpha: {{fontColor.fill.alpha}})
-        {{#if backgroundColor }}
-        (view as! TextView).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
-        {{/if}}
+        {{/compare}}
+        {{/eq}}
+        {{#eq type 'TextInput'}}
+        view = TextField(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         {{/eq}}
         {{#eq type 'Image'}}
-        view = UIImageView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
-        (view as! UIImageView).image = UIImage(named: "DtcGenerated/images/{{stem imageName}}")
+        view = ImageView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
+        (view as! ImageView).image = UIImage(named: "DtcGenerated/images/{{stem imageName}}")
         view!.contentMode = .scaleAspectFill
+        {{#if backgroundColor }}
         view!.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+        {{/if}}
         {{/eq}}
         {{#eq type 'List'}}
         let collectionView: UICollectionView = {
@@ -91,7 +87,11 @@ class {{container.name}}Config: ViewConfigImpl {
             layout.minimumLineSpacing = 0
 
             let collectionView = UICollectionView( frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), collectionViewLayout: layout)
+            {{#if backgroundColor }}
+            collectionView.backgroundColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
+            {{else}}
             collectionView.backgroundColor = UIColor.white
+            {{/if}}
             {{#each ../listSections}}
             collectionView.register({{classPrefix}}CollectionViewCell.self, forCellWithReuseIdentifier: "{{classPrefix}}CollectionViewCell")
             {{/each}}

@@ -24,7 +24,7 @@ export class ImageParser extends SymbolParser {
           this.parseImage(node, view, aLayer);
           break;
         case 'background':
-          this.parseBackground(node, view, aLayer);
+          this.parseBackground(aLayer, view, node);
           break;
       }
     }
@@ -107,17 +107,6 @@ export class ImageParser extends SymbolParser {
         true,
       );
       imageRefNode.export(imagePathName);
-    }
-  }
-
-  private parseBackground(node: any, view: Image, aLayer: any) {
-    view.radius = aLayer.fixedRadius;
-    const comps = new ColorComponents(<ColorComponents>(
-      aLayer.style.fills[0].color
-    ));
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
     }
   }
 }

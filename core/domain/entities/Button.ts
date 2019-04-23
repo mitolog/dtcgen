@@ -1,9 +1,17 @@
 import { View } from './View';
-import { Color } from './Color';
+import { TextStyle } from './TextStyle';
+
+export enum ButtonType {
+  text = 0,
+  icon,
+  iconAndText,
+  toggle, // not implemented yet
+  unknown,
+}
 
 export class Button extends View {
-  fontName?: string;
-  fontSize?: number;
-  fontColor?: Color;
+  buttonType: ButtonType;
+  textStyle?: TextStyle;
+  text?: string;
   hasIcon?: boolean;
 }

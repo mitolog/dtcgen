@@ -1,7 +1,10 @@
 import UIKit
 
 @IBDesignable
-class TextField: UITextField {
+class TextField: UITextField, DtcViewProtocol {
+    typealias PropType = TextInputProps
+    var props: PropType?
+
     @IBInspectable var assistiveText: String = "" {
         didSet {
             updateAssisiveTextLabel()
@@ -62,6 +65,12 @@ class TextField: UITextField {
     override func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
         commonInit()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // need to redraw after subviews are autoresized
+        self.adoptFillsIfNeeded(self.props?.fills)
     }
 
     private func commonInit() {
@@ -204,6 +213,53 @@ class TextField: UITextField {
 
             assistiveTextLabel.textColor = textColor
             assistiveTextLabel.text = errorText
+        }
+    }
+
+    func assign(props: PropType?) {
+        self.props = props
+        guard let props = self.props else { return }
+
+        self.isHidden = !props.isVisible
+        self.backgroundColor = props.backgroundColor?.uiColor ?? UIColor.clear
+
+        self.adoptFillsIfNeeded(props.fills)
+
+        self.isEnabled = props.isEditable
+        self.underlineView.isHidden = !props.showsUnderline
+        self.labelTextLabel.isHidden = !props.showsLabel
+        self.text = props.text
+        self.placeholder = props.placeHolder
+
+        if let assistiveText = props.assistiveText {
+            self.assistiveTextLabel.isHidden = false
+            self.assistiveText = assistiveText
+        } else {
+            self.assistiveTextLabel.isHidden = true
+        }
+
+        if let errorText = props.errorText {
+            self.errorText = errorText
+        }
+
+        if let textStyle = props.textStyle {
+            self.font = textStyle.uiFont
+            self.textColor = textStyle.fontColor?.uiColor
+
+            if let alignment = textStyle.alignment {
+                var hAlign: NSTextAlignment = .center
+                switch alignment {
+                case .right:
+                    hAlign = .right
+                case .center:
+                    hAlign = .center
+                case .left:
+                    hAlign = .left
+                case .equalWidth:
+                    hAlign = .justified
+                }
+                self.textAlignment = hAlign
+            }
         }
     }
 }

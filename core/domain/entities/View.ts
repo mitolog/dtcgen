@@ -1,8 +1,8 @@
-import { ElementType } from './ElementType';
 import { Constraints } from './Constraints';
 import { Container } from './Container';
 import { Rect } from './Rect';
 import { Color } from './Color';
+import { ColorFill } from './ColorFill';
 
 export class View extends Container {
   isVisible: boolean;
@@ -12,4 +12,5 @@ export class View extends Container {
   constraints?: Constraints;
   backgroundColor?: Color;
   radius?: number;
+  fills?: ColorFill[];
 }

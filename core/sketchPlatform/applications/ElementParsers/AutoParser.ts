@@ -10,7 +10,9 @@ import {
   TextView,
   Image,
   ElementType,
+  TextStyle,
 } from '../../../domain/Entities';
+import { TextViewType } from '../../../domain/entities/TextView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -25,22 +27,25 @@ enum AutoDetectType {
 }
 
 export class AutoParser extends SymbolParser {
-  // `node` shuold be symbol's node (not artboard's).
-  // `view` should have been already assigned takeOver data.
-  parse(node: any, view: View) {
+  /// `node` shuold be symbol's node (not artboard's).
+  /// `view` should have been already assigned takeOver data.
+  /// `parentNode` can be node on artboard's.
+  parse(node: any, view: View, parentNode?: any) {
+    // doesn't need any initialized properties on super.parse().
+    //super.parse(node, view, parentNode);
     const type: AutoDetectType | null = this.distinctType(node, view);
     if (!type) return;
     switch (type) {
       case AutoDetectType.Text:
         view.type = ElementType.TextView;
-        this.parseText(node, <TextView>view);
+        this.parseLabel(node, <TextView>view);
         break;
       case AutoDetectType.Image:
         view.type = ElementType.Image;
         this.parseImage(node, <Image>view);
         break;
       case AutoDetectType.View:
-        this.parseBackground(node, view);
+        this.parseBackground(node, view, parentNode);
         break;
       case AutoDetectType.Cell:
         view.type = ElementType.Cell;
@@ -142,7 +147,7 @@ export class AutoParser extends SymbolParser {
     let type: AutoDetectType | null = null;
     // todo: auto detect keywords shuold be placed somewhere around
     // should be name on artboard
-    const autoDetectKeywords: string[] = ['Cell'];
+    const autoDetectKeywords: string[] = super.dynamicClasses();
     const matches: string[] = autoDetectKeywords.filter(keyword => {
       const results = view.name.match(new RegExp(keyword, 'g'));
       return results && results.length > 0 ? true : false;
@@ -153,29 +158,58 @@ export class AutoParser extends SymbolParser {
     return type;
   }
 
-  private parseText(node: any, view: TextView) {
-    // prettier-ignore
-    const fontAttribute = _.get(node, 'style.textStyle.encodedAttributes.MSAttributedStringFontAttribute');
-    // prettier-ignore
-    const colorAttribute = _.get(node, 'style.textStyle.encodedAttributes.MSAttributedStringColorAttribute');
+  private parseLabel(aLayer: any, view: TextView) {
+    // we treat all autoParsed textview as label. The other types will be dealt
+    // within parseElement() on SketchParser, where each text types are detected by keywords.
+    view.textViewType = TextViewType.label;
 
-    if (!fontAttribute || !colorAttribute) return;
     if (this.followOverrides) {
-      this.parseOverride(node, 'stringValue', view);
+      this.parseOverride(aLayer, 'stringValue', view);
     } else {
-      view.name = node.name;
+      view.name = aLayer.name;
     }
-    // prettier-ignore
-    view.fontName = fontAttribute.attributes.name;
-    view.fontSize = fontAttribute.attributes.size;
-    const comps = new ColorComponents(<ColorComponents>colorAttribute);
-    view.fontColor = new Color(<Color>{ fill: comps });
+    this.parseBackground(aLayer, view);
+
+    // If there are no `view.text`, we can assign symbol's default text, if needed.
+    // if (!view.text) {
+    //   view.text = _.get(aLayer, 'attributedString.string', null);
+    // }
+
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
+    }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    view.textStyle = textStyle;
   }
 
   private parseImage(node: any, view: Image) {
     // prettier-ignore
     const fillObj = _.get(node, 'style.fills[0]');
     const fillType = _.get(fillObj, 'fillType');
+
+    this.parseBackground(node, view);
 
     if (!fillObj || fillType !== 4) return; // fillType 4 is "image pattern"
     if (this.followOverrides && node.overrideValues) {
@@ -194,19 +228,6 @@ export class AutoParser extends SymbolParser {
         true,
       );
       imageRefNode.export(imagePathName);
-    }
-  }
-
-  private parseBackground(node: any, view: View) {
-    const color = _.get(node, 'style.fills[0].color');
-    view.radius = node.fixedRadius;
-    if (!color) {
-      return;
-    }
-    const comps = new ColorComponents(<ColorComponents>color);
-    view.backgroundColor = new Color(<Color>{ fill: comps });
-    if (this.followOverrides) {
-      this.parseOverride(node, 'layerStyle', view);
     }
   }
 }

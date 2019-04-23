@@ -19,4 +19,5 @@ protocol ViewConfig {
     func configureViews()
     func getView(_ viewId: String) -> UIView?
     func getTreeElement(for name: String) -> TreeElement?
+    func trimClassPrefix(_ name: String, classPrefix: String) -> String
 }
