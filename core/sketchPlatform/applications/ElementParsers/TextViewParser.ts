@@ -12,6 +12,9 @@ export class TextViewParser extends SymbolParser {
   parse(node: any, textView: TextView) {
     super.parse(node, textView);
 
+    // set default
+    textView.isEditable = false;
+
     const elements = this.getSymbolElements(ElementType.TextView);
     for (const key of Object.keys(elements)) {
       const aLayer: any = this.getSubLayerFor(key, elements);

@@ -11,4 +11,5 @@ export class TextView extends View {
   text?: string;
   placeHolder?: string;
   textStyle?: TextStyle;
+  isEditable?: boolean;
 }
