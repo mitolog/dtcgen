@@ -49,6 +49,7 @@ class TextView: UITextView, DtcViewProtocol {
         self.adoptFillsIfNeeded(props.fills)
 
         self.text = props.text
+        self.isEditable = props.isEditable ?? false
 
         if let textStyle = props.textStyle {
             self.font = textStyle.uiFont

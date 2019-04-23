@@ -8,6 +8,7 @@ import {
   TreeElement,
   TextView,
   View,
+  TextInput,
 } from '../../domain/Entities';
 
 import { SketchView } from '../entities/SketchView';
@@ -16,6 +17,7 @@ import { TakeOverData } from '../entities/TakeOverData';
 import { IElementParser } from './ElementParsers/IElementParser';
 import { ButtonParser } from './ElementParsers/ButtonParser';
 import { TextViewParser } from './ElementParsers/TextViewParser';
+import { TextInputParser } from './ElementParsers/TextInputParser';
 import { ImageParser } from './ElementParsers/ImageParser';
 import { AutoParser } from './ElementParsers/AutoParser';
 import { TextViewType } from '../../domain/entities/TextView';
@@ -95,9 +97,8 @@ export class SketchParser {
         parser.parse(node, <TextView>(<unknown>view));
         break;
       case ElementType.TextInput:
-        ((<unknown>view) as TextView).textViewType = TextViewType.input;
-        parser = new TextViewParser(this.sketch, this.config);
-        parser.parse(node, <TextView>(<unknown>view));
+        parser = new TextInputParser(this.sketch, this.config);
+        parser.parse(node, <TextInput>(<unknown>view));
         break;
       case ElementType.Image:
         parser = new ImageParser(this.sketch, this.config, this.outputDir);

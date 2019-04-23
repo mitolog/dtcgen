@@ -15,6 +15,7 @@ export {
   VerticalTextAlignment,
 } from './entities/TextStyle';
 export { TextView } from './entities/TextView';
+export { TextInput } from './entities/TextInput';
 export { TreeElement } from './entities/TreeElement';
 export { View } from './entities/View';
 export { ColorFill, FillType, FillTypeValues } from './entities/ColorFill';

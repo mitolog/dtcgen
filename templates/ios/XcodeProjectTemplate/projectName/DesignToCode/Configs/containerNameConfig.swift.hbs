@@ -67,14 +67,6 @@ class {{container.name}}Config: ViewConfigImpl {
         view = TextView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}), 
         textContainer: nil)
         {{/compare}}
-        {{!-- view!.backgroundColor = UIColor.clear --}}
-        {{!-- (view as! TextView).text = "{{text}}" --}}
-        {{!-- (view as! TextView).textAlignment = {{alignment}} --}}
-        {{!-- (view as! TextView).font = UIFont(name: "{{fontName}}", size: {{fontSize}})
-        (view as! TextView).textColor = UIColor(red: {{fontColor.fill.red}}, green: {{fontColor.fill.green}}, blue: {{fontColor.fill.blue}}, alpha: {{fontColor.fill.alpha}}) --}}
-        {{!-- {{#if backgroundColor }}
-        (view as! TextView).containerColor = UIColor(red: {{backgroundColor.fill.red}}, green: {{backgroundColor.fill.green}}, blue: {{backgroundColor.fill.blue}}, alpha: {{backgroundColor.fill.alpha}})
-        {{/if}} --}}
         {{/eq}}
         {{#eq type 'TextInput'}}
         view = TextField(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))

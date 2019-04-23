@@ -91,7 +91,8 @@ class TextViewProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
-
+    var isEditable: Bool?
+    
     enum TextViewType: Int, Codable {
         case label, input, textView
     }
@@ -105,6 +106,36 @@ class TextViewProps: DtcProperties {
     func assign(to view: UIView) {
     }
 
+}
+
+class TextInputProps: DtcProperties {
+    // Container Props
+    var type: PropertyType
+    var id: String
+    var name: String
+    var rect: Rect
+
+    // View props
+    var isVisible: Bool
+    var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
+    var fills: [ColorFill]?
+
+    // TextInput props
+    var isEditable: Bool
+    var showsLabel: Bool
+    var showsUnderline: Bool
+
+    var text: String?
+    var placeHolder: String?
+    var assistiveText: String?
+    var errorText: String?
+
+    var textStyle: TextStyle?
+
+    func assign(to view: UIView) {
+    }
 }
 
 class ImageProps: DtcProperties {
@@ -206,8 +237,10 @@ enum PropertyType: String, Codable {
             return ViewProps.self
         case .Button:
             return ButtonProps.self
-        case .TextView, .TextInput:
+        case .TextView:
             return TextViewProps.self
+        case .TextInput:
+            return TextInputProps.self
         case .Image:
             return ImageProps.self
         case .Card:
