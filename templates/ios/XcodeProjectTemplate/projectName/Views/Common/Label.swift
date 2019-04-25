@@ -47,7 +47,9 @@ class Label: UILabel, DtcViewProtocol {
     override func layoutSubviews() {
         super.layoutSubviews()
         // need to redraw after subviews are autoresized
-        self.adoptFillsIfNeeded(self.props?.fills)
+        if (self.props?.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(self.props?.fills)
+        }
     }
 
     private func commonInit() {
@@ -69,7 +71,9 @@ class Label: UILabel, DtcViewProtocol {
         self.containerColor = props.backgroundColor?.uiColor ?? UIColor.clear
         self.cornerRadius = props.radius ?? 0
 
-        self.adoptFillsIfNeeded(props.fills)
+        if (props.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(props.fills)
+        }
 
         self.text = props.text
 

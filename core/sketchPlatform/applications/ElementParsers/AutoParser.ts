@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
-import { SymbolParser } from './SymbolParser';
+import { BaseElementParser } from './BaseElementParser';
 import { OutputType } from '../../../utilities/PathManager';
 
 import {
@@ -8,11 +8,11 @@ import {
   ColorComponents,
   View,
   TextView,
+  TextViewType,
   Image,
   ElementType,
   TextStyle,
 } from '../../../domain/Entities';
-import { TextViewType } from '../../../domain/entities/TextView';
 
 dotenv.config();
 if (dotenv.error) {
@@ -26,7 +26,7 @@ enum AutoDetectType {
   Cell = 'Cell',
 }
 
-export class AutoParser extends SymbolParser {
+export class AutoParser extends BaseElementParser {
   /// `node` shuold be symbol's node (not artboard's).
   /// `view` should have been already assigned takeOver data.
   /// `parentNode` can be node on artboard's.

@@ -6,9 +6,9 @@ import {
   TextStyle,
 } from '../../../domain/Entities';
 import * as _ from 'lodash';
-import { SymbolParser } from './SymbolParser';
+import { BaseElementParser } from './BaseElementParser';
 
-export class TextViewParser extends SymbolParser {
+export class TextViewParser extends BaseElementParser {
   parse(node: any, textView: TextView) {
     super.parse(node, textView);
 

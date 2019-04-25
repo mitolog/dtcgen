@@ -5,7 +5,6 @@ export enum ElementType {
   TextView = 'TextView',
   TextInput = 'TextInput',
   Image = 'Image',
-  Card = 'Card',
   List = 'List',
   Cell = 'Cell',
 }
@@ -18,5 +17,4 @@ export const ElementTypes: string[] = [
   ElementType[5],
   ElementType[6],
   ElementType[7],
-  ElementType[8],
 ];

@@ -1,5 +1,4 @@
 export { Button, ButtonType } from './entities/Button';
-export { Card } from './entities/Card';
 export { Color } from './entities/Color';
 export { ColorComponents } from './entities/ColorComponents';
 export { Constraints } from './entities/Constraints';
@@ -14,7 +13,7 @@ export {
   TextAlignment,
   VerticalTextAlignment,
 } from './entities/TextStyle';
-export { TextView } from './entities/TextView';
+export { TextView, TextViewType } from './entities/TextView';
 export { TextInput } from './entities/TextInput';
 export { TreeElement } from './entities/TreeElement';
 export { View } from './entities/View';
