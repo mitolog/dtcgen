@@ -2,17 +2,17 @@ import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
 import { Color } from '../../../domain/entities/Color';
 import { ColorComponents } from '../../../domain/entities/ColorComponents';
-import { SymbolParser } from './SymbolParser';
+import { BaseElementParser } from './BaseElementParser';
 import { ElementType } from '../../../domain/entities/ElementType';
 import { Image } from '../../../domain/entities/Image';
-import { PathManager, OutputType } from '../../../utilities/PathManager';
+import { OutputType } from '../../../utilities/PathManager';
 
 dotenv.config();
 if (dotenv.error) {
   throw dotenv.error;
 }
 
-export class ImageParser extends SymbolParser {
+export class ImageParser extends BaseElementParser {
   parse(node: any, view: Image) {
     super.parse(node, view);
     const elements = this.getSymbolElements(ElementType.Image);

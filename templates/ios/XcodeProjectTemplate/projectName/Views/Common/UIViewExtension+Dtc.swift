@@ -5,6 +5,7 @@ import UIKit
 // https://medium.com/@valv0/computed-properties-and-extensions-a-pure-swift-approach-64733768112c
 extension UIView {
     private static var _parentId = [String:String?]()
+    private static var dtcTag = "dtc"   // design-to-code tag to identify layers
 
     var parentId:String? {
         get {
@@ -28,19 +29,31 @@ extension UIView {
             subLayers?.append(layer)
         }
         // update subLayers
-        self.layer.sublayers = nil
-        self.layer.sublayers = subLayers
+        if let currentSublayers = self.layer.sublayers {
+            for layer in currentSublayers {
+                if layer.name == UIView.dtcTag {
+                    layer.removeFromSuperlayer()
+                }
+            }
+        }
+        subLayers?.forEach({ [weak self] (layer) in
+            guard let weakSelf = self else { return }
+            weakSelf.layer.addSublayer(layer)
+        })
     }
 
     func layerFor(_ fill: ColorFill) -> CALayer {
         var layer = CALayer()
+        layer.name = UIView.dtcTag
+
         // fillタイプを見る
         switch fill.fillType {
         case .fill:
             layer.backgroundColor = fill.color.uiColor.cgColor
             layer.opacity = Float(fill.opacity)
         case .gradient:
-            layer = self.gradientLayer(for: fill.gradient)
+            guard let gradient = fill.gradient else { break }
+            layer = self.gradientLayer(for: gradient)
             layer.opacity = Float(fill.opacity)
         default:
             break
@@ -50,7 +63,7 @@ extension UIView {
 
     func gradientLayer(for gradient: Gradient) -> CAGradientLayer {
         let gradientLayer = CAGradientLayer()
-
+        gradientLayer.name = UIView.dtcTag
         switch gradient.type {
         case .linear:
             let colors = gradient.stops.map { $0.color.uiColor.cgColor }

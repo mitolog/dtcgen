@@ -171,27 +171,6 @@ class ImageProps: DtcProperties {
     }
 }
 
-class CardProps: DtcProperties {
-    // Container Props
-    var type: PropertyType
-    var id: String
-    var name: String
-    var rect: Rect
-
-    // View props
-    var isVisible: Bool
-    var originalRect: Rect
-    var fills: [ColorFill]?
-
-    // Card props
-    var imageName: String?
-    var title: String?
-    var description: String?
-
-    func assign(to view: UIView) {
-    }
-}
-
 class ListProps: DtcProperties {
     // Container Props
     var type: PropertyType
@@ -202,6 +181,8 @@ class ListProps: DtcProperties {
     // View props
     var isVisible: Bool
     var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
     var fills: [ColorFill]?
 
     func assign(to view: UIView) {
@@ -226,7 +207,7 @@ class CellProps: DtcProperties {
 
 /* same as ElementType of DesignToCode entity */
 enum PropertyType: String, Codable {
-    case Container, View, Button, TextView, TextInput, Image, Card, List, Cell
+    case Container, View, Button, TextView, TextInput, Image, List, Cell
 
     var metatype: DtcProperties.Type {
         switch self {
@@ -243,8 +224,6 @@ enum PropertyType: String, Codable {
             return TextInputProps.self
         case .Image:
             return ImageProps.self
-        case .Card:
-            return CardProps.self
         case .List:
             return ListProps.self
         case .Cell:

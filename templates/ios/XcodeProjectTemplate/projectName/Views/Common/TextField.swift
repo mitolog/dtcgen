@@ -70,7 +70,9 @@ class TextField: UITextField, DtcViewProtocol {
     override func layoutSubviews() {
         super.layoutSubviews()
         // need to redraw after subviews are autoresized
-        self.adoptFillsIfNeeded(self.props?.fills)
+        if (self.props?.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(self.props?.fills)
+        }
     }
 
     private func commonInit() {
@@ -223,7 +225,9 @@ class TextField: UITextField, DtcViewProtocol {
         self.isHidden = !props.isVisible
         self.backgroundColor = props.backgroundColor?.uiColor ?? UIColor.clear
 
-        self.adoptFillsIfNeeded(props.fills)
+        if (props.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(props.fills)
+        }
 
         self.isEnabled = props.isEditable
         self.underlineView.isHidden = !props.showsUnderline
