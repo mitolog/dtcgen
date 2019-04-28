@@ -8,19 +8,31 @@ targets:
     platform: iOS
     deploymentTarget: "11.0"
     sources: [{{projectName}}]
+    {{#if plist}}
+    info:
+      path: {{projectName}}/Info.plist
+      {{#if plist.attributes}}
+      properties:
+        LSRequiresIPhoneOS: YES
+        UILaunchStoryboardName: "LaunchScreen"
+        UIMainStoryboardFile: "Main"
+        UIRequiredDeviceCapabilities: ["armv7"]
+        UISupportedInterfaceOrientations: ["UIInterfaceOrientationPortrait", "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight"]
+        UISupportedInterfaceOrientations~ipad: ["UIInterfaceOrientationPortrait", "UIInterfaceOrientationPortraitUpsideDown", "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight"]
+      {{#forIn plist.attributes}}
+        {{@key}}: "{{.}}"
+      {{/forIn}}
+      {{/if}}
+    {{/if}}
     settings:
       configs:
         debug:
           CUSTOM_BUILD_SETTING: my_debug_value
         release:
           CUSTOM_BUILD_SETTING: my_release_value
-#    dependencies:
-#      - target: MyFramework
-#      - carthage: Alamofire
-#      - framework: Vendor/MyFramework.framework
-#      - sdk: Contacts.framework
-#      - sdk: libc++.tbd
-#  MyFramework:
-#    type: framework
-#    platform: iOS
-#    sources: [MyFramework]
+    {{#if dependencies}}
+    dependencies:
+    {{#each dependencies.sdks}}
+      - sdk: {{.}}
+    {{/each}}
+    {{/if}}

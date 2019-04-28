@@ -29,7 +29,7 @@ export class SourceCodeGenerator {
   }
 
   generateSourceCodes(searchDir: string) {
-    const treeJson = this.getJson(OutputType.tree);
+    const treeJson = this.pathManager.getJson(OutputType.tree);
     // Prepare needed pathes
     const templatePaths = new DesignToCodeTemplatePaths(searchDir);
 
@@ -158,26 +158,6 @@ export class SourceCodeGenerator {
     );
     fs.copySync(dynamicAttributesDir, dynamicAttributesDestDir);
 
-    // // make .swift for each dynamic json
-    // const dynamicAttributesJsonPaths: string[] = this.pathManager.searchDirsOrFiles(
-    //   dynamicAttributesDestDir,
-    //   `.*\.json$`,
-    //   true,
-    // );
-    // const execSync = cp.execSync;
-    // for (let jsonPath of dynamicAttributesJsonPaths) {
-    //   fs.ensureFileSync(jsonPath);
-    //   let command = 'npx quicktype ';
-    //   command += jsonPath;
-    //   command += ' -o ';
-    //   command += path.join(
-    //     path.dirname(jsonPath),
-    //     path.basename(jsonPath, 'json') + 'swift',
-    //   );
-    //   command += ' --struct-or-class class';
-    //   execSync(command);
-    // }
-
     // remove templates itself
     templatePaths.removeTemplates();
   }
@@ -205,6 +185,22 @@ export class SourceCodeGenerator {
       // todo: suppose only 1 list exists on 1 artboard.
       targetList = allLists[0];
     }
+
+    const imports: string[] = views
+      .filter(view => {
+        switch (view.type) {
+          case ElementType.Map:
+            return true;
+        }
+        return false;
+      })
+      .map(view => {
+        switch (view.type) {
+          case ElementType.Map:
+            return 'MapKit';
+        }
+        return '';
+      });
 
     const dynamicClasses: string[] = [];
 
@@ -255,6 +251,9 @@ export class SourceCodeGenerator {
     /// cell preparation to here ///
 
     /// set content from here ///
+    if (imports) {
+      containerConfig.imports = imports;
+    }
     containerConfig.container = container;
     containerConfig.views = views;
     if (targetList) {
@@ -267,18 +266,6 @@ export class SourceCodeGenerator {
     /// set content to here ///
 
     return containerConfig;
-  }
-
-  private getJson(outputType: OutputType): any {
-    const metadataJsonPath = this.pathManager.getOutputPath(outputType);
-    if (!metadataJsonPath) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
-    }
-    const json: any[] = JSON.parse(this.pathManager.read(metadataJsonPath));
-    if (!json) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
-    }
-    return json;
   }
 
   private gatherViewsForContainer(treeElements: [TreeElement?], views: [any?]) {

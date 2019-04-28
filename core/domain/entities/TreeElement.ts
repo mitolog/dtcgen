@@ -1,6 +1,7 @@
 import { Container } from './Container';
 import { View } from './View';
 import { isContainer } from '../../typeGuards';
+import { ElementType } from './ElementType';
 
 export class TreeElement {
   public uid: string;
@@ -70,6 +71,22 @@ export class TreeElement {
     }
     for (const element of this.elements) {
       const matched = element.searchElement(uid);
+      if (matched) {
+        return matched;
+      }
+    }
+  }
+
+  /**
+   * returns first treeElement of `type` parameter matched
+   * @param type {ElementType}
+   */
+  firstElementByType(type: ElementType): TreeElement {
+    if (this.properties.type === type) {
+      return this;
+    }
+    for (const element of this.elements) {
+      const matched = element.firstElementByType(type);
       if (matched) {
         return matched;
       }

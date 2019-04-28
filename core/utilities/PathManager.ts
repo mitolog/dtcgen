@@ -231,6 +231,18 @@ export class PathManager {
     return foundPaths;
   }
 
+  getJson(outputType: OutputType): any {
+    const metadataJsonPath = this.getOutputPath(outputType);
+    if (!metadataJsonPath) {
+      throw new Error('cannot find directory: ' + metadataJsonPath);
+    }
+    const json: any[] = JSON.parse(this.read(metadataJsonPath));
+    if (!json) {
+      throw new Error('cannot find directory: ' + metadataJsonPath);
+    }
+    return json;
+  }
+
   read(filePath): string {
     let content = '';
     if (this.check(filePath)) {
