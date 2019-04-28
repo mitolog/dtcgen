@@ -19,6 +19,7 @@ import { AutoParser } from './ElementParsers/AutoParser';
 import { TextViewType } from '../../domain/entities/TextView';
 import { ListParser } from './ElementParsers/ListParser';
 import { SymbolParser } from './ElementParsers/SymbolParser';
+import { MapParser } from './ElementParsers/MapParser';
 
 export class SketchParser {
   private sketch: Object;
@@ -111,6 +112,10 @@ export class SketchParser {
         break;
       case ElementType.List:
         parser = new ListParser(this.sketch, this.config, this.outputDir);
+        parser.parse(node, view, treeElement);
+        break;
+      case ElementType.Map:
+        parser = new MapParser(this.sketch, this.config, this.outputDir);
         parser.parse(node, view, treeElement);
         break;
       default:
