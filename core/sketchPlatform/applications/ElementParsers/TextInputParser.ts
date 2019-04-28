@@ -7,9 +7,9 @@ import {
   View,
 } from '../../../domain/Entities';
 import * as _ from 'lodash';
-import { SymbolParser } from './SymbolParser';
+import { BaseElementParser } from './BaseElementParser';
 
-export class TextInputParser extends SymbolParser {
+export class TextInputParser extends BaseElementParser {
   parse(node: any, textInput: TextInput) {
     super.parse(node, textInput);
 

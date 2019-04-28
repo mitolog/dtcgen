@@ -108,6 +108,12 @@ class ViewConfigImpl : NSObject, ViewConfig {
             case is TextField:
                 guard let textInputProps = props as? TextInputProps else { break }
                 (view as! TextField).assign(props: textInputProps)
+            case is TextField:
+                guard let textInputProps = props as? TextInputProps else { break }
+                (view as! TextField).assign(props: textInputProps)
+            case is CollectionView:
+                guard let listProps = props as? ListProps else { break }
+                (view as! CollectionView).assign(props: listProps)
             default:
                 break
             }

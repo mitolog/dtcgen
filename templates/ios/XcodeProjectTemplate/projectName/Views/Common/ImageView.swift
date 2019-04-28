@@ -7,10 +7,12 @@ class ImageView: UIImageView, DtcViewProtocol {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.adoptFillsIfNeeded(self.props?.fills)
+        if (self.props?.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(self.props?.fills)
+        }
     }
 
-    func assign(props: ImageProps?) {
+    func assign(props: PropType?) {
         self.props = props
         guard let props = self.props else { return }
 
@@ -18,7 +20,9 @@ class ImageView: UIImageView, DtcViewProtocol {
         self.backgroundColor = props.backgroundColor?.uiColor ?? UIColor.clear
         self.layer.cornerRadius = props.radius ?? 0
 
-        self.adoptFillsIfNeeded(props.fills)
+        if (props.backgroundColor == nil) {
+            self.adoptFillsIfNeeded(props.fills)
+        }
 
         if let imagePath = props.getAssetPath() {
             self.image = UIImage(named: imagePath)
