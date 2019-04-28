@@ -21,7 +21,7 @@ struct ColorFill: Codable {
     let fillType: FillType
     let opacity: CGFloat
     let color: Color
-    let gradient: Gradient
+    let gradient: Gradient?
 }
 
 struct Gradient: Codable {

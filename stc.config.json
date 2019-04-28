@@ -11,7 +11,6 @@
         "Mask",
         "Pin",
         "Guide",
-        "List/Background",
         "Tab Bar",
         "Navigation Bar",
         "Keyboard"
@@ -35,10 +34,8 @@
           "Image": "rectangle",
           "Background": "rectangle"
         },
-        "Card": {
-          "Title": "text",
-          "Description": "text",
-          "Image": "rectangle",
+        "List": {
+          "Cell": "symbolInstance",
           "Background": "rectangle"
         }
       }
