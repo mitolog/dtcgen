@@ -21,6 +21,7 @@ export type ListSection = {
   insets: Insets;
 };
 export class ContainerConfig {
+  imports?: string[];
   container?: Container;
   dataVariables?: DataVariable[];
   dynamicClasses?: string[];
