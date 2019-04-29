@@ -7,12 +7,12 @@ import {
   TreeElement,
   View,
   ElementType,
+  Size,
 } from '../../domain/Entities';
 import {
   ContainerConfig,
   DataVariable,
   ListSection,
-  Size,
 } from '../entities/ContainerConfig';
 import { isString } from 'util';
 import { isContainer } from '../../typeGuards';
