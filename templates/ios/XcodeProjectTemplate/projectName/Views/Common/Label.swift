@@ -50,6 +50,7 @@ class Label: UILabel, DtcViewProtocol {
         if (self.props?.backgroundColor == nil) {
             self.adoptFillsIfNeeded(self.props?.fills)
         }
+        self.adoptShadowsIfNeeded(self.props?.shadows)
     }
 
     private func commonInit() {
@@ -74,6 +75,7 @@ class Label: UILabel, DtcViewProtocol {
         if (props.backgroundColor == nil) {
             self.adoptFillsIfNeeded(props.fills)
         }
+        self.adoptShadowsIfNeeded(props.shadows)
 
         self.text = props.text
 

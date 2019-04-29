@@ -66,6 +66,7 @@ class Button: UIButton, DtcViewProtocol {
         if (self.props?.backgroundColor == nil) {
             self.adoptFillsIfNeeded(self.props?.fills)
         }
+        self.adoptShadowsIfNeeded(self.props?.shadows)
     }
 
     public func commonInit() {
@@ -91,7 +92,8 @@ class Button: UIButton, DtcViewProtocol {
         if (props.backgroundColor == nil) {
             self.adoptFillsIfNeeded(props.fills)
         }
-
+        self.adoptShadowsIfNeeded(props.shadows)
+        
         self.setTitle(props.text, for: .normal)
 
         if let hasIcon = props.hasIcon {

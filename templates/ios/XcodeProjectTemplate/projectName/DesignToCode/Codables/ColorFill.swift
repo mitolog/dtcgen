@@ -31,14 +31,6 @@ struct Gradient: Codable {
     let stops: [Stop]
 }
 
-struct Point: Codable {
-    let x, y: CGFloat
-
-    func cgPoint() -> CGPoint {
-        return CGPoint(x: x, y: y)
-    }
-}
-
 struct Stop: Codable {
     let position: CGFloat
     let color: Color
