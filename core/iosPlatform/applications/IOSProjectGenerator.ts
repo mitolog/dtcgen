@@ -6,6 +6,8 @@ import { PathManager, OutputType } from '../../utilities/PathManager';
 import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
 import { SourceCodeGenerator } from './SourceCodeGenerator';
+import { ElementType, TreeElement } from '../../domain/Entities';
+import { ProjectSettings } from '../entities/ProjectSettings';
 
 dotenv.config();
 if (dotenv.error) {
@@ -68,11 +70,14 @@ export class IOSProjectGenerator {
 
     const projectNameData = { projectName: trimedProjectName };
 
+    const projectSettings = this.projectSettings();
+    projectSettings.projectName = trimedProjectName;
+
     // deal with project.yml
     this.templateHelpers.searchAndAdoptTemplate(
       templateDestDir,
       `project\.yml\.hbs`,
-      projectNameData,
+      projectSettings,
     );
 
     // deal with *Tests directories
@@ -95,6 +100,45 @@ export class IOSProjectGenerator {
   /**
    * Private methods
    */
+
+  // TODO: we have same method within `TreeElement`, but when you execute
+  // `pathManager.getJson(OutputType.tree)`, you will get `any`
+  // which is not TreeElement instance. so, you cannot call `firstElementByType`
+  // from TreeElement. so I temporarily place here...
+  firstElementByType(type: ElementType, treeElement: TreeElement): TreeElement {
+    if (treeElement.properties.type === type) {
+      return treeElement;
+    }
+    for (const element of treeElement.elements) {
+      const matched = this.firstElementByType(type, element);
+      if (matched) {
+        return matched;
+      }
+    }
+  }
+
+  private projectSettings(): ProjectSettings {
+    const settings = new ProjectSettings();
+
+    const treeJson = this.pathManager.getJson(OutputType.tree);
+    let hasMap = false;
+    for (const treeElement of treeJson as TreeElement[]) {
+      // map related settings
+      const elm = this.firstElementByType(ElementType.Map, treeElement);
+      if (elm) {
+        hasMap = true;
+      }
+    }
+
+    // map related settings
+    if (hasMap) {
+      settings.plist.attributes['NSLocationWhenInUseUsageDescription'] =
+        'overwrite here';
+      settings.dependencies.sdks.push('MapKit.framework');
+    }
+
+    return settings.trim();
+  }
 
   /**
    *

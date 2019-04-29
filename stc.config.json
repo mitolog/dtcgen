@@ -1,7 +1,7 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button", "TextView", "TextInput", "Image", "List"],
+      "keywords": ["Button", "TextView", "TextInput", "Image", "List", "Map"],
       "dynamicClasses": ["Cell"],
       "exceptions": [
         "iPhone X Frame",
@@ -37,6 +37,9 @@
         "List": {
           "Cell": "symbolInstance",
           "Background": "rectangle"
+        },
+        "Map": {
+          "Map": "symbolInstance"
         }
       }
     },

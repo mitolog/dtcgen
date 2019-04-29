@@ -1,5 +1,8 @@
 import Foundation
 import UIKit
+{{#imports}}
+import {{.}}
+{{/imports}}
 
 class {{container.name}}Config: ViewConfigImpl {
 
@@ -94,6 +97,9 @@ class {{container.name}}Config: ViewConfigImpl {
             return collectionView
         }()
         view = collectionView
+        {{/eq}}
+        {{#eq type 'Map'}}
+        view = MKMapView(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))
         {{/eq}}
         {{#eq type 'Cell'}}
         view = Container(frame: CGRect(x: {{rect.x}}, y: {{rect.y}}, width: {{rect.width}}, height: {{rect.height}}))

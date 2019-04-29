@@ -25,3 +25,4 @@ export {
   GradientTypeValues,
   GradientStop,
 } from './entities/Gradient';
+export { MapView, MapType } from './entities/MapView';

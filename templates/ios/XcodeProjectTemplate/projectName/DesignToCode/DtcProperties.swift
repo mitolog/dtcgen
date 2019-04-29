@@ -205,9 +205,37 @@ class CellProps: DtcProperties {
     }
 }
 
+class MapProps: DtcProperties {
+    // Container Props
+    var type: PropertyType
+    var id: String
+    var name: String
+    var rect: Rect
+
+    // View props
+    var isVisible: Bool
+    var originalRect: Rect
+    var backgroundColor: Color?
+    var radius: CGFloat?
+    var fills: [ColorFill]?
+
+    enum MapType: Int, Codable {
+        case standard, satellite, hybrid
+    }
+
+    // Map props
+    var mapType: MapType?
+    var isZoomEnabled: Bool?
+    var isScrollEnabled: Bool?
+    var isRotateEnabled: Bool?
+
+    func assign(to view: UIView) {
+    }
+}
+
 /* same as ElementType of DesignToCode entity */
 enum PropertyType: String, Codable {
-    case Container, View, Button, TextView, TextInput, Image, List, Cell
+    case Container, View, Button, TextView, TextInput, Image, List, Cell, Map
 
     var metatype: DtcProperties.Type {
         switch self {
@@ -228,6 +256,8 @@ enum PropertyType: String, Codable {
             return ListProps.self
         case .Cell:
             return CellProps.self
+        case .Map:
+            return MapProps.self
         }
     }
 }
