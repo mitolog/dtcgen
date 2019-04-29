@@ -1,17 +1,16 @@
-import { Container, View, ElementType } from '../../domain/Entities';
+import {
+  Container,
+  View,
+  ElementType,
+  Size,
+  Insets,
+} from '../../domain/Entities';
 
 export type DataVariable = {
   type: ElementType;
   variableName: string;
   treeName: string;
   classPrefix: string;
-};
-export type Size = { width: number; height: number };
-export type Insets = {
-  top: number;
-  left: number;
-  bottom: number;
-  right: number;
 };
 export type ListSection = {
   sectionName: string;
