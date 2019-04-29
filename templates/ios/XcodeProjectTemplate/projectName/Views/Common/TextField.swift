@@ -73,6 +73,7 @@ class TextField: UITextField, DtcViewProtocol {
         if (self.props?.backgroundColor == nil) {
             self.adoptFillsIfNeeded(self.props?.fills)
         }
+        self.adoptShadowsIfNeeded(self.props?.shadows)
     }
 
     private func commonInit() {
@@ -228,6 +229,7 @@ class TextField: UITextField, DtcViewProtocol {
         if (props.backgroundColor == nil) {
             self.adoptFillsIfNeeded(props.fills)
         }
+        self.adoptShadowsIfNeeded(props.shadows)
 
         self.isEnabled = props.isEditable
         self.underlineView.isHidden = !props.showsUnderline

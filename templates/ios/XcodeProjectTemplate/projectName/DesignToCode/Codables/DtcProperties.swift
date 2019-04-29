@@ -45,6 +45,7 @@ class ViewProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     func assign(to view: UIView) {
     }
@@ -63,6 +64,7 @@ class ButtonProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     enum ButtonType: Int, Codable {
         case text, icon, iconAndText, toggle, unknown
@@ -91,6 +93,8 @@ class TextViewProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
+
     var isEditable: Bool?
     
     enum TextViewType: Int, Codable {
@@ -121,6 +125,7 @@ class TextInputProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     // TextInput props
     var isEditable: Bool
@@ -151,6 +156,7 @@ class ImageProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     // Image props
     var imageName: String?
@@ -184,6 +190,7 @@ class ListProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     func assign(to view: UIView) {
     }
@@ -200,6 +207,7 @@ class CellProps: DtcProperties {
     var isVisible: Bool
     var originalRect: Rect
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     func assign(to view: UIView) {
     }
@@ -218,6 +226,7 @@ class MapProps: DtcProperties {
     var backgroundColor: Color?
     var radius: CGFloat?
     var fills: [ColorFill]?
+    var shadows: [Shadow]?
 
     enum MapType: Int, Codable {
         case standard, satellite, hybrid
