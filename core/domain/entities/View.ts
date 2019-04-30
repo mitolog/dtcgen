@@ -3,6 +3,7 @@ import { Container } from './Container';
 import { Rect } from './Rect';
 import { Color } from './Color';
 import { ColorFill } from './ColorFill';
+import { Shadow } from './Shadow';
 
 export class View extends Container {
   isVisible: boolean;
@@ -13,4 +14,5 @@ export class View extends Container {
   backgroundColor?: Color;
   radius?: number;
   fills?: ColorFill[];
+  shadows?: Shadow[];
 }

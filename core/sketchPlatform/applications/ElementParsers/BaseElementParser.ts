@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { isNumber } from 'util';
+import { isNumber, isBoolean } from 'util';
 import { IElementParser } from './IElementParser';
 import { ElementType } from '../../../domain/entities/ElementType';
 import { PathManager } from '../../../utilities/PathManager';
@@ -11,6 +11,8 @@ import {
   ColorFill,
   Color,
   TreeElement,
+  Shadow,
+  Size,
 } from '../../../domain/Entities';
 import { isFillType } from '../../../typeGuards';
 
@@ -93,6 +95,11 @@ export abstract class BaseElementParser implements IElementParser {
       this.adoptFill(fillsObj, view);
     }
 
+    const shadowsObj = _.get(targetNode, 'style.shadows', null);
+    if (shadowsObj) {
+      this.adoptShadow(shadowsObj, view);
+    }
+
     if (this.followOverrides) {
       // Parse overrides of "SYMBOLs" if atteined, and assign to the `view`.
       this.parseOverride(targetNode, 'layerStyle', view);
@@ -142,6 +149,49 @@ export abstract class BaseElementParser implements IElementParser {
 
     if (fills.length > 0) {
       view.fills = fills;
+    }
+  }
+
+  adoptShadow(shadowsObj: any, view: View) {
+    const shadows: Shadow[] = [];
+    for (let shadowObj of shadowsObj) {
+      const isEnabled: boolean = isBoolean(shadowObj['isEnabled'])
+        ? shadowObj['isEnabled']
+        : false;
+      const colorComps: object = shadowObj['color'] || null;
+      const offsetX: number = isNumber(shadowObj['offsetX'])
+        ? shadowObj['offsetX']
+        : 0;
+      const offsetY: number = isNumber(shadowObj['offsetY'])
+        ? shadowObj['offsetY']
+        : 0;
+      const radius: number = isNumber(shadowObj['blurRadius'])
+        ? shadowObj['blurRadius']
+        : 0;
+
+      if (!colorComps) {
+        continue;
+      }
+
+      let shadow = new Shadow();
+      shadow.isEnabled = isEnabled;
+      shadow.opacity = _.get(shadowObj, 'contextSettings.opacity', 1);
+      shadow.offset = new Size({ width: offsetX, height: offsetY });
+      shadow.radius = radius;
+
+      let colorFillComponents = new ColorComponents({
+        alpha: isNumber(colorComps['alpha']) ? colorComps['alpha'] : 0,
+        red: isNumber(colorComps['red']) ? colorComps['red'] : 0,
+        green: isNumber(colorComps['green']) ? colorComps['green'] : 0,
+        blue: isNumber(colorComps['blue']) ? colorComps['blue'] : 0,
+      });
+      shadow.color = Color.withFill(colorFillComponents);
+
+      shadows.push(shadow);
+    }
+
+    if (shadows.length > 0) {
+      view.shadows = shadows;
     }
   }
 
