@@ -37,6 +37,7 @@ class TextView: UITextView, DtcViewProtocol {
         if (self.props?.backgroundColor == nil) {
             self.adoptFillsIfNeeded(self.props?.fills)
         }
+        self.adoptShadowsIfNeeded(self.props?.shadows)
     }
     
     private func commonInit() {
@@ -57,6 +58,7 @@ class TextView: UITextView, DtcViewProtocol {
         if (props.backgroundColor == nil) {
             self.adoptFillsIfNeeded(props.fills)
         }
+        self.adoptShadowsIfNeeded(props.shadows)
 
         self.text = props.text
         self.isEditable = props.isEditable ?? false

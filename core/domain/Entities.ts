@@ -8,6 +8,8 @@ export { ElementType, ElementTypes } from './entities/ElementType';
 export { Image } from './entities/Image';
 export { OSType } from './entities/OSType';
 export { Rect } from './entities/Rect';
+export { Size } from './entities/Size';
+export { Insets } from './entities/Insets';
 export {
   TextStyle,
   TextAlignment,
@@ -26,3 +28,4 @@ export {
   GradientStop,
 } from './entities/Gradient';
 export { MapView, MapType } from './entities/MapView';
+export { Shadow } from './entities/Shadow';

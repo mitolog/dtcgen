@@ -18,6 +18,19 @@ extension UIView {
         }
     }
 
+    func adoptShadowsIfNeeded(_ shadows: [Shadow]? = nil) {
+        guard
+            let shadows = shadows,
+            let shadow = shadows.first else { return }
+
+        if (!shadow.isEnabled) { return }
+
+        self.layer.shadowColor = shadow.color.uiColor.cgColor
+        self.layer.shadowOffset = shadow.offset.cgSize()
+        self.layer.shadowRadius = shadow.radius
+        self.layer.shadowOpacity = Float(shadow.opacity)
+    }
+
     func adoptFillsIfNeeded(_ fills: [ColorFill]? = nil) {
         guard let fills = fills else { return }
         var subLayers: [CALayer]? = []
