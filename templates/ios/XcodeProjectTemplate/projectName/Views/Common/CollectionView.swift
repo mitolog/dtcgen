@@ -10,7 +10,11 @@ class CollectionView: UICollectionView, DtcViewProtocol {
         }
     }
     @IBInspectable var name: String = ""
-    @IBInspectable var cornerRadius: CGFloat = 0
+    @IBInspectable var cornerRadius: CGFloat = 0 {
+        didSet {
+            layer.cornerRadius = cornerRadius
+        }
+    }
     @IBInspectable var shadowRadius: CGFloat = 0
     @IBInspectable var shadowColor: UIColor = .clear
     @IBInspectable var shadowOffset: CGSize = .zero
