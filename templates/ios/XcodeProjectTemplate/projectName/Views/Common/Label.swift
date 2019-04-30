@@ -9,7 +9,11 @@ class Label: UILabel, DtcViewProtocol {
         }
     }
     @IBInspectable var name: String = ""
-    @IBInspectable var cornerRadius: CGFloat = 0
+    @IBInspectable var cornerRadius: CGFloat = 0 {
+        didSet {
+            layer.cornerRadius = cornerRadius
+        }
+    }
     @IBInspectable var bgShadowRadius: CGFloat = 0
     @IBInspectable var bgShadowColor: UIColor = .clear
     @IBInspectable var bgShadowOffset: CGSize = .zero

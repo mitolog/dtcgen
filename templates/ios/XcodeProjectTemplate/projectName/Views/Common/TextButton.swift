@@ -2,7 +2,11 @@ import UIKit
 
 @IBDesignable
 class TextButton: UIButton {
-    @IBInspectable var cornerRadius: CGFloat = 4
+    @IBInspectable var cornerRadius: CGFloat = 4 {
+        didSet {
+            layer.cornerRadius = cornerRadius
+        }
+    }
     @IBInspectable var shadowRadius: CGFloat = 0
     @IBInspectable var shadowColor: UIColor = .clear
     @IBInspectable var shadowOffset: CGSize = .zero
