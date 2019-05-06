@@ -18,8 +18,8 @@ import { isFillType } from '../../../typeGuards';
 
 export type SymbolElement<T> = { key: T };
 export abstract class BaseElementParser implements IElementParser {
-  private sketch: Object;
-  private config: Object;
+  public sketch: Object;
+  public config: Object;
 
   public pathManager: PathManager;
   public subLayers?: any[];
@@ -51,17 +51,8 @@ export abstract class BaseElementParser implements IElementParser {
     }
 
     // node shuold be a symbol instance.
-    const symbolsPage = this.sketch['symbolsPage'];
-    const targetSymbol = symbolsPage.get(
-      'symbolMaster',
-      instance => instance.symbolID === node.symbolID,
-    );
-    if (
-      !targetSymbol ||
-      !targetSymbol.layers ||
-      targetSymbol.layers.length <= 0
-    )
-      return;
+    const targetSymbol = this.getSymbolWithSymbolID(node.symbolID);
+    if (!targetSymbol.layers || targetSymbol.layers.length <= 0) return;
 
     // TBD: exclude 'shapeGroup' because it's info is too large to deal with at this time.
     this.subLayers = targetSymbol.layers.filter(
@@ -72,12 +63,6 @@ export abstract class BaseElementParser implements IElementParser {
   parseBackground(targetNode: any, view: View, parentNode?: any) {
     // Set radius
     view.radius = targetNode.fixedRadius;
-
-    // Set default backgroundColor in advance
-    // let fillColorComponents: ColorComponents = ColorComponents.clearColor();
-    // view.backgroundColor = new Color(<Color>{
-    //   fill: fillColorComponents,
-    // });
 
     const hasBackgroundColor = targetNode['hasBackgroundColor'] || false;
     const backgroundColor = targetNode['backgroundColor'] || null;
@@ -219,13 +204,16 @@ export abstract class BaseElementParser implements IElementParser {
     return matchedLayers[0];
   }
 
-  // silly
-  getSketch(): Object {
-    return this.sketch;
-  }
+  /// retrieve symbol instance with symbolID
+  getSymbolWithSymbolID(id: string): any {
+    if (!id) return null;
 
-  // silly
-  getConfig(): Object {
-    return this.config;
+    const symbolsPage = this.sketch['symbolsPage'];
+    const targetSymbol = symbolsPage.get(
+      'symbolMaster',
+      instance => instance.symbolID === id,
+    );
+    if (!targetSymbol) return null;
+    return targetSymbol;
   }
 }

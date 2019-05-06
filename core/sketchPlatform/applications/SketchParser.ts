@@ -20,6 +20,7 @@ import { TextViewType } from '../../domain/entities/TextView';
 import { ListParser } from './ElementParsers/ListParser';
 import { SymbolParser } from './ElementParsers/SymbolParser';
 import { MapParser } from './ElementParsers/MapParser';
+import { NavigationBarParser } from './ElementParsers/NavigationBarParser';
 
 export class SketchParser {
   private sketch: Object;
@@ -116,6 +117,14 @@ export class SketchParser {
         break;
       case ElementType.Map:
         parser = new MapParser(this.sketch, this.config, this.outputDir);
+        parser.parse(node, view, treeElement);
+        break;
+      case ElementType.NavBar:
+        parser = new NavigationBarParser(
+          this.sketch,
+          this.config,
+          this.outputDir,
+        );
         parser.parse(node, view, treeElement);
         break;
       default:

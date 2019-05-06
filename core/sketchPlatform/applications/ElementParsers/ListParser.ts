@@ -21,8 +21,8 @@ export class ListParser extends BaseElementParser {
           case 'cell':
             if (!treeElement) break;
             const symbolParser = new SymbolParser(
-              this.getSketch(),
-              this.getConfig(),
+              this.sketch,
+              this.config,
               this.pathManager.outputDir,
             );
             // assuming aLayer: cell(_class=symbolInstance), node: List(_class=group)
