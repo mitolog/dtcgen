@@ -13,6 +13,7 @@ import {
   TreeElement,
   Shadow,
   Size,
+  TextStyle,
 } from '../../../domain/Entities';
 import { isFillType } from '../../../typeGuards';
 
@@ -77,7 +78,10 @@ export abstract class BaseElementParser implements IElementParser {
 
     const fillsObj = _.get(targetNode, 'style.fills', null);
     if (fillsObj) {
-      this.adoptFill(fillsObj, view);
+      const fills = this.getFills(fillsObj);
+      if (fills) {
+        view.fills = fills;
+      }
     }
 
     const shadowsObj = _.get(targetNode, 'style.shadows', null);
@@ -99,10 +103,40 @@ export abstract class BaseElementParser implements IElementParser {
     // });
   }
 
+  parseTextStyle(aLayer: any): TextStyle | null {
+    const textStyle: TextStyle = new TextStyle();
+
+    const textAttribute = _.get(
+      aLayer,
+      'style.textStyle.encodedAttributes',
+      null,
+    );
+    if (!textAttribute) return;
+
+    const fontObj = textAttribute['MSAttributedStringFontAttribute'] || null;
+    if (fontObj) {
+      textStyle.fontName = _.get(fontObj, 'attributes.name', null);
+      textStyle.fontSize = _.get(fontObj, 'attributes.size', null);
+    }
+    const colorObj = textAttribute['MSAttributedStringColorAttribute'] || null;
+    if (colorObj) {
+      const comps = new ColorComponents(<ColorComponents>colorObj);
+      textStyle.fontColor = new Color(<Color>{ fill: comps });
+    }
+    const alignment = _.get(textAttribute, 'paragraphStyle.alignment', null);
+    textStyle.alignment = alignment !== null ? alignment : null;
+    const vAlignment = textStyle['verticalAlignment'];
+    if (vAlignment !== null) {
+      textStyle.verticalAlignment = vAlignment;
+    }
+
+    return textStyle;
+  }
+
   abstract parseSharedStyle(node: any, styleType: string, view: View);
   abstract parseOverride(node: any, styleType: string, view: View);
 
-  adoptFill(fillsObj: any, view: View) {
+  getFills(fillsObj: any): ColorFill[] | null {
     const fills: ColorFill[] = [];
     for (let fill of fillsObj) {
       const isFillEnabled: boolean = fill['isEnabled'] || false;
@@ -132,9 +166,7 @@ export abstract class BaseElementParser implements IElementParser {
       fills.push(colorFill);
     }
 
-    if (fills.length > 0) {
-      view.fills = fills;
-    }
+    return fills.length > 0 ? fills : null;
   }
 
   adoptShadow(shadowsObj: any, view: View) {
@@ -198,14 +230,14 @@ export abstract class BaseElementParser implements IElementParser {
   getSubLayerFor(key: string, elements: SymbolElement<string>): any {
     if (!this.subLayers || this.subLayers.length <= 0) return null;
     const matchedLayers = this.subLayers.filter(layer => {
-      const matched = layer.name.match(new RegExp(key, 'g'));
+      const matched = layer.name.match(new RegExp(key, 'gi'));
       return matched && matched.length > 0 && layer._class === elements[key];
     });
     return matchedLayers[0];
   }
 
   /// retrieve symbol instance with symbolID
-  getSymbolWithSymbolID(id: string): any {
+  getSymbolWithSymbolID(id?: string): any {
     if (!id) return null;
 
     const symbolsPage = this.sketch['symbolsPage'];
