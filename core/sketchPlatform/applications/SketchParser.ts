@@ -5,6 +5,7 @@ import {
   TreeElement,
   TextView,
   TextInput,
+  NavigationBarIOS,
 } from '../../domain/Entities';
 import { SketchView } from '../entities/SketchView';
 import { TakeOverData } from '../entities/TakeOverData';
@@ -125,7 +126,7 @@ export class SketchParser {
           this.config,
           this.outputDir,
         );
-        parser.parse(node, view, treeElement);
+        parser.parse(node, <NavigationBarIOS>(<unknown>view), treeElement);
         break;
       default:
         break;

@@ -33,4 +33,5 @@ export {
   NavigationBarIOS,
   NavigationItemIOS,
   BarButtonItemIOS,
+  BarButtonItemSide,
 } from './entities/NavigationBarIOS';
