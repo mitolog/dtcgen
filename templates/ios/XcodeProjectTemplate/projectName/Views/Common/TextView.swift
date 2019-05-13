@@ -10,7 +10,11 @@ class TextView: UITextView, DtcViewProtocol {
             backgroundColor = containerColor
         }
     }
-    @IBInspectable var cornerRadius: CGFloat = 0
+    @IBInspectable var cornerRadius: CGFloat = 0 {
+        didSet {
+            layer.cornerRadius = cornerRadius
+        }
+    }
 
     override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
