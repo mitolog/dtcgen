@@ -29,3 +29,9 @@ export {
 } from './entities/Gradient';
 export { MapView, MapType } from './entities/MapView';
 export { Shadow } from './entities/Shadow';
+export {
+  NavigationBarIOS,
+  NavigationItemIOS,
+  BarButtonItemIOS,
+  BarButtonItemSide,
+} from './entities/NavigationBarIOS';

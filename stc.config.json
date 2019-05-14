@@ -1,7 +1,15 @@
 {
   "sketch": {
     "extraction": {
-      "keywords": ["Button", "TextView", "TextInput", "Image", "List", "Map"],
+      "keywords": [
+        "Button",
+        "TextView",
+        "TextInput",
+        "Image",
+        "List",
+        "Map",
+        "NavigationBar"
+      ],
       "dynamicClasses": ["Cell"],
       "exceptions": [
         "iPhone X Frame",
@@ -12,7 +20,6 @@
         "Pin",
         "Guide",
         "Tab Bar",
-        "Navigation Bar",
         "Keyboard"
       ],
       "followOverrides": true,
@@ -40,6 +47,12 @@
         },
         "Map": {
           "Map": "symbolInstance"
+        },
+        "NavigationBar": {
+          "Background": "rectangle",
+          "Center": "symbolInstance",
+          "Left": "symbolInstance",
+          "Right": "symbolInstance"
         }
       }
     },

@@ -38,7 +38,7 @@ export class SymbolParser extends BaseElementParser {
     }
 
     const view = new SketchView(targetNode, parentId);
-    if (SketchUtil.shouldExclude(node.name, this.getConfig(), parentTree)) {
+    if (SketchUtil.shouldExclude(node.name, this.config, parentTree)) {
       return;
     }
 
@@ -49,8 +49,8 @@ export class SymbolParser extends BaseElementParser {
 
     // AutoParse this node(node-sketch).
     const parser = new AutoParser(
-      this.getSketch(),
-      this.getConfig(),
+      this.sketch,
+      this.config,
       this.pathManager.outputDir,
     );
     parser.parse(targetNode, view, takeOverData.nodeOnArtboard);
@@ -82,7 +82,7 @@ export class SymbolParser extends BaseElementParser {
    * @param node Node instance
    */
   private symbolForNode(node: any): any | null {
-    const symbolsPage = this.getSketch()['symbolsPage'];
+    const symbolsPage = this.sketch['symbolsPage'];
     let targetSymbol: any | null = null;
     if (node._class === 'symbolMaster' || node._class === 'symbolInstance') {
       targetSymbol = symbolsPage.get(
