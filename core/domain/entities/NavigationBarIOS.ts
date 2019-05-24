@@ -25,11 +25,10 @@ export class NavigationItemIOS {
   leftItems?: BarButtonItemIOS[];
   rightItems?: BarButtonItemIOS[];
 
-  // check `titleText` exists first, then check `titleView` on perser.
   titleText?: string;
   subTitleText?: string;
   titleTextStyle?: TextStyle;
-  titleView?: View; // If titleView is assigned, priorize `titleView` over `titleText`
+  titleView?: View;
 
   addOrReplaceItem(item: BarButtonItemIOS) {
     let items: BarButtonItemIOS[];

@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import {
   ElementType,
   Button,
@@ -53,9 +54,21 @@ export class SketchParser {
       // so `View` and  `Button` will be matched, but adopt latter one,
       // because it's expected to be a button element according to english grammer.
       view.type = <ElementType>matches[matches.length - 1];
-    }
 
-    if (isKeywordMatched) {
+      // 1) excludesリストに入っているものの場合、treeElement.shuoldExcludeをtrueに
+      // 2) navBarより下のviewのlayout値をnavBarの高さ分詰める
+      const excludes: string[] = _.get(
+        this.config,
+        'generation.excludes',
+        null,
+      );
+      if (excludes && excludes.length > 0) {
+        const matched = excludes.filter(name => view.type === name);
+        if (matched && matched.length > 0) {
+          treeElement.shuoldExcludeOnAdopt = true;
+        }
+      }
+
       this.parseElement(node, view, treeElement);
       treeElement.name = view.name.toLowerCamelCase(' ');
       parentTree.addElement(treeElement);

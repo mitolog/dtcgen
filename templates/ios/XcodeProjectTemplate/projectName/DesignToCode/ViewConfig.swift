@@ -15,7 +15,7 @@ protocol ViewConfig {
     ///   - name: shuold be same as `Dtc.config.baseViewComponentName` or a `name` of treeElement.
     ///   - onView: the view where all views matching `name` are added
     /// - Returns: adopted view ids
-    func adopt(name: String, on onView: UIView) -> [String: String]
+    func adopt<T>(name: String, on: T) -> [String: String]
     func configureViews()
     func getView(_ viewId: String) -> UIView?
     func getTreeElement(for name: String) -> TreeElement?
