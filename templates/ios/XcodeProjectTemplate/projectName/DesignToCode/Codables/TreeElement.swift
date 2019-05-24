@@ -11,6 +11,7 @@ struct TreeElement: Codable {
     let uid, name: String?
     let elements: [TreeElement]?
     let properties: DtcProperties?
+    let shuoldExcludeOnAdopt: Bool
 }
 
 // MARK: Convenience initializers and mutators
@@ -18,7 +19,7 @@ struct TreeElement: Codable {
 extension TreeElement {
 
     private enum CodingKeys: CodingKey {
-        case uid, name, elements, properties
+        case uid, name, elements, properties, shuoldExcludeOnAdopt
     }
 
     init(from decoder: Decoder) throws {
@@ -27,6 +28,7 @@ extension TreeElement {
         uid = try container.decode(String.self, forKey: .uid)
         name = try container.decode(String.self, forKey: .name)
         elements = try container.decode([TreeElement].self, forKey: .elements)
+        shuoldExcludeOnAdopt = try container.decode(Bool.self, forKey: .shuoldExcludeOnAdopt)
         let properties = try ContainerProps.init(from: container.superDecoder(forKey: .properties))
         self.properties = try properties.type.metatype.init(from: container.superDecoder(forKey: .properties))
     }
@@ -65,7 +67,8 @@ extension TreeElement {
             uid: uid ?? self.uid,
             name: name ?? self.name,
             elements: elements ?? self.elements,
-            properties: properties ?? self.properties
+            properties: properties ?? self.properties,
+            shuoldExcludeOnAdopt: shuoldExcludeOnAdopt
         )
     }
 

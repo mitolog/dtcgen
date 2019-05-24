@@ -16,7 +16,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
      * protocol methods below
      */
 
-    func adopt(name: String, on onView: UIView) -> [String: String] {
+    func adopt<T>(name: String, on: T) -> [String: String] {
 
         // [uid: name]
         var viewIdMap: [String:String] = [:]
@@ -25,16 +25,16 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
         // ここでstaticなviewにpropsをアサインしていく
         if let treeElement = self.treeElement {
-            self.assignProps(treeElement: treeElement)
+            self.assignProps(on: on, treeElement: treeElement)
         }
 
-        // do not place code below upper than configureViews()
+        // do not place this code upper than configureViews()
         if (isBaseView) {
             self.bindDummyData()
         }
         self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIdMap)
-        self.adopt(on: onView, viewIdMap: viewIdMap, isExceptions: isBaseView)
-        return viewIdMap;
+        self.adopt(on: on, viewIdMap: viewIdMap, isExceptions: isBaseView)
+        return viewIdMap
     }
 
     func configureViews() {
@@ -86,7 +86,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
      * private methods below
      */
 
-    private func assignProps(treeElement: TreeElement) {
+    private func assignProps<T>(on: T, treeElement: TreeElement) {
         guard
             let uid = treeElement.uid,
             let props = treeElement.properties else { return }
@@ -108,12 +108,15 @@ class ViewConfigImpl : NSObject, ViewConfig {
             case is TextField:
                 guard let textInputProps = props as? TextInputProps else { break }
                 (view as! TextField).assign(props: textInputProps)
-            case is TextField:
-                guard let textInputProps = props as? TextInputProps else { break }
-                (view as! TextField).assign(props: textInputProps)
             case is CollectionView:
                 guard let listProps = props as? ListProps else { break }
                 (view as! CollectionView).assign(props: listProps)
+            case is UINavigationBar:
+                guard
+                    let navBarProps = props as? NavBarProps,
+                    T.self == UIViewController.self,
+                    let navCon = (on as! UIViewController).navigationController else { break }
+                navCon.assign(props: navBarProps)
             default:
                 break
             }
@@ -121,7 +124,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
         guard let elements = treeElement.elements else { return }
         for element in elements {
-            self.assignProps(treeElement: element)
+            self.assignProps(on: on, treeElement: element)
         }
     }
 
@@ -133,6 +136,8 @@ class ViewConfigImpl : NSObject, ViewConfig {
         guard
             let treeElement = treeElement,
             let treeElements = treeElement.elements else { return }
+        if treeElement.shuoldExcludeOnAdopt { return }
+
         let isBaseView = name == Dtc.config.baseViewComponentName
         for aElement in treeElements {
             guard let treeName = aElement.name else { continue }
@@ -169,7 +174,19 @@ class ViewConfigImpl : NSObject, ViewConfig {
         }
     }
 
-    private func adopt(on onView: UIView, viewIdMap: [String: String], isExceptions: Bool) {
+    private func adopt<T>(on: T, viewIdMap: [String: String], isExceptions: Bool) {
+
+        var view: UIView? = nil
+        switch on.self {
+            case is UIView:
+                view = on as? UIView
+            case is UIViewController:
+                view = (on as! UIViewController).view
+            default:
+                break
+        }
+
+        guard let onView = view else { return }
 
         // add views onto super view BEFORE layouts, otherwise it crashes
         self.lookupViews(onView,
