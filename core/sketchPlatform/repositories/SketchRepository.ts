@@ -236,6 +236,14 @@ export class SketchRepository implements ISketchRepository {
       attributesByArtboards[topTree.name] = attribute;
     });
 
+    // delete current attributes first
+    const attributesPath = pathManager.getOutputPath(
+      OutputType.dynamicAttributes,
+      true,
+      null,
+    );
+    fs.removeSync(attributesPath);
+
     for (const artboardName of Object.keys(attributesByArtboards)) {
       const attribute: DynamicAttribute = attributesByArtboards[artboardName];
       for (const classPrefix of Object.keys(attribute)) {
