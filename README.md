@@ -35,15 +35,16 @@
 ### extract
 
 - それぞれの artboard に含まれる`group`は`View`に変換し、`symbol`は要素の特徴にしたがって抽出
-- どの`symbol`を抽出するかは`stc.config.json` でも定義できるし、ある程度は自動でも可能
+- どの`symbol`を抽出するかは`dtc.config.json` でも定義できるし、ある程度は自動でも可能
 - アイコンの抽出などは、sketch.app に含まれる `sketch-tool` の slice コマンドを利用
 
 ### generate
 
 -
+
 - コードテンプレートには[handlebars](https://handlebarsjs.com/)を使っている
 
-### stc.config.json
+### dtc.config.json
 
 config ファイル中の `keywords` に 1:1 で対応するクラスに変換(つまり、keywords の数だけアプリ側でクラスができる)
 
@@ -53,7 +54,7 @@ config ファイル中の `keywords` に 1:1 で対応するクラスに変換(�
 - `keywords`
 
 - group は Container(View)とし、symbol は命名規則に従って各種要素に変換
-- シンボルのレイヤ構造は `stc.config.json` に記載
+- シンボルのレイヤ構造は `dtc.config.json` に記載
 
 ## acknowlagement
 

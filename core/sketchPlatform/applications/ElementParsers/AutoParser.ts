@@ -71,7 +71,7 @@ export class AutoParser extends BaseElementParser {
         type = typeByView || AutoDetectType.View;
         // todo: 名前で検出したtypeごとに自動パースしたほうがよさげでは。symbol配下の要素まで命名規則が決められてしまうと
         // - 制約事項が多くてデザイナのタスクが増える
-        // - 要素が多くなった場合に、大量に命名規則が発生してしまう、すると stc.config.jsonで定義すべきものも同時に増えてとても大変
+        // - 要素が多くなった場合に、大量に命名規則が発生してしまう、すると dtc.config.jsonで定義すべきものも同時に増えてとても大変
 
         break;
     }
