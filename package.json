@@ -10,12 +10,8 @@
     "@types/jest": "^23.3.14",
     "@types/lodash": "^4.14.133",
     "@types/node": "^8.10.49",
-    "cac": "^5.0.16",
     "jest": "~23.6.0",
-    "merge": "^1.2.1",
-    "pluralize": "^7.0.0",
     "prettier": "1.14.3",
-    "rimraf": "^2.6.3",
     "ts-jest": "^23.10.5",
     "tslint": "~5.11.0",
     "tslint-config-prettier": "1.15.0",
@@ -31,9 +27,10 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch --rootDir \"./core\""
   },
-  "author": "mito_log <hkyhm5l@gmail.com>",
+  "author": "mito-san <yuhei.miyazato@nexusfrontier.tech>",
   "license": "Apache-2.0",
   "dependencies": {
+    "cac": "git+ssh:git@github.com:mitolog/cac.git#namedExportOnEventModule",
     "dotenv": "^6.2.0",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.1.2",
@@ -41,6 +38,7 @@
     "inversify": "^5.0.1",
     "lodash": "^4.17.11",
     "node-sketch": "^0.10.0",
+    "pluralize": "^8.0.0",
     "reflect-metadata": "^0.1.13",
     "tslib": "~1.9.3"
   }
