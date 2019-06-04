@@ -3,14 +3,14 @@ import UIKit
 
 class {{classPrefix}}CollectionViewCell: BindableCollectionViewCell<[TreeElement]> {
 
-    var viewConfig: ViewConfig?
+    var viewConfig: {{container.name}}Config?
     var viewIdMap: [String: String] = [:]
 
     // called when the view is instantiated via code, not interface builder.
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.viewConfig = Dtc.config.{{container.name}}
-        self.viewIdMap = viewConfig!.adopt(name:"{{treeName}}", on: self.contentView)
+        self.viewConfig = {{container.name}}Config()
+        self.viewIdMap = viewConfig!.adopt(on: self.contentView, name:"{{treeName}}")
     }
 
     // called via interface builder, but not initialize IBOutlets, IBActions

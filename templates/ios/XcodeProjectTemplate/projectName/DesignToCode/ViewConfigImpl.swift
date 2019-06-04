@@ -16,25 +16,29 @@ class ViewConfigImpl : NSObject, ViewConfig {
      * protocol methods below
      */
 
-    func adopt<T>(name: String, on: T) -> [String: String] {
+    func adopt<T>(on: T, name: String? = nil) -> [String: String] {
 
-        // [uid: name]
-        var viewIdMap: [String:String] = [:]
-        let isBaseView = name == Dtc.config.baseViewComponentName
+        // [uid: element name with dot-delimiter]
+        var dynamicViewIdNameMap: [String:String] = [:]
+        let isOnViewControllerView = name == nil
         self.configureViews()
 
-        // ここでstaticなviewにpropsをアサインしていく
+        // assign props to static views
         if let treeElement = self.treeElement {
             self.assignProps(on: on, treeElement: treeElement)
         }
 
         // do not place this code upper than configureViews()
-        if (isBaseView) {
+        if (isOnViewControllerView) {
             self.bindDummyData()
         }
-        self.searchViewIds(for: name, treeElement: self.treeElement, outputs: &viewIdMap)
-        self.adopt(on: on, viewIdMap: viewIdMap, isExceptions: isBaseView)
-        return viewIdMap
+        self.fillInDynamicViews(for: name,
+                                treeElement: self.treeElement,
+                                outputs: &dynamicViewIdNameMap)
+        self.adopt(on: on,
+                   dynamicViewIdNameMap: dynamicViewIdNameMap,
+                   isOnViewControllerView: isOnViewControllerView)
+        return dynamicViewIdNameMap
     }
 
     func configureViews() {
@@ -128,17 +132,18 @@ class ViewConfigImpl : NSObject, ViewConfig {
         }
     }
 
-    // If the `name` parameter is not base view's, only first matched treeElement is used.
-    // Otherwise, search and collect all treeElements' uids(and names) that matches.
-    private func searchViewIds(for name: String,
-                               treeElement: TreeElement?,
-                               outputs: inout [String: String]) {
+    /// これは、例えばhogeCellみたいな動的なviewをoutputsに格納するメソッド。
+    /// ただnameパラメータの有無で挙動が変わる。
+    /// `name`有：最初に`name`にマッチしたtreeElementだけを抽出 (例えばcell配下のviewを想定)
+    /// `name`無：dynamicClassesに含まれているtreeElementをすべて抽出 (例えばviewController上を想定)
+    private func fillInDynamicViews(for name: String?,
+                                    treeElement: TreeElement?,
+                                    outputs: inout [String: String]) {
         guard
             let treeElement = treeElement,
             let treeElements = treeElement.elements else { return }
-        if treeElement.shuoldExcludeOnAdopt { return }
 
-        let isBaseView = name == Dtc.config.baseViewComponentName
+        let isBaseView = name == nil
         for aElement in treeElements {
             guard let treeName = aElement.name else { continue }
             let dynamicClasses: [String] = self.dynamicClasses ?? []
@@ -149,14 +154,14 @@ class ViewConfigImpl : NSObject, ViewConfig {
                     return
                 }
             }
-            let matched = (isBaseView && isDynamicClass) || (!isBaseView && treeName == name)
+            let matched = (isBaseView && isDynamicClass) || (!isBaseView && treeName == name!)
             if matched {
                 // get all uids(and dot connected names) of sucseeding tree elements
                 self.getAllUid(treeElement: aElement, uidMap: &outputs)
                 if isBaseView { continue } else { return }
             }
             // if element name doesn't match, dig deeper
-            self.searchViewIds(for: name, treeElement: aElement, outputs: &outputs)
+            self.fillInDynamicViews(for: name, treeElement: aElement, outputs: &outputs)
         }
     }
 
@@ -174,7 +179,9 @@ class ViewConfigImpl : NSObject, ViewConfig {
         }
     }
 
-    private func adopt<T>(on: T, viewIdMap: [String: String], isExceptions: Bool) {
+    private func adopt<T>(on: T,
+                          dynamicViewIdNameMap: [String: String],
+                          isOnViewControllerView: Bool) {
 
         var view: UIView? = nil
         switch on.self {
@@ -188,19 +195,22 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
         guard let onView = view else { return }
 
+
         // add views onto super view BEFORE layouts, otherwise it crashes
         self.lookupViews(onView,
-                         viewIdMap: viewIdMap,
-                         isExceptions: isExceptions) { [weak self] (view, uid) in
+                         dynamicViewIdNameMap: dynamicViewIdNameMap,
+                         isOnViewControllerView: isOnViewControllerView)
+        { [weak self] (view, uid) in
             guard let weakSelf = self else { return }
-            weakSelf.add(view, onView, viewIdMap)
+            weakSelf.add(view, onView, dynamicViewIdNameMap)
         }
 
-        // layout views
+        // layout views AFTER `addSubView`, oterwise it crashes
         var anchors: [NSLayoutConstraint] = []
         self.lookupViews(onView,
-                         viewIdMap: viewIdMap,
-                         isExceptions: isExceptions) { [weak self] (view, uid) in
+                         dynamicViewIdNameMap: dynamicViewIdNameMap,
+                         isOnViewControllerView: isOnViewControllerView)
+        { [weak self] (view, uid) in
             guard let weakSelf = self else { return }
             weakSelf.layoutViews(view, on: onView, uid: uid, anchors: &anchors)
         }
@@ -208,9 +218,27 @@ class ViewConfigImpl : NSObject, ViewConfig {
     }
 
     private func lookupViews(_ onView: UIView,
-                             viewIdMap: [String: String],
-                             isExceptions: Bool,
+                             dynamicViewIdNameMap: [String: String],
+                             isOnViewControllerView: Bool,
                              found: (_ view: UIView, _ uid: String) -> Void) {
+
+        guard let treeElement = self.treeElement else { return }
+        var uids: [String] = []
+        treeElement.getUids(&uids)
+
+        for uid in uids {
+            let isDynamicView = dynamicViewIdNameMap[uid] != nil
+            guard let targetView = self.views[uid] else { continue }
+            // 1) viewController.view上なら、dynamicViewじゃないやつを採用
+            // 2) 任意のview上(例えばHogeCell)なら、dynamicViewを採用
+            // 3) viewが除外対象じゃないものを採用
+            if isOnViewControllerView && !isDynamicView
+                ||
+               !isOnViewControllerView && isDynamicView
+            {
+                found(targetView, uid)
+            }
+        }
 
         /* 
             Here we are aiming to retrieve view instances linked to each uid of viewIdMap.
@@ -229,26 +257,6 @@ class ViewConfigImpl : NSObject, ViewConfig {
             But if you do that, complexity becomes O(n). So, potencially we shuold make Ordered hash map like:
             https://github.com/omochi/OrderedDictionary/tree/25c754ff4fd48942dbc43df90234eec8243b44b9
         */
-
-        guard let treeElement = self.treeElement else { return }
-        var uids: [String] = []
-        treeElement.getUids(&uids)
-        for uid in uids {
-            let isMatched = viewIdMap[uid] != nil
-            let isBase = isExceptions && !isMatched
-            let isView = !isExceptions && isMatched
-            if(!isBase && !isView) { continue }
-
-            if let viewName = viewIdMap[uid],
-                let dynamicClasses = self.dynamicClasses,
-                dynamicClasses.contains(viewName) {
-                continue
-            }
-
-            guard let view = self.views[uid] else { continue }
-
-            found(view, uid)
-        }
     }
 
     private func layoutViews(_ view: UIView,
@@ -279,7 +287,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
     private func add(_ targetView: UIView,
                      _ onView: UIView,
-                     _ viewIdNameMap: [String: String]) {
+                     _ dynamicViews: [String: String]) {
         // If there are no parent, just add to base `onView`
         guard
             let parentId = targetView.parentId,
@@ -293,7 +301,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
         // If there are no entry of dynamicClasses on current adoptation,
         // just add onto `parentView` we attained above
         guard
-            let parentName = viewIdNameMap[parentId],
+            let parentName = dynamicViews[parentId],
             let dynamicClasses = self.dynamicClasses else {
                 parentView.addSubview(targetView)
                 return
@@ -301,7 +309,7 @@ class ViewConfigImpl : NSObject, ViewConfig {
 
         // If there exist dynamicClasses on current adoptation,
         // add it onto base `onView`, not to `parentView`,
-        // which is dynamicClass(i.e. "cell" class)
+        // which is dynamicClass(i.e. "UICollectionViewCell" class)
         if dynamicClasses.contains(parentName) {
             onView.addSubview(targetView)
             return

@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as pluralize from 'pluralize';
+import * as _ from 'lodash';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import {
   Container,
@@ -8,6 +9,7 @@ import {
   View,
   ElementType,
   Size,
+  DynamicClass,
 } from '../../domain/Entities';
 import {
   ContainerConfig,
@@ -202,8 +204,6 @@ export class SourceCodeGenerator {
         return '';
       });
 
-    const dynamicClasses: string[] = [];
-
     /// cell preparation from here ///
     const allCells: View[] = views.filter(
       view => view.type === ElementType.Cell,
@@ -250,6 +250,17 @@ export class SourceCodeGenerator {
     }
     /// cell preparation to here ///
 
+    /// other dynamicClasses preparetion from here ///
+    const dynamicClasses: string[] = _.get(
+      this.pathManager.getConfig(),
+      'extraction.dynamicClasses',
+      [],
+    )
+      .map(obj => new DynamicClass(obj))
+      .filter(classObj => classObj.excludeOnPaste)
+      .map(classObj => classObj.name.toLowerCamelCase());
+    /// other dynamicClasses preparetion to here ///
+
     /// set content from here ///
     if (imports) {
       containerConfig.imports = imports;
@@ -261,7 +272,7 @@ export class SourceCodeGenerator {
       containerConfig.listViewId = targetList.id;
       containerConfig.listSections = listSections;
     }
-    containerConfig.dynamicClasses = [...cellClassNames]; // spread syntax
+    containerConfig.dynamicClasses = [...cellClassNames, ...dynamicClasses]; // spread syntax
     containerConfig.dataVariables = [...cellVariables];
     /// set content to here ///
 

@@ -8,7 +8,6 @@ export class TreeElement {
   public name: string;
   public properties: View | Container;
   public elements: [TreeElement?];
-  public shuoldExcludeOnAdopt: boolean = false;
 
   constructor(containerOrView: Container | View, elements?: [TreeElement]) {
     this.uid = containerOrView.id;

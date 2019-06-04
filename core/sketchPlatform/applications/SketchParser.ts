@@ -7,6 +7,8 @@ import {
   TextView,
   TextInput,
   NavigationBarIOS,
+  DynamicClass,
+  DynamicClassShift,
 } from '../../domain/Entities';
 import { SketchView } from '../entities/SketchView';
 import { TakeOverData } from '../entities/TakeOverData';
@@ -55,20 +57,7 @@ export class SketchParser {
       // because it's expected to be a button element according to english grammer.
       view.type = <ElementType>matches[matches.length - 1];
 
-      // 1) excludesリストに入っているものの場合、treeElement.shuoldExcludeをtrueに
-      // 2) navBarより下のviewのlayout値をnavBarの高さ分詰める
-      const excludes: string[] = _.get(
-        this.config,
-        'generation.excludes',
-        null,
-      );
-      if (excludes && excludes.length > 0) {
-        const matched = excludes.filter(name => view.type === name);
-        if (matched && matched.length > 0) {
-          treeElement.shuoldExcludeOnAdopt = true;
-        }
-      }
-
+      this.shiftElementIfNeeded(treeElement, parentTree);
       this.parseElement(node, view, treeElement);
       treeElement.name = view.name.toLowerCamelCase(' ');
       parentTree.addElement(treeElement);
@@ -104,6 +93,66 @@ export class SketchParser {
   /**
    * Private methods below
    */
+
+  // dynamicClassesのうち、(iOS/Android)テンプレート側で貼り付けしないもの(excludeOnPaste)を、
+  // 貼り付けしない分、同階層他の他要素をx,y軸方向のいずれかに詰める必要があれば、詰める
+  private shiftElementIfNeeded(
+    treeElement: TreeElement,
+    parentTree: TreeElement,
+  ) {
+    const dynamicClasses: DynamicClass[] = _.get(
+      this.config,
+      'extraction.dynamicClasses',
+      [],
+    ).map(obj => new DynamicClass(obj));
+
+    if (!dynamicClasses || dynamicClasses.length <= 0) return;
+    const excludes = dynamicClasses.filter(classObj => classObj.excludeOnPaste);
+    if (!excludes || excludes.length <= 0) return;
+
+    const targetViewType: ElementType = treeElement.properties.type;
+    const targetRect = treeElement.properties.rect;
+    const targetName = treeElement.name;
+
+    for (const classObj of excludes) {
+      const shiftDirection = classObj.getShift();
+      if (!shiftDirection) continue;
+      const excludeName = classObj.name || null;
+      if (!excludeName || excludeName !== targetViewType) continue;
+
+      // sketch/figmaも、画面上では、上から順にz軸で前面 -> 後面 と並んでいる
+      // 一方TreeElement.elementsでは、後面 -> 前面の順で入っている
+      // よってfor文でindex順にiterateしてる場合、後面からでてくるので、
+      // 除外対象要素にぶち当たったら、そこで処理完了とし、それより前面のlayerは処理しない。
+      for (const elm of parentTree.elements) {
+        const isNotShiftOriginElement = elm.name !== targetName;
+        if (!isNotShiftOriginElement) break;
+
+        switch (shiftDirection) {
+          case DynamicClassShift.up:
+            if (targetRect.y < elm.properties.rect.y) {
+              elm.properties.rect.y = elm.properties.rect.y - targetRect.height;
+            }
+            break;
+          case DynamicClassShift.down:
+            if (targetRect.y > elm.properties.rect.y) {
+              elm.properties.rect.y = elm.properties.rect.y + targetRect.height;
+            }
+            break;
+          case DynamicClassShift.left:
+            if (targetRect.x < elm.properties.rect.x) {
+              elm.properties.rect.x = elm.properties.rect.x - targetRect.width;
+            }
+            break;
+          case DynamicClassShift.right:
+            if (targetRect.x > elm.properties.rect.x) {
+              elm.properties.rect.x = elm.properties.rect.x + targetRect.width;
+            }
+            break;
+        }
+      }
+    }
+  }
 
   private parseElement(node: any, view: SketchView, treeElement: TreeElement) {
     let parser: IElementParser;
