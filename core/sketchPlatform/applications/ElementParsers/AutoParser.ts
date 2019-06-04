@@ -11,19 +11,15 @@ import {
   TextViewType,
   Image,
   ElementType,
+  AutoDetectType,
   TextStyle,
+  DynamicClass,
 } from '../../../domain/Entities';
+import { isAutoDetectType } from '../../../typeGuards';
 
 dotenv.config();
 if (dotenv.error) {
   throw dotenv.error;
-}
-
-enum AutoDetectType {
-  Text = 'text',
-  Image = 'image',
-  View = 'view',
-  Cell = 'Cell',
 }
 
 export class AutoParser extends BaseElementParser {
@@ -147,13 +143,19 @@ export class AutoParser extends BaseElementParser {
     let type: AutoDetectType | null = null;
     // todo: auto detect keywords shuold be placed somewhere around
     // should be name on artboard
-    const autoDetectKeywords: string[] = super.dynamicClasses();
-    const matches: string[] = autoDetectKeywords.filter(keyword => {
-      const results = view.name.match(new RegExp(keyword, 'g'));
+    const dynamicClasses: DynamicClass[] = super.dynamicClasses();
+    const matches: DynamicClass[] = dynamicClasses.filter(classObj => {
+      const name = classObj.name || null;
+      if (!name) return false;
+      const results = view.name.match(new RegExp(name, 'gi'));
       return results && results.length > 0 ? true : false;
     });
     if (matches && matches.length > 0) {
-      type = AutoDetectType[matches[matches.length - 1]];
+      const matchedClass = matches[matches.length - 1];
+      const matchedType: AutoDetectType = isAutoDetectType(matchedClass.name)
+        ? (matchedClass.name as AutoDetectType)
+        : AutoDetectType.View;
+      type = AutoDetectType[matchedType];
     }
     return type;
   }

@@ -4,7 +4,12 @@ export { ColorComponents } from './entities/ColorComponents';
 export { Constraints } from './entities/Constraints';
 export { Container } from './entities/Container';
 export { DesignToolType } from './entities/DesignToolType';
-export { ElementType, ElementTypes } from './entities/ElementType';
+export {
+  ElementType,
+  ElementTypes,
+  AutoDetectType,
+  AutoDetectTypeValues,
+} from './entities/ElementType';
 export { Image } from './entities/Image';
 export { OSType } from './entities/OSType';
 export { Rect } from './entities/Rect';
@@ -35,3 +40,5 @@ export {
   BarButtonItemIOS,
   BarButtonItemSide,
 } from './entities/NavigationBarIOS';
+
+export { DynamicClass, DynamicClassShift } from './entities/DynamicClass';

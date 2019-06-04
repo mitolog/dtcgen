@@ -22,3 +22,17 @@ export const ElementTypes: string[] = [
   ElementType[8],
   ElementType[9],
 ];
+
+export enum AutoDetectType {
+  Text = 'text',
+  Image = 'image',
+  View = 'view',
+  Cell = 'Cell',
+}
+
+export const AutoDetectTypeValues: string[] = [
+  AutoDetectType.Text,
+  AutoDetectType.Image,
+  AutoDetectType.View,
+  AutoDetectType.Cell,
+];
