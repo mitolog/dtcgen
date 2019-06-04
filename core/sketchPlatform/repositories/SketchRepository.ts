@@ -14,7 +14,7 @@ import { Rect } from '../../domain/entities/Rect';
 import { TreeElement } from '../../domain/entities/TreeElement';
 import { PathManager, OutputType } from '../../utilities/PathManager';
 import { SketchView } from '../entities/SketchView';
-import { isContainer } from '../../typeGuards';
+import { DynamicClass } from '../../domain/Entities';
 
 dotenv.config();
 if (dotenv.error) {
@@ -36,33 +36,6 @@ export class SketchRepository implements ISketchRepository {
   /**
    * Private methods
    */
-
-  /**
-   * recursively lookup config json from
-   * command executed directory to upper directories.
-   * @param jsonPath {string?} path to config json
-   * @return sketch {string?} sketch config object
-   */
-  private getConfig(jsonPath?: string): Object | null {
-    const targetPath = jsonPath || process.env.CONFIG_PATH;
-    const absolutePath = path.isAbsolute(targetPath)
-      ? targetPath
-      : path.resolve(process.cwd(), targetPath);
-
-    if (fs.existsSync(absolutePath)) {
-      const jsonObj = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
-      return jsonObj.sketch;
-    } else if (path.dirname(absolutePath) === '/') {
-      throw new Error('no config file');
-    }
-
-    const upperFilePath = path.join(
-      path.dirname(absolutePath),
-      '../',
-      path.basename(absolutePath),
-    );
-    return this.getConfig(upperFilePath);
-  }
 
   /**
    * get sketch file object from which extract metadata and asset files
@@ -142,16 +115,20 @@ export class SketchRepository implements ISketchRepository {
   }
 
   private gatherDynamicAttributes(
-    dynamicClasses: string[],
+    dynamicClasses: DynamicClass[],
     treeElement: TreeElement,
     attribute: DynamicAttribute,
   ) {
     // treeElementsを走査して、dynamicClassesにマッチすれば、その配下を格納
     const targetName = treeElement.name;
-    const matches: string[] = dynamicClasses.filter(className => {
-      const results = targetName.match(new RegExp(className, 'gi'));
-      return results && results.length > 0 ? true : false;
-    });
+    const matches: string[] = dynamicClasses
+      .filter(classObj => {
+        const name = classObj.name || null;
+        if (!name || classObj.excludeOnPaste) return false;
+        const results = targetName.match(new RegExp(name, 'gi'));
+        return results && results.length > 0 ? true : false;
+      })
+      .map(classObj => classObj.name);
     const isDynamic = matches && matches.length > 0 ? true : false;
     if (!isDynamic) {
       for (const element of treeElement.elements) {
@@ -211,12 +188,14 @@ export class SketchRepository implements ISketchRepository {
     // extract all artboards
     const artboards = await this.getAll(inputPath);
     const treeElements: [TreeElement?] = [];
-    const sketchConfig: Object = this.getConfig();
+    const sketchConfig: Object = pathManager.getConfig();
     const sketchParser = new SketchParser(sketch, sketchConfig, outputDir);
-    const dynamicClasses: string[] = _.get(
+    const dynamicClasses: DynamicClass[] = _.get(
       sketchConfig,
       'extraction.dynamicClasses',
-    );
+      [],
+    ).map(obj => new DynamicClass(obj));
+
     const attributesByArtboards: { [k: string]: DynamicAttribute } = {};
 
     artboards.forEach(artboard => {
@@ -235,6 +214,14 @@ export class SketchRepository implements ISketchRepository {
       this.gatherDynamicAttributes(dynamicClasses, topTree, attribute);
       attributesByArtboards[topTree.name] = attribute;
     });
+
+    // delete current attributes first
+    const attributesPath = pathManager.getOutputPath(
+      OutputType.dynamicAttributes,
+      true,
+      null,
+    );
+    fs.removeSync(attributesPath);
 
     for (const artboardName of Object.keys(attributesByArtboards)) {
       const attribute: DynamicAttribute = attributesByArtboards[artboardName];

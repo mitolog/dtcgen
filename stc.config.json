@@ -10,7 +10,10 @@
         "Map",
         "NavigationBar"
       ],
-      "dynamicClasses": ["Cell"],
+      "dynamicClasses": [
+        { "name": "Cell", "excludeOnPaste": false },
+        { "name": "NavigationBar", "excludeOnPaste": true, "shift": "UP" }
+      ],
       "exceptions": [
         "iPhone X Frame",
         "Color",

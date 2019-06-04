@@ -14,8 +14,9 @@ import {
   Shadow,
   Size,
   TextStyle,
+  DynamicClass,
 } from '../../../domain/Entities';
-import { isFillType } from '../../../typeGuards';
+import { isFillType, isDynamicClass } from '../../../typeGuards';
 
 export type SymbolElement<T> = { key: T };
 export abstract class BaseElementParser implements IElementParser {
@@ -30,8 +31,17 @@ export abstract class BaseElementParser implements IElementParser {
   public get layerStyles(): any[] {
     return this.sketch['layerStyles'];
   }
-  public dynamicClasses(): string[] {
-    return _.get(this.config, `extraction.dynamicClasses`, []);
+  public dynamicClasses(): DynamicClass[] {
+    const dynamicClasses = _.get(this.config, `extraction.dynamicClasses`, []);
+    if (!dynamicClasses || dynamicClasses.length <= 0) return [];
+    const attained: DynamicClass[] = [];
+    for (const classObj of dynamicClasses) {
+      const dynamicClass = new DynamicClass(classObj);
+      if (isDynamicClass(dynamicClass)) {
+        attained.push(dynamicClass);
+      }
+    }
+    return attained;
   }
 
   constructor(sketch: Object, config: Object, outputDir?: string) {

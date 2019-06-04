@@ -6,6 +6,9 @@ import {
   Point,
   GradientType,
   GradientTypeValues,
+  AutoDetectType,
+  AutoDetectTypeValues,
+  DynamicClass,
 } from './domain/Entities';
 
 // you can refer "Type Guards and Differentiating Types" section
@@ -48,6 +51,15 @@ const isGradientType = (x: any): x is GradientType => {
   );
 };
 
+const isAutoDetectType = (x: any): x is AutoDetectType => {
+  return (
+    x !== undefined &&
+    x !== null &&
+    isString(x) &&
+    AutoDetectTypeValues.filter(val => val === x).length === 1
+  );
+};
+
 // check if `x` is string like "{0.99999999999999978, 0.49999999999999983}"
 const isPoint = (x: any): x is Point => {
   return (
@@ -60,4 +72,21 @@ const isPoint = (x: any): x is Point => {
   );
 };
 
-export { isContainer, isFillType, isGradientType, isPoint };
+const isDynamicClass = (x: Object): x is DynamicClass => {
+  return (
+    x !== undefined &&
+    x !== null &&
+    typeof x === 'object' &&
+    typeof x['name'] === 'string' &&
+    typeof x['excludeOnPaste'] === 'boolean'
+  );
+};
+
+export {
+  isContainer,
+  isFillType,
+  isGradientType,
+  isPoint,
+  isAutoDetectType,
+  isDynamicClass,
+};

@@ -1,14 +1,14 @@
 import UIKit
 
 class {{container.name}}ViewController: UIViewController {
-    var viewConfig: ViewConfig?
+    var viewConfig: {{container.name}}Config?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
 
-        self.viewConfig = Dtc.config.{{container.name}}
-        self.viewConfig!.adopt(name: Dtc.config.baseViewComponentName, on: self.view)
+        self.viewConfig = {{container.name}}Config()
+        _ = self.viewConfig!.adopt(on: self)
 
         /*
          * acknowledgement:

@@ -231,6 +231,33 @@ export class PathManager {
     return foundPaths;
   }
 
+  /**
+   * recursively lookup config json from
+   * command executed directory to upper directories.
+   * @param jsonPath {string?} path to config json
+   * @return sketch {string?} sketch config object
+   */
+  getConfig(jsonPath?: string): Object | null {
+    const targetPath = jsonPath || process.env.CONFIG_PATH;
+    const absolutePath = path.isAbsolute(targetPath)
+      ? targetPath
+      : path.resolve(process.cwd(), targetPath);
+
+    if (fs.existsSync(absolutePath)) {
+      const jsonObj = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
+      return jsonObj.sketch;
+    } else if (path.dirname(absolutePath) === '/') {
+      throw new Error('no config file');
+    }
+
+    const upperFilePath = path.join(
+      path.dirname(absolutePath),
+      '../',
+      path.basename(absolutePath),
+    );
+    return this.getConfig(upperFilePath);
+  }
+
   getJson(outputType: OutputType): any {
     const metadataJsonPath = this.getOutputPath(outputType);
     if (!metadataJsonPath) {
