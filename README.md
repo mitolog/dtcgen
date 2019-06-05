@@ -1,61 +1,64 @@
-# sketch-to-code-generator
+# design-to-code-generator
 
-現状、sketch-to-code-generator は、sketch ファイルをパースして、iOS のレイアウトコードを生成できるツールです。パース時は独自に定義した命名ルールに従ってパースします。今後は、sketch 以外のデザインファイル、iOS 以外のプラットフォーム(つまり Android)にも対応できればと思います。
+By following specific naming rules on design prototyping tool, this tool will turn it into source code directly. you can also customise how it works by config file.
 
-## What you can do
+## background
 
-- [WIP]lint ... 指定した命名規則に則っているかをチェックします。 (extract の方が進んでしまい今は out of date 状態)
-- extract ... 指定した命名規則で sketch をパースして要素を抽出し json ファイルに出力します。同時に画像やアイコンなども抽出します。
-- generate ... ectract した json から対象の OS のコードを生成します。
+This repository aims to be a tool set that generates iOS/Android app source code and related assets from design prototyping tools like Sketch, Figma, and so on.
 
-### prerequisite
+The base concept is that _"let's automate process turning designs into source codes as possible as we can"_ so that both designers and developers can concentrate on more higher level of the product creation.
+
+## tools
+
+we prepared cli tools as below:
+
+### currently implemented
+
+- (Sketch -> iOS) convert image slices into xcassets files
+
+### to be added
+
+- (Sketch -> iOS) convert color palette into xcassets files
+- (Figma -> iOS) convert image slices and color palette into xcassets files
+- (Sketch -> iOS) convert static view layouts into SwiftUI layout
+
+Android version to be added...
+
+## prerequisite
 
 1. node version `8.9.0` or over.
-2. Install [sketch](https://www.sketchapp.com/).
-3. check if `SKETCH_TOOL_PATH` is valid with command like `$ ls /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool`
-4. run `npm install` on project root directory.
+2. install [sketch](https://www.sketchapp.com/).
+3. check if [sketchtool](https://developer.sketchapp.com/guides/sketchtool/) exists by executing `$ ls /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool`
 
-## How to Use (in development phase)
+## how to install
 
-まだコマンド化していないのですが、基本的な使い方は、
+1. npm install -g git@github.com:podder-ai/design-to-code.git
 
-1. .env ファイルの各種パスを設定
-2. `cli-app`と`core`ディレクトリ配下それぞれで `tsc -w` で watch しつつトランスパイル(すると`dist`ディレクトリに吐き出される)
-3. `cd cli-app` して `node index.js extract --input "../linterSample.sketch"` でメタデータを sketch から抽出
-4. `node index.js generate --project Foo` という形でコードを生成
+## how to use
 
-という流れです。
+1. check if environment variables on `.env` file are all set properly
+2. dtctool <command> <options>
 
-## How it works
+### (Sketch -> iOS) To convert image slices into xcassets files
 
-- sketch ファイルを [node-sketch](https://github.com/oscarotero/node-sketch)を使ってすべての artboard と symbol をパース
-- パースした結果を `tree.json`という階層構造を持った json と、`metadata.json`という各 view のプロパティ情報を持った json に出力、同時に画像やスライスも出力
-- 出力した結果に従って OS 別(今は iOS のみ)のソースコードやアセットファイル、プロジェクトファイル等を生成
+`dtctool convert slices --input "../sample.sketch" --pf ios`
 
-### extract
+### (Sketch -> iOS) convert color palette into xcassets files
 
-- それぞれの artboard に含まれる`group`は`View`に変換し、`symbol`は要素の特徴にしたがって抽出
-- どの`symbol`を抽出するかは`dtc.config.json` でも定義できるし、ある程度は自動でも可能
-- アイコンの抽出などは、sketch.app に含まれる `sketch-tool` の slice コマンドを利用
+to be added...
 
-### generate
+### (Figma -> iOS) convert image slices and color palette into xcassets files
 
--
+to be added...
 
-- コードテンプレートには[handlebars](https://handlebarsjs.com/)を使っている
+### (Sketch -> iOS) convert static view layouts into SwiftUI layout
 
-### dtc.config.json
+to be added...
 
-config ファイル中の `keywords` に 1:1 で対応するクラスに変換(つまり、keywords の数だけアプリ側でクラスができる)
+## contribution
 
-- `symbol`の構成要素は、
+welcome
 
-- 各 `keywords` がコード生成後の各クラスに対応するような形
-- `keywords`
+## LICENSE
 
-- group は Container(View)とし、symbol は命名規則に従って各種要素に変換
-- シンボルのレイヤ構造は `dtc.config.json` に記載
-
-## acknowlagement
-
-this project is originally boilerplated by https://github.com/jsynowiec/node-typescript-boilerplate
+apache2.0

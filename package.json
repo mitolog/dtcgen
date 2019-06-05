@@ -1,7 +1,7 @@
 {
-  "name": "sketch-linter",
+  "name": "dtcgen",
   "version": "0.0.0",
-  "description": "sketch linter",
+  "description": "design to code generator",
   "engineStrict": true,
   "engines": {
     "node": ">= 8.9.0"
