@@ -11,7 +11,8 @@
     "types": ["node", "reflect-metadata"],
     "removeComments": false,
     "sourceMap": false,
-    "target": "es6"
+    "target": "es6",
+    "outDir": "../dist"
   },
   "files": ["index.ts"]
 }

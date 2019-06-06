@@ -27,16 +27,10 @@ export class PathManager {
   outputDir: string;
 
   constructor(outputDir?: string) {
-    if (outputDir) {
-      this.outputDir = path.isAbsolute(outputDir)
-        ? outputDir
-        : path.resolve(process.cwd(), outputDir);
-    } else {
-      this.outputDir = path.resolve(
-        process.cwd(),
-        process.env.DEFAULT_OUTPUT_PATH,
-      );
-    }
+    const absoluteOrRelativeOutDir = outputDir || process.env.OUTPUT_PATH;
+    this.outputDir = path.isAbsolute(absoluteOrRelativeOutDir)
+      ? absoluteOrRelativeOutDir
+      : path.resolve(process.cwd(), absoluteOrRelativeOutDir);
   }
 
   /**
