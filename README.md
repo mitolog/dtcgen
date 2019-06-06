@@ -37,11 +37,11 @@ Android version to be added...
 ## how to use
 
 1. check if environment variables on `.env` file are all set properly
-2. dtctool <command> <options>
+2. dtcgen <command> <options>
 
 ### (Sketch -> iOS) To convert image slices into xcassets files
 
-`dtctool convert slices --input "../sample.sketch" --pf ios`
+`dtcgen convert slices --input "./sample.sketch" --platform ios`
 
 ### (Sketch -> iOS) convert color palette into xcassets files
 

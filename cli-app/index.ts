@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { cac } from "cac";
 import { DIContainer } from "../dist/inversify.config";
 import {
