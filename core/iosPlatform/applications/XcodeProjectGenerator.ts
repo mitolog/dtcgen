@@ -19,10 +19,9 @@ export class XcodeProjectGenator {
   generate(outputDir?: string) {
     const execSync = cp.execSync;
     const pathManager = new PathManager(outputDir);
-    const defaultOutputDir = path.resolve(
-      process.cwd(),
-      process.env.DEFAULT_OUTPUT_PATH,
-    );
+    const defaultOutputDir = path.isAbsolute(process.env.OUTPUT_PATH)
+      ? process.env.OUTPUT_PATH
+      : path.resolve(process.cwd(), process.env.OUTPUT_PATH);
     const searchPath = outputDir || defaultOutputDir;
     const projectDir = pathManager.getOutputPath(
       OutputType.project,
