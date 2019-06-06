@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "declaration": false,
     "lib": ["dom", "es6", "scripthost"],
     "module": "CommonJS",
     "moduleResolution": "node",

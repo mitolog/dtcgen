@@ -11,7 +11,7 @@
     "url": "git@github.com:podder-ai/design-to-code.git"
   },
   "bin": {
-    "dtcgen": "./dist/index.js"
+    "dtcgen": "./bin/cli"
   },
   "devDependencies": {
     "@types/jest": "^23.3.14",

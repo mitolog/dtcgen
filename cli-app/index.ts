@@ -118,4 +118,4 @@ cli
     "optional. but MUST BE SAME BETWEEN COMMANDS. Default dir is set on .env file."
   );
 
-cli.parse();
+export { cli };
