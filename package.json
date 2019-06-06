@@ -6,6 +6,13 @@
   "engines": {
     "node": ">= 8.9.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:podder-ai/design-to-code.git"
+  },
+  "bin": {
+    "dtcgen": "./dist/index.js"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.14",
     "@types/lodash": "^4.14.133",
@@ -30,7 +37,7 @@
   "author": "mito-san <yuhei.miyazato@nexusfrontier.tech>",
   "license": "Apache-2.0",
   "dependencies": {
-    "cac": "git+ssh:git@github.com:mitolog/cac.git#namedExportOnEventModule",
+    "cac": "^6.5.2",
     "dotenv": "^6.2.0",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.1.2",
@@ -41,5 +48,11 @@
     "pluralize": "^8.0.0",
     "reflect-metadata": "^0.1.13",
     "tslib": "~1.9.3"
-  }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "dtc.config.json",
+    "./cli-app/.env.default"
+  ]
 }
