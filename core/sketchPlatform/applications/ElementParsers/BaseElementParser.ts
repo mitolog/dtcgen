@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import { isNumber, isBoolean } from 'util';
 import { IElementParser } from './IElementParser';
-import { ElementType } from '../../../domain/entities/ElementType';
-import { PathManager } from '../../../utilities/PathManager';
+import { PathManager } from '../../../utilities/Utilities';
 import {
   View,
   Gradient,
@@ -15,6 +14,7 @@ import {
   Size,
   TextStyle,
   DynamicClass,
+  ElementType,
 } from '../../../domain/Entities';
 import { isFillType, isDynamicClass } from '../../../typeGuards';
 
@@ -171,6 +171,7 @@ export abstract class BaseElementParser implements IElementParser {
 
       let gradObj = fill['gradient'] || null;
       if (gradObj && fillType === FillType.gradient) {
+        gradObj['type'] = gradObj['gradientType'] || null;
         colorFill.gradient = new Gradient(gradObj);
       }
       fills.push(colorFill);

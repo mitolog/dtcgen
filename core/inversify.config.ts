@@ -1,14 +1,12 @@
 import { Container } from 'inversify';
 import 'reflect-metadata';
 import { TYPES } from './types';
+import { DesignToolType, DesignToolTypeValues } from './domain/Entities';
+import { OSType, OSTypeValues } from './domain/Entities';
+
 import * as Domain from './domain/Domain';
 import * as SketchPlatform from './sketchPlatform/SketchPlatform';
 import * as IOSPlatform from './iosPlatform/IOSPlatform';
-import {
-  DesignToolType,
-  DesignToolTypeValues,
-} from './domain/entities/DesignToolType';
-import { OSType, OSTypeValues } from './domain/entities/OSType';
 
 export class DIContainer {
   private container: Container;

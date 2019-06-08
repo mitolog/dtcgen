@@ -1,5 +1,4 @@
-import { SketchLayerTypes } from '../entities/SketchLayerType';
-import { LayerName } from '../../domain/entities/LayerName';
+import { LayerName } from '../../domain/Entities';
 import { INamingLinter } from '../../domain/applications/INamingLinter';
 import * as fs from 'fs';
 import { injectable } from 'inversify';

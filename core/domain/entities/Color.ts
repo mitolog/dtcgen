@@ -1,4 +1,4 @@
-import { ColorComponents } from './ColorComponents';
+import { ColorComponents } from '../Entities';
 
 export class Color {
   fill: ColorComponents;

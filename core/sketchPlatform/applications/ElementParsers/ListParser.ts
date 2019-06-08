@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 import { ElementType, View, TreeElement } from '../../../domain/Entities';
 import { BaseElementParser } from './BaseElementParser';
-import { TakeOverData } from '../../entities/TakeOverData';
 import { SymbolParser } from './SymbolParser';
+import { TakeOverData } from '../../entities/Entities';
 
 export class ListParser extends BaseElementParser {
   parse(node: any, view: View, treeElement?: TreeElement) {

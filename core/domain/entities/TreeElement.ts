@@ -1,7 +1,5 @@
-import { Container } from './Container';
-import { View } from './View';
+import { Container, View, ElementType } from '../Entities';
 import { isContainer } from '../../typeGuards';
-import { ElementType } from './ElementType';
 
 export class TreeElement {
   public uid: string;

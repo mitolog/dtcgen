@@ -1,4 +1,4 @@
-import { LayerName } from '../entities/LayerName';
+import { LayerName } from '../Entities';
 
 export interface ILintNamingUseCase {
   handle(inputPath: string): Promise<LayerName[]>;

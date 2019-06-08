@@ -1,5 +1,4 @@
-import { Color } from './Color';
-import { Gradient } from './Gradient';
+import { Color, Gradient } from '../Entities';
 
 export enum FillType {
   fill = 0,

@@ -1,12 +1,14 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { OSType } from '../../domain/entities/OSType';
-import { PathManager, OutputType } from '../../utilities/PathManager';
-import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
-import { HandlebarsPartials } from '../../utilities/HandlebarsPartials';
+import { OSType, ElementType, TreeElement } from '../../domain/Entities';
+import {
+  PathManager,
+  OutputType,
+  HandlebarsHelpers,
+  HandlebarsPartials,
+} from '../../utilities/Utilities';
 import { SourceCodeGenerator } from './SourceCodeGenerator';
-import { ElementType, TreeElement } from '../../domain/Entities';
 import { ProjectSettings } from '../entities/ProjectSettings';
 
 dotenv.config();

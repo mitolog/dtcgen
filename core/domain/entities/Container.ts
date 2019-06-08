@@ -1,5 +1,4 @@
-import { ElementType } from './ElementType';
-import { Rect } from './Rect';
+import { ElementType, Rect } from '../Entities';
 
 export class Container {
   type: ElementType;

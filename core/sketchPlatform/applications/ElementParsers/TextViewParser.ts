@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import {
   Color,
   ColorComponents,
@@ -5,7 +6,6 @@ import {
   ElementType,
   TextStyle,
 } from '../../../domain/Entities';
-import * as _ from 'lodash';
 import { BaseElementParser } from './BaseElementParser';
 
 export class TextViewParser extends BaseElementParser {
