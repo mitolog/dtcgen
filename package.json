@@ -50,6 +50,7 @@
     "tslib": "~1.9.3"
   },
   "files": [
+    "bin",
     "dist",
     "templates",
     "dtc.config.json",
