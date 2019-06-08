@@ -9,10 +9,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["node", "reflect-metadata"],
-    "outDir": "../dist",
+    "outDir": "./dist",
     "removeComments": false,
     "sourceMap": false,
-    "target": "es5"
+    "target": "es6"
   },
-  "exclude": ["__tests__/**/*"]
+  "files": ["./cli-app/index.ts"],
+  "exclude": ["./core/__tests__/**/*"]
 }

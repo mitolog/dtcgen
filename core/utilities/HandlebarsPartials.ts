@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { PathManager, OutputType } from './PathManager';
 import * as handlebars from 'handlebars';
+import { PathManager } from './PathManager';
 
 export class HandlebarsPartials {
   static registerPartials(partialTemplateRootDir: string): void {

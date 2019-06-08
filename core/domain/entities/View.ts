@@ -1,6 +1,6 @@
 import { Constraints } from './Constraints';
-import { Container } from './Container';
 import { Rect } from './Rect';
+import { Container } from './Container';
 import { Color } from './Color';
 import { ColorFill } from './ColorFill';
 import { Shadow } from './Shadow';

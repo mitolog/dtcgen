@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as handlebars from 'handlebars';
 import * as helpers from 'handlebars-helpers';
-import { PathManager } from './PathManager';
+import { PathManager } from './Utilities';
 
 export class HandlebarsHelpers {
   private pathManager: PathManager;

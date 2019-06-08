@@ -1,8 +1,8 @@
-import { isNumber, isArray } from 'util';
-import { Point } from './Point';
-import { ColorComponents, ColorName } from './ColorComponents';
-import { isGradientType } from '../../typeGuards';
+import { isNumber, isString, isArray } from 'util';
 import { Color } from './Color';
+import { ColorComponents, ColorName } from './ColorComponents';
+import { Point } from './Point';
+import { isPoint } from '../../typeGuards';
 
 export class GradientStop {
   position: number; // between 0 to 1, can be both horizontal/vertical
@@ -64,18 +64,26 @@ export class Gradient {
   elipseLength: number; // can be both horizontal/vertical
   stops: GradientStop[];
 
-  constructor(obj: any) {
+  constructor(obj: Gradient) {
     this.elipseLength = isNumber(obj.elipseLength)
       ? obj.elipseLength
       : parseFloat(obj.elipseLength) || 0;
 
-    this.from = Point.parsePoint(obj.from) || new Point({ x: 0, y: 0 });
-    this.to = Point.parsePoint(obj.to) || new Point({ x: 1, y: 1 });
-    this.type = isGradientType(obj.gradientType)
-      ? obj.gradientType
-      : GradientType.linear;
+    const fromPoint =
+      isPoint(obj.from) && isString(obj.from)
+        ? Point.parsePoint(obj.from)
+        : null;
+
+    const toPoint =
+      isPoint(obj.to) && isString(obj.to) ? Point.parsePoint(obj.to) : null;
+
+    this.from = fromPoint || new Point({ x: 0, y: 0 });
+    this.to = toPoint || new Point({ x: 1, y: 1 });
+
     this.stops =
       GradientStop.parseGradientStops(obj.stops) ||
       GradientStop.defaultGradientStops();
+
+    this.type = obj.type || GradientType.linear;
   }
 }

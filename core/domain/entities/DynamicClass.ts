@@ -1,4 +1,4 @@
-import { ElementType } from './ElementType';
+import { ElementType } from '../Entities';
 
 export enum DynamicClassShift {
   up = 'UP',

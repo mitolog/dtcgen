@@ -2,7 +2,11 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as pluralize from 'pluralize';
 import * as _ from 'lodash';
-import { PathManager, OutputType } from '../../utilities/PathManager';
+import {
+  PathManager,
+  OutputType,
+  HandlebarsHelpers,
+} from '../../utilities/Utilities';
 import {
   Container,
   TreeElement,
@@ -19,7 +23,6 @@ import {
 import { isString } from 'util';
 import { isContainer } from '../../typeGuards';
 import { DesignToCodeTemplatePaths } from '../entities/DesignToCodeTemplatePaths';
-import { HandlebarsHelpers } from '../../utilities/HandlebarsHelpers';
 
 export class SourceCodeGenerator {
   private pathManager: PathManager;

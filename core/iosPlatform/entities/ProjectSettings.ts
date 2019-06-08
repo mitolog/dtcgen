@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import * as _ from 'lodash';
 
 export class Plist {
   attributes?: { [s: string]: string };

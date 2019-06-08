@@ -53,6 +53,6 @@
     "dist",
     "templates",
     "dtc.config.json",
-    "./cli-app/.env.default"
+    ".env.default"
   ]
 }

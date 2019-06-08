@@ -1,5 +1,5 @@
 import { Node } from 'node-sketch';
-import { LayerName } from '../../domain/entities/LayerName';
+import { LayerName } from '../../domain/Entities';
 import { injectable } from 'inversify';
 
 export interface ISketchPresenter {
