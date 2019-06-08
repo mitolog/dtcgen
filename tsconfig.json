@@ -15,5 +15,5 @@
     "target": "es6"
   },
   "include": ["cli-app/**/*", "core/**/*"],
-  "exclude": ["./core/__tests__/**/*"]
+  "exclude": ["./core/__tests__/**/*", "dist"]
 }
