@@ -1,4 +1,3 @@
-import { isPoint } from '../../typeGuards';
 import { isString } from 'util';
 
 export class Point {
@@ -6,7 +5,7 @@ export class Point {
   y: number;
 
   public static parsePoint(obj: any): Point | null {
-    if (!isString(obj) || !isPoint(obj)) return null;
+    if (!isString(obj)) return null;
 
     let numbers: number[] = obj.match(/[0-9.e-]+/gi).map(str => {
       return parseFloat(str);

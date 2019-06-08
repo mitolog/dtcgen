@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
-import { OSType } from '../domain/entities/OSType';
+import { OSType } from '../domain/Entities';
 
 dotenv.config();
 if (dotenv.error) {

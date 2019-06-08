@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
-import { PathManager, OutputType } from '../../utilities/PathManager';
+import { PathManager, OutputType } from '../../utilities/Utilities';
 import { OSType } from '../../domain/entities/OSType';
 
 dotenv.config();

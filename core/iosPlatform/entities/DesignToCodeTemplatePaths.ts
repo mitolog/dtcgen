@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { PathManager } from '../../utilities/PathManager';
+import { PathManager } from '../../utilities/Utilities';
 
 export class IOSTemplatePaths {
   containerNameConfig: string;

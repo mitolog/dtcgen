@@ -1,4 +1,4 @@
-import { Color } from './Color';
+import { Color } from '../Entities';
 
 export enum TextAlignment {
   EqualWidth = 0,

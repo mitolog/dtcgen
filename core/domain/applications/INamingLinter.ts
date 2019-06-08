@@ -1,4 +1,4 @@
-import { LayerName } from '../entities/LayerName';
+import { LayerName } from '../Entities';
 
 export interface INamingLinter {
   config: any; // todo: prepare some type for config object

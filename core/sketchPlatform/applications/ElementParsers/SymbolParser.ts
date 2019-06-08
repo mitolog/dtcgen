@@ -1,10 +1,9 @@
 import _ = require('lodash');
-import { BaseElementParser } from './BaseElementParser';
 import { View, TreeElement, Image, TextView } from '../../../domain/Entities';
-import { TakeOverData } from '../../entities/TakeOverData';
-import { SketchView } from '../../entities/SketchView';
-import { SketchUtil } from '../../SketchUtil';
+import { SketchView, TakeOverData } from '../../entities/Entities';
+import { BaseElementParser } from './BaseElementParser';
 import { AutoParser } from './AutoParser';
+import { SketchUtil } from '../../SketchUtil';
 
 export class SymbolParser extends BaseElementParser {
   parse(node: any, view: View, treeElement?: TreeElement) {

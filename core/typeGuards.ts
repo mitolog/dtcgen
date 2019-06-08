@@ -1,15 +1,12 @@
 import {
   ElementType,
-  Container,
-  FillType,
-  FillTypeValues,
-  Point,
-  GradientType,
-  GradientTypeValues,
   AutoDetectType,
   AutoDetectTypeValues,
-  DynamicClass,
-} from './domain/Entities';
+} from './domain/entities/ElementType';
+import { Container } from './domain/entities/Container';
+import { FillType, FillTypeValues } from './domain/entities/ColorFill';
+import { Point } from './domain/entities/Point';
+import { DynamicClass } from './domain/entities/DynamicClass';
 
 // you can refer "Type Guards and Differentiating Types" section
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -39,15 +36,6 @@ const isFillType = (x: any): x is FillType => {
     x !== null &&
     isNumber(x) &&
     FillTypeValues.filter(val => val === x).length === 1
-  );
-};
-
-const isGradientType = (x: any): x is GradientType => {
-  return (
-    x !== undefined &&
-    x !== null &&
-    isNumber(x) &&
-    GradientTypeValues.filter(val => val === x).length === 1
   );
 };
 
@@ -82,11 +70,4 @@ const isDynamicClass = (x: Object): x is DynamicClass => {
   );
 };
 
-export {
-  isContainer,
-  isFillType,
-  isGradientType,
-  isPoint,
-  isAutoDetectType,
-  isDynamicClass,
-};
+export { isContainer, isFillType, isPoint, isAutoDetectType, isDynamicClass };

@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
 import { BaseElementParser } from './BaseElementParser';
-import { OutputType } from '../../../utilities/PathManager';
+import { OutputType } from '../../../utilities/Utilities';
 
 import {
   Color,

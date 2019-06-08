@@ -1,20 +1,21 @@
 import * as fs from 'fs-extra';
 import * as ns from 'node-sketch';
 import * as _ from 'lodash';
-import { SketchLayerType } from '../entities/SketchLayerType';
-import { injectable } from 'inversify';
 import * as dotenv from 'dotenv';
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
+import { injectable } from 'inversify';
+
+import { Rect, TreeElement, DynamicClass } from '../../domain/Entities';
+import {
+  SketchView,
+  SketchLayerType,
+  SketchContainer,
+} from '../entities/Entities';
 import '../../extensions/String.extensions';
-import { SketchContainer } from '../entities/SketchContainer';
 import { SketchParser } from '../applications/SketchParser';
-import { Rect } from '../../domain/entities/Rect';
-import { TreeElement } from '../../domain/entities/TreeElement';
-import { PathManager, OutputType } from '../../utilities/PathManager';
-import { SketchView } from '../entities/SketchView';
-import { DynamicClass } from '../../domain/Entities';
+import { PathManager, OutputType } from '../../utilities/Utilities';
 
 dotenv.config();
 if (dotenv.error) {

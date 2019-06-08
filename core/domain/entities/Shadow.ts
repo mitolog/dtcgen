@@ -1,5 +1,4 @@
-import { Color } from './Color';
-import { Size } from './Size';
+import { Color, Size } from '../Entities';
 
 export class Shadow {
   isEnabled: boolean;
