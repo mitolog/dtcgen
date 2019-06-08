@@ -1,5 +1,5 @@
-import _ = require('lodash');
-import { SketchView } from './entities/SketchView';
+import * as _ from 'lodash';
+import { SketchView } from './entities/Entities';
 import { Constraints, TreeElement } from '../domain/Entities';
 
 export class SketchUtil {

@@ -1,9 +1,9 @@
 import { ILintNamingUseCase } from '../../domain/usecases/ILintNamingUseCase';
 import { INamingLinter } from '../../domain/applications/INamingLinter';
-import { LayerName } from '../../domain/entities/LayerName';
+import { LayerName } from '../../domain/Entities';
 import { ISketchRepository } from '../repositories/SketchRepository';
 import { ISketchPresenter } from '../presenters/SketchPresenter';
-import { SketchLayerType } from '../entities/SketchLayerType';
+import { SketchLayerType } from '../entities/Entities';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-const cli = require('../cli-app/index');
+const cli = require('../dist/cli-app/index').cli;
 cli.parse();

@@ -5,26 +5,27 @@ import {
   Image,
   TreeElement,
   TextView,
+  TextViewType,
   TextInput,
   NavigationBarIOS,
   DynamicClass,
   DynamicClassShift,
 } from '../../domain/Entities';
-import { SketchView } from '../entities/SketchView';
-import { TakeOverData } from '../entities/TakeOverData';
+import { SketchView, TakeOverData } from '../entities/Entities';
 
 import { SketchUtil } from '../SketchUtil';
-import { IElementParser } from './ElementParsers/IElementParser';
-import { ButtonParser } from './ElementParsers/ButtonParser';
-import { TextViewParser } from './ElementParsers/TextViewParser';
-import { TextInputParser } from './ElementParsers/TextInputParser';
-import { ImageParser } from './ElementParsers/ImageParser';
-import { AutoParser } from './ElementParsers/AutoParser';
-import { TextViewType } from '../../domain/entities/TextView';
-import { ListParser } from './ElementParsers/ListParser';
-import { SymbolParser } from './ElementParsers/SymbolParser';
-import { MapParser } from './ElementParsers/MapParser';
-import { NavigationBarParser } from './ElementParsers/NavigationBarParser';
+import {
+  IElementParser,
+  ButtonParser,
+  TextViewParser,
+  TextInputParser,
+  ImageParser,
+  AutoParser,
+  ListParser,
+  SymbolParser,
+  MapParser,
+  NavigationBarParser,
+} from './ElementParsers';
 
 export class SketchParser {
   private sketch: Object;

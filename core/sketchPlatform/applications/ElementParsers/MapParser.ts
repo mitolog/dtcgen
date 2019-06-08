@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import {
   Color,
   ColorComponents,
@@ -6,7 +7,6 @@ import {
   MapView,
   MapType,
 } from '../../../domain/Entities';
-import * as _ from 'lodash';
 import { BaseElementParser } from './BaseElementParser';
 
 export class MapParser extends BaseElementParser {

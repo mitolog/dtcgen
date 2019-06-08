@@ -1,4 +1,7 @@
 export enum ElementType {
+  Page = 'Page',
+  Artboard = 'Artboard',
+  Symbol = 'Symbol',
   Container = 'Container',
   View = 'View',
   Button = 'Button',
@@ -21,6 +24,9 @@ export const ElementTypes: string[] = [
   ElementType[7],
   ElementType[8],
   ElementType[9],
+  ElementType[10],
+  ElementType[11],
+  ElementType[12],
 ];
 
 export enum AutoDetectType {
