@@ -12,7 +12,7 @@
     "outDir": "./dist",
     "removeComments": false,
     "sourceMap": false,
-    "target": "es5"
+    "target": "es6"
   },
   "include": ["cli-app/**/*", "core/**/*"],
   "exclude": ["./core/__tests__/**/*"]
