@@ -57,6 +57,23 @@ to be added...
 
 ## contribution
 
+### development preparation
+
+1. git clone git@github.com:podder-ai/design-to-code.git
+2. npm install
+3. `tsc -w` on project root directory
+
+### try cli while development
+
+1. make sure that you did finished `tsc` and have directory `dist` on root dir which has transpiled sourcecodes.
+2. `npm link` on project root dir which make symlink to global npm node_modules
+3. now you can execute like `dtcgen slice --input "./sample.sketch"`.
+4. if you want to use on another node project, you can type `npm link dtcgen` on root dir of that project.
+
+** To remove symlink, you can execute `npm install` on dtcgen project. **
+
+### how to make PR
+
 welcome
 
 ## LICENSE
