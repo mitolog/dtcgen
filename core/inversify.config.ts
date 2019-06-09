@@ -65,12 +65,22 @@ export class DIContainer {
     container
       .bind<Domain.IExtractElementUseCase>(TYPES.IExtractElementUseCase)
       .to(SketchPlatform.ExtractElementUseCase);
+
+    // Slices use case
+    container
+      .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
+      .to(SketchPlatform.SliceImageUseCase);
   }
 
   injectIos(container: Container) {
-    // Generate use case
+    // Generate project use case
     container
       .bind<Domain.IGenerateProjectUseCase>(TYPES.IGenerateProjectUseCase)
       .to(IOSPlatform.GenerateProjectUseCase);
+
+    // Generate asset use case
+    container
+      .bind<Domain.IGenerateAssetUseCase>(TYPES.IGenerateAssetUseCase)
+      .to(IOSPlatform.GenerateAssetUseCase);
   }
 }
