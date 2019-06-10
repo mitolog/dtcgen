@@ -27,7 +27,8 @@ type DynamicAttribute = { [k: string]: [[TreeElement?]] };
 export interface ISketchRepository {
   getAll(inputPath: string): Promise<Node[]>;
   extractAll(inputPath: string, outputDir?: string): Promise<void>;
-  extractSlices(inputPath: string, outputDir?: string): void;
+  extractSlices(inputPath: string, outputDir?: string): Promise<void>;
+  extractImages(inputPath: string, outputDir?: string): Promise<void>;
 }
 
 @injectable()
@@ -244,7 +245,16 @@ export class SketchRepository implements ISketchRepository {
     fs.writeFileSync(treePath, JSON.stringify(treeElements));
   }
 
-  extractSlices(inputPath: string, outputDir?: string): void {
+  async extractImages(inputPath: string, outputDir?: string): Promise<void> {
+    const sketch = await this.getTargetSketch(inputPath);
+    const pathManager = new PathManager(outputDir);
+
+    // extract all images within 'Pages'(not in 'Symbols')
+    const imagesDirName = pathManager.getOutputPath(OutputType.images, true);
+    sketch.use(new ns.plugins.ExportImages(imagesDirName));
+  }
+
+  extractSlices(inputPath: string, outputDir?: string): Promise<void> {
     const absoluteInputPath = this.absolutePath(inputPath);
     const pathManager = new PathManager(outputDir);
     if (!absoluteInputPath) return;
