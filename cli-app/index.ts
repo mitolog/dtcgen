@@ -4,7 +4,9 @@ import {
   DIContainer,
   ILintNamingUseCase,
   IExtractElementUseCase,
+  ISliceImageUseCase,
   IGenerateProjectUseCase,
+  IGenerateAssetUseCase,
   TYPES,
   OSType,
   OSTypeValues,
@@ -106,6 +108,55 @@ cli
   })
   .option('platform [osType]', 'optional. currently `ios` only.')
   .option('project [name]', 'required. specify the name for the project.');
+
+/**
+ * extract image slices and convert them into ready to use assets on each platform.
+ */
+cli
+  .command(
+    'slice',
+    'extract image slices and turn them into ready-to-use assets.',
+  )
+  .action((input, _) => {
+    const inputPath = input.input;
+    const outputDir = input.output;
+    if (!inputPath) {
+      console.log('input option is not detected. see `extract --help`.');
+      return;
+    }
+
+    const toolType =
+      DesignToolTypeValues.find(type => type === input.tool) ||
+      DesignToolType.sketch;
+    const platform =
+      OSTypeValues.find(type => type === input.platform) || OSType.ios;
+
+    const extractContainer = new DIContainer(<DesignToolType>(
+      toolType
+    )).getContainer();
+    const sliceImageUseCase = extractContainer.get<ISliceImageUseCase>(
+      TYPES.ISliceImageUseCase,
+    );
+    const generateContainer = new DIContainer(<OSType>platform).getContainer();
+    const generateAssetUseCase = generateContainer.get<IGenerateAssetUseCase>(
+      TYPES.IGenerateAssetUseCase,
+    );
+
+    sliceImageUseCase
+      .handle(inputPath, outputDir)
+      .then(() => {
+        console.log(`asset extracted`);
+        return generateAssetUseCase.handle();
+      })
+      .then(() => {
+        console.log(`asset generated`);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  })
+  .option('tool [designTool]', 'optional. `sketch` as a default.')
+  .option('platform [osType]', 'optional. currently `ios` only.');
 
 cli
   .option(

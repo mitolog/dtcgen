@@ -41,7 +41,7 @@ Android version to be added...
 
 ### (Sketch -> iOS) To convert image slices into xcassets files
 
-`dtcgen convert slices --input "./sample.sketch" --platform ios`
+`dtcgen slices --input "./sample.sketch" --platform ios`
 
 ### (Sketch -> iOS) convert color palette into xcassets files
 
