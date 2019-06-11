@@ -1,5 +1,5 @@
 import { IExtractElementUseCase } from '../../domain/usecases/IExtractElementUseCase';
-import { ISketchRepository } from '../repositories/SketchRepository';
+import { ISketchRepository } from '../repositories/ISketchRepository';
 import { ISketchPresenter } from '../presenters/SketchPresenter';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';

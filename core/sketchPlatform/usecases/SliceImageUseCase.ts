@@ -1,5 +1,5 @@
 import { ISliceImageUseCase } from '../../domain/usecases/ISliceImageUseCase';
-import { ISketchRepository } from '../repositories/SketchRepository';
+import { ISketchRepository } from '../repositories/ISketchRepository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
 

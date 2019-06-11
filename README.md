@@ -41,7 +41,7 @@ Android version to be added...
 
 ### (Sketch -> iOS) To convert image slices into xcassets files
 
-`dtcgen slices --input "./sample.sketch" --platform ios`
+`dtcgen slice --input "./sample.sketch" --platform ios`
 
 ### (Sketch -> iOS) convert color palette into xcassets files
 
@@ -75,6 +75,10 @@ to be added...
 ### how to make PR
 
 welcome
+
+## thanks to
+
+https://github.com/jsynowiec/node-typescript-boilerplate
 
 ## LICENSE
 

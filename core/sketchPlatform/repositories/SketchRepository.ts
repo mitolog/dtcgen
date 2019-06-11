@@ -16,6 +16,7 @@ import {
 import '../../extensions/String.extensions';
 import { SketchParser } from '../applications/SketchParser';
 import { PathManager, OutputType } from '../../utilities/Utilities';
+import { ISketchRepository } from './ISketchRepository';
 
 dotenv.config();
 if (dotenv.error) {
@@ -23,13 +24,6 @@ if (dotenv.error) {
 }
 
 type DynamicAttribute = { [k: string]: [[TreeElement?]] };
-
-export interface ISketchRepository {
-  getAll(inputPath: string): Promise<Node[]>;
-  extractAll(inputPath: string, outputDir?: string): Promise<void>;
-  extractSlices(inputPath: string, outputDir?: string): Promise<void>;
-  extractImages(inputPath: string, outputDir?: string): Promise<void>;
-}
 
 @injectable()
 export class SketchRepository implements ISketchRepository {
