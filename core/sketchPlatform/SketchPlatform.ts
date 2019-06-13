@@ -1,8 +1,5 @@
 export { ISketchRepository } from './repositories/ISketchRepository';
 export { SketchRepository } from './repositories/SketchRepository';
-export {
-  ThrowExeptionSketchRepository,
-} from './repositories/ThrowExeptionSketchRepository';
 
 export {
   ISketchPresenter,
