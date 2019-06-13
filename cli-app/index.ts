@@ -146,7 +146,7 @@ cli
       .handle(inputPath, outputDir)
       .then(() => {
         console.log(`asset extracted`);
-        return generateAssetUseCase.handle();
+        return generateAssetUseCase.handle(outputDir);
       })
       .then(() => {
         console.log(`asset generated`);

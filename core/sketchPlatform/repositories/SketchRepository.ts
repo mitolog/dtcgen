@@ -17,6 +17,7 @@ import '../../extensions/String.extensions';
 import { SketchParser } from '../applications/SketchParser';
 import { PathManager, OutputType } from '../../utilities/Utilities';
 import { ISketchRepository } from './ISketchRepository';
+import { isString } from 'util';
 
 dotenv.config();
 if (dotenv.error) {
@@ -255,6 +256,9 @@ export class SketchRepository implements ISketchRepository {
     const execSync = cp.execSync;
     const dirPath = pathManager.getOutputPath(OutputType.slices, true);
     let command = process.env.SKETCH_TOOL_PATH;
+    if (!command || !isString(command)) {
+      throw new Error('no sketch tool path set.');
+    }
     command += ' export slices ';
     command += absoluteInputPath;
     command += ' --formats=pdf'; //png,svg

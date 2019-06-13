@@ -1,4 +1,3 @@
-// import * as child_process from 'child_process';
 import * as execa from 'execa';
 
 describe('tests for cli commands', () => {
