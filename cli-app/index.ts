@@ -121,7 +121,7 @@ cli
     const inputPath = input.input;
     const outputDir = input.output;
     if (!inputPath) {
-      console.log('input option is not detected. see `extract --help`.');
+      console.log('input option is not detected. see `dtcgen slice --help`.');
       return;
     }
 
@@ -146,7 +146,7 @@ cli
       .handle(inputPath, outputDir)
       .then(() => {
         console.log(`asset extracted`);
-        return generateAssetUseCase.handle();
+        return generateAssetUseCase.handle(outputDir);
       })
       .then(() => {
         console.log(`asset generated`);
@@ -167,5 +167,8 @@ cli
     'output [relative/absolute dir]',
     'optional. but MUST BE SAME BETWEEN COMMANDS. Default dir is set on .env file.',
   );
+
+cli.version('0.0.0');
+cli.help();
 
 export { cli };

@@ -3,6 +3,7 @@ import * as cp from 'child_process';
 import * as path from 'path';
 import { PathManager, OutputType } from '../../utilities/Utilities';
 import { OSType } from '../../domain/entities/OSType';
+import { isString } from 'util';
 
 dotenv.config();
 if (dotenv.error) {
@@ -22,6 +23,9 @@ export class XcodeProjectGenator {
     const defaultOutputDir = path.isAbsolute(process.env.OUTPUT_PATH)
       ? process.env.OUTPUT_PATH
       : path.resolve(process.cwd(), process.env.OUTPUT_PATH);
+    if (!defaultOutputDir || !isString(defaultOutputDir)) {
+      throw new Error('output directory shuold be set.');
+    }
     const searchPath = outputDir || defaultOutputDir;
     const projectDir = pathManager.getOutputPath(
       OutputType.project,
