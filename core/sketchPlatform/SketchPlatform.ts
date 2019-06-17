@@ -1,7 +1,5 @@
-export {
-  ISketchRepository,
-  SketchRepository,
-} from './repositories/SketchRepository';
+export { ISketchRepository } from './repositories/ISketchRepository';
+export { SketchRepository } from './repositories/SketchRepository';
 
 export {
   ISketchPresenter,

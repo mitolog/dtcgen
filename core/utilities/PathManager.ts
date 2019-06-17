@@ -2,6 +2,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 import { OSType } from '../domain/Entities';
+import { isString } from 'util';
 
 dotenv.config();
 if (dotenv.error) {
@@ -28,6 +29,9 @@ export class PathManager {
 
   constructor(outputDir?: string) {
     const absoluteOrRelativeOutDir = outputDir || process.env.OUTPUT_PATH;
+    if (!absoluteOrRelativeOutDir || !isString(absoluteOrRelativeOutDir)) {
+      throw new Error('output directory shuold be set.');
+    }
     this.outputDir = path.isAbsolute(absoluteOrRelativeOutDir)
       ? absoluteOrRelativeOutDir
       : path.resolve(process.cwd(), absoluteOrRelativeOutDir);
@@ -293,7 +297,6 @@ export class PathManager {
       } else {
         // todo: need to be tested
         throw new Error(error);
-        //console.log(error);
       }
     }
   }

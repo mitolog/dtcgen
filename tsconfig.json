@@ -8,7 +8,7 @@
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["node", "reflect-metadata"],
+    "types": ["node", "reflect-metadata", "jest"],
     "outDir": "./dist",
     "removeComments": false,
     "sourceMap": false,
