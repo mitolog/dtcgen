@@ -53,3 +53,5 @@ export {
 
 export { LayerName } from './entities/LayerName';
 export { DynamicClass, DynamicClassShift } from './entities/DynamicClass';
+export { AssetFormat } from './entities/AssetFormat';
+export { SliceConfig } from './entities/SliceConfig';

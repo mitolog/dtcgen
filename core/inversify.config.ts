@@ -6,6 +6,7 @@ import { OSType, OSTypeValues } from './domain/Entities';
 
 import * as Domain from './domain/Domain';
 import * as SketchPlatform from './sketchPlatform/SketchPlatform';
+import * as FigmaPlatform from './figmaPlatform/FigmaPlatform';
 import * as IOSPlatform from './iosPlatform/IOSPlatform';
 
 export class DIContainer {
@@ -21,6 +22,9 @@ export class DIContainer {
       switch (type) {
         case DesignToolType.sketch:
           this.injectSketch(container);
+          break;
+        case DesignToolType.figma:
+          this.injectFigma(container);
           break;
         default:
           break;
@@ -70,6 +74,18 @@ export class DIContainer {
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
       .to(SketchPlatform.SliceImageUseCase);
+  }
+
+  injectFigma(container: Container) {
+    // need to specify to properly construct LintNamingUseCase
+    container
+      .bind<FigmaPlatform.FigmaRepository>(TYPES.IFigmaRepository)
+      .to(FigmaPlatform.FigmaRepository);
+
+    // slice use case
+    container
+      .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
+      .to(FigmaPlatform.SliceImageUseCase);
   }
 
   injectIos(container: Container) {

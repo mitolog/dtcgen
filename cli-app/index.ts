@@ -12,6 +12,7 @@ import {
   OSTypeValues,
   DesignToolType,
   DesignToolTypeValues,
+  SliceConfig,
 } from '../internal';
 
 const cli = cac();
@@ -125,11 +126,16 @@ cli
       return;
     }
 
-    const toolType =
+    const toolType: string =
       DesignToolTypeValues.find(type => type === input.tool) ||
       DesignToolType.sketch;
     const platform =
       OSTypeValues.find(type => type === input.platform) || OSType.ios;
+
+    const sliceConfig: SliceConfig = new SliceConfig();
+    sliceConfig.initWithDtcConfig(toolType as DesignToolType);
+    sliceConfig.inputPath = inputPath;
+    sliceConfig.outputDir = outputDir;
 
     const extractContainer = new DIContainer(<DesignToolType>(
       toolType
@@ -143,7 +149,7 @@ cli
     );
 
     sliceImageUseCase
-      .handle(inputPath, outputDir)
+      .handle(sliceConfig)
       .then(() => {
         console.log(`asset extracted`);
         return generateAssetUseCase.handle(outputDir);

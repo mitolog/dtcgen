@@ -14,6 +14,7 @@ import {
   ElementType,
   Size,
   DynamicClass,
+  DesignToolType,
 } from '../../domain/Entities';
 import {
   ContainerConfig,
@@ -254,9 +255,12 @@ export class SourceCodeGenerator {
     /// cell preparation to here ///
 
     /// other dynamicClasses preparetion from here ///
+    const dtcConfig = this.pathManager.getConfig();
+    const designToolType = DesignToolType.sketch;
+
     const dynamicClasses: string[] = _.get(
-      this.pathManager.getConfig(),
-      'extraction.dynamicClasses',
+      dtcConfig, // TODO
+      `${designToolType}.extraction.dynamicClasses`,
       [],
     )
       .map(obj => new DynamicClass(obj))

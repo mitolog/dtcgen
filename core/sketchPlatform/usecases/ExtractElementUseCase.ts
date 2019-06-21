@@ -19,6 +19,5 @@ export class ExtractElementUseCase implements IExtractElementUseCase {
 
   async handle(inputPath: string, outputDir?: string): Promise<void> {
     await this.repository.extractAll(inputPath, outputDir);
-    this.repository.extractSlices(inputPath, outputDir);
   }
 }

@@ -257,11 +257,11 @@ export class NavigationBarParser extends BaseElementParser {
 
     switch (matches[matches.length - 1].toLowerCase()) {
       case 'icon':
-        item.iconPath = 'DtcGenerated/' + name.replace(/\s+/g, '');
+        item.iconPath = 'DtcGenerated/' + name.removeAllWhiteSpaces();
         break;
       case 'color':
         // update icon color
-        const colorName = 'DtcGenerated/' + name.replace(/\s+/g, '');
+        const colorName = 'DtcGenerated/' + name.removeAllWhiteSpaces();
         const subLayers = node.layers;
         if (!subLayers) break;
         for (const layer of subLayers) {

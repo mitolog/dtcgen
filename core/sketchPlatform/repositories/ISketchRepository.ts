@@ -1,8 +1,8 @@
-import * as ns from 'node-sketch';
+import { SliceConfig } from '../../domain/Entities';
 
 export interface ISketchRepository {
   getAll(inputPath: string): Promise<any[]>;
   extractAll(inputPath: string, outputDir?: string): Promise<void>;
-  extractSlices(inputPath: string, outputDir?: string): Promise<void>;
-  extractImages(inputPath: string, outputDir?: string): Promise<void>;
+  extractSlices(config: SliceConfig): Promise<void>;
+  extractImages(config: SliceConfig): Promise<void>;
 }
