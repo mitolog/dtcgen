@@ -2,6 +2,7 @@ import { ISliceImageUseCase } from '../../domain/usecases/ISliceImageUseCase';
 import { ISketchRepository } from '../repositories/ISketchRepository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
+import { SliceConfig } from '../../domain/Entities';
 
 @injectable()
 export class SliceImageUseCase implements ISliceImageUseCase {
@@ -11,8 +12,8 @@ export class SliceImageUseCase implements ISliceImageUseCase {
     this.repository = repository;
   }
 
-  async handle(inputPath: string, outputDir?: string): Promise<void> {
-    await this.repository.extractImages(inputPath, outputDir);
-    await this.repository.extractSlices(inputPath, outputDir);
+  async handle(config: SliceConfig): Promise<void> {
+    await this.repository.extractImages(config);
+    await this.repository.extractSlices(config);
   }
 }

@@ -1,3 +1,4 @@
+import { SliceConfig } from '../Entities';
 export interface ISliceImageUseCase {
-  handle(inputPath: string, outputDir?: string): Promise<void>;
+  handle(config: SliceConfig): Promise<void>;
 }

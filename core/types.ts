@@ -2,6 +2,7 @@ const TYPES = {
   INamingLinter: Symbol.for('INamingLinter'),
   ISketchPresenter: Symbol.for('ISketchPresenter'),
   ISketchRepository: Symbol.for('ISketchRepository'),
+  IFigmaRepository: Symbol.for('IFigmaRepository'),
   ILintNamingUseCase: Symbol.for('ILintNamingUseCase'),
   IExtractElementUseCase: Symbol.for('IExtractElementUseCase'),
   ISliceImageUseCase: Symbol.for('ISliceImageUseCase'),

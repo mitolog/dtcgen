@@ -22,6 +22,7 @@ export enum OutputType {
   tree,
   sourcecodes,
   project,
+  figmaTree,
 }
 
 export class PathManager {
@@ -75,6 +76,18 @@ export class PathManager {
         outputPath = path.join(treeDirName, 'tree.json');
         break;
 
+      case OutputType.figmaTree:
+        const figmaTreeDirName = path.join(
+          this.outputDir,
+          OutputMidDirName.extracted,
+          'metadata',
+        );
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(figmaTreeDirName);
+        }
+        outputPath = path.join(figmaTreeDirName, 'figmaTree.json');
+        break;
+
       case OutputType.dynamicAttributes:
         const attributesPath = path.join(
           this.outputDir,
@@ -107,7 +120,7 @@ export class PathManager {
           'slices',
         );
         if (shouldCreateMidDir) {
-          fs.ensureDirSync(path.dirname(slicesPath));
+          fs.ensureDirSync(slicesPath);
         }
         outputPath = slicesPath;
         break;
@@ -242,8 +255,7 @@ export class PathManager {
       : path.resolve(process.cwd(), targetPath);
 
     if (fs.existsSync(absolutePath)) {
-      const jsonObj = JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
-      return jsonObj.sketch;
+      return JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
     } else if (path.dirname(absolutePath) === '/') {
       throw new Error('no config file');
     }
@@ -256,14 +268,20 @@ export class PathManager {
     return this.getConfig(upperFilePath);
   }
 
-  getJson(outputType: OutputType): any {
-    const metadataJsonPath = this.getOutputPath(outputType);
-    if (!metadataJsonPath) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
+  getJson(outputType: OutputType, fileName?: string): any {
+    var metadataJsonPath = this.getOutputPath(outputType);
+    if (fileName) {
+      metadataJsonPath = path.join(metadataJsonPath, fileName);
     }
-    const json: any[] = JSON.parse(this.read(metadataJsonPath));
+    if (
+      PathManager.isDir(metadataJsonPath) ||
+      !fs.existsSync(metadataJsonPath)
+    ) {
+      throw new Error('cannot find json file: ' + metadataJsonPath);
+    }
+    const json: any = JSON.parse(this.read(metadataJsonPath));
     if (!json) {
-      throw new Error('cannot find directory: ' + metadataJsonPath);
+      throw new Error('cannot parse json file: ' + metadataJsonPath);
     }
     return json;
   }
