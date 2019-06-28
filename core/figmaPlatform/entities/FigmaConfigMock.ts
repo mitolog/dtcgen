@@ -1,22 +1,26 @@
 import * as dotenv from 'dotenv';
-import { AssetFormat, SliceConfig } from '../../domain/Entities';
+import { injectable } from 'inversify';
+import { AssetFormat, SliceConfig } from '../../Domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
-import { IFigmaConfig } from './IFigmaConfig';
+import { IFigmaConfig } from '../FigmaPlatform';
+import { FigmaMockAdapter } from './figmaMockAdapter';
 
 dotenv.config();
 if (dotenv.error) {
   throw dotenv.error;
 }
 
-export class FigmaConfig implements IFigmaConfig {
+@injectable()
+export class FigmaConfigMock implements IFigmaConfig {
   fileKey?: string;
   token?: string;
   sliceConfig?: SliceConfig;
+  adapter: FigmaMockAdapter;
 
   init(sliceConfig?: SliceConfig) {
     this.sliceConfig = sliceConfig;
 
-    this.fileKey = process.env.FIGMA_FILE_KEY;
+    this.fileKey = 'RL6HzoX6UeVaQw4OmSsqxr'; //process.env.FIGMA_FILE_KEY;
     if (!this.fileKey) {
       throw new Error('no fileKey found');
     }
@@ -24,12 +28,15 @@ export class FigmaConfig implements IFigmaConfig {
     if (!this.token) {
       throw new Error('no token found');
     }
+
+    this.adapter = new FigmaMockAdapter();
   }
 
   setSliceConfig(config: SliceConfig) {
     this.sliceConfig = config;
   }
 
+  // curl -H 'X-FIGMA-TOKEN: xxxx' 'https://api.figma.com/v1/files/RL6HzoX6UeVaQw4OmSsqxr' > mockSampleFigma.json
   filesConfig(): AxiosRequestConfig {
     return {
       url: `/files/${this.fileKey}`,
@@ -38,9 +45,11 @@ export class FigmaConfig implements IFigmaConfig {
       headers: {
         'X-FIGMA-TOKEN': this.token,
       },
+      adapter: this.adapter.configAdapterOK('figmaFile.json'),
     };
   }
 
+  // curl -H 'X-FIGMA-TOKEN: xxxx' 'https://api.figma.com/v1/images/S63Ch0fsfmOUJjjdz53QrZm3?ids=0:331,0:332&format=pdf&svg_include_id=true'
   imagesConfig(ids: string[]): AxiosRequestConfig {
     return {
       url: `/images/${this.fileKey}`,
@@ -54,9 +63,11 @@ export class FigmaConfig implements IFigmaConfig {
       headers: {
         'X-FIGMA-TOKEN': this.token,
       },
+      adapter: this.adapter.configAdapterOK('figmaImages.json'),
     };
   }
 
+  // curl -H 'X-FIGMA-TOKEN: xxxx' 'https://api.figma.com/v1/files/RL6HzoX6UeVaQw4OmSsqxr/images' > mockImageFills.json
   imageFillsConfig(): AxiosRequestConfig {
     return {
       url: `/files/${this.fileKey}/images`,
@@ -65,6 +76,7 @@ export class FigmaConfig implements IFigmaConfig {
       headers: {
         'X-FIGMA-TOKEN': this.token,
       },
+      adapter: this.adapter.configAdapterOK('imageFills.json'),
     };
   }
 
@@ -72,6 +84,7 @@ export class FigmaConfig implements IFigmaConfig {
     const config = {
       url: url,
       method: 'get' as Method,
+      adapter: this.adapter.configAdapterBlob(url, ext),
     };
 
     var headers = {};

@@ -77,9 +77,11 @@ export class DIContainer {
   }
 
   injectFigma(container: Container) {
-    // need to specify to properly construct LintNamingUseCase
     container
-      .bind<FigmaPlatform.FigmaRepository>(TYPES.IFigmaRepository)
+      .bind<FigmaPlatform.IFigmaConfig>(TYPES.IFigmaConfig)
+      .to(FigmaPlatform.FigmaConfig);
+    container
+      .bind<FigmaPlatform.IFigmaRepository>(TYPES.IFigmaRepository)
       .to(FigmaPlatform.FigmaRepository);
 
     // slice use case

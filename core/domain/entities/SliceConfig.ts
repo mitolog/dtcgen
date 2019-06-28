@@ -1,12 +1,12 @@
 import * as _ from 'lodash';
-import { AssetFormat } from '../Entities';
-import { PathManager } from '../../utilities/Utilities';
+import { AssetFormat } from './AssetFormat';
+import { PathManager } from '../../utilities/PathManager';
 import { DesignToolType } from './DesignToolType';
 
 export class SliceConfig {
   keywords?: string[];
   caseSensitive: boolean;
-  extension?: AssetFormat;
+  extension: AssetFormat;
   inputPath?: string;
   outputDir?: string;
 

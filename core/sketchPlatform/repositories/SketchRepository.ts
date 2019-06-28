@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import * as ns from 'node-sketch';
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
-import * as cp from 'child_process';
+import * as execa from 'execa';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
 import { injectable } from 'inversify';
@@ -250,7 +250,7 @@ export class SketchRepository implements ISketchRepository {
     config.initWithDtcConfig(DesignToolType.sketch);
     config.inputPath = inputPath;
     config.outputDir = outputDir;
-    this.extractSlices(config);
+    await this.extractSlices(config);
   }
 
   async extractImages(config: SliceConfig): Promise<void> {
@@ -262,11 +262,14 @@ export class SketchRepository implements ISketchRepository {
     sketch.use(new ns.plugins.ExportImages(imagesDirName));
   }
 
-  extractSlices(config: SliceConfig): Promise<void> {
+  async extractSlices(config: SliceConfig): Promise<void> {
+    if (!config) {
+      throw new Error('no `sliceConfig` parameter is set.');
+    }
     const absoluteInputPath = this.absolutePath(config.inputPath);
     const pathManager = new PathManager(config.outputDir);
     if (!absoluteInputPath) return;
-    const execSync = cp.execSync;
+
     const dirPath = pathManager.getOutputPath(OutputType.slices, true);
     let command = process.env.SKETCH_TOOL_PATH;
     if (!command || !isString(command)) {
@@ -278,7 +281,7 @@ export class SketchRepository implements ISketchRepository {
     // command += ' --scales=1,2,3';
     command += ' --output=' + dirPath;
 
-    execSync(command);
+    await execa.shell(command);
 
     // `export slices` command may make leading/trailing spaces, so remove these.
     pathManager.removeWhiteSpaces(dirPath);
