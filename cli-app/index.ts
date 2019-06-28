@@ -121,16 +121,19 @@ cli
   .action((input, _) => {
     const inputPath = input.input;
     const outputDir = input.output;
-    if (!inputPath) {
-      console.log('input option is not detected. see `dtcgen slice --help`.');
-      return;
-    }
 
     const toolType: string =
       DesignToolTypeValues.find(type => type === input.tool) ||
       DesignToolType.sketch;
     const platform =
       OSTypeValues.find(type => type === input.platform) || OSType.ios;
+
+    if (toolType == DesignToolType.sketch && !inputPath) {
+      console.log(
+        '`input` option on sketch is required. see `dtcgen slice --help`.',
+      );
+      return;
+    }
 
     const sliceConfig: SliceConfig = new SliceConfig();
     sliceConfig.initWithDtcConfig(toolType as DesignToolType);
@@ -161,18 +164,17 @@ cli
         console.log(error);
       });
   })
+  .option(
+    'input [relative/absolute path]',
+    'input file path. required for sketch, optional for figma.',
+  )
   .option('tool [designTool]', 'optional. `sketch` as a default.')
   .option('platform [osType]', 'optional. currently `ios` only.');
 
-cli
-  .option(
-    'input [relative/absolute path]',
-    'required for lint/extract. File path to be executed comamnd.',
-  )
-  .option(
-    'output [relative/absolute dir]',
-    'optional. but MUST BE SAME BETWEEN COMMANDS. Default dir is set on .env file.',
-  );
+cli.option(
+  'output [relative/absolute dir]',
+  'optional. but MUST BE SAME BETWEEN COMMANDS. Default dir is set on .env file.',
+);
 
 cli.version('0.0.0');
 cli.help();

@@ -1,0 +1,9 @@
+{
+  "error": false,
+  "status": 200,
+  "meta": {
+    "images": {
+      "adf714b66ccd9674ca6faef60973e79a718b0c98": "https://s3-alpha-sig.figma.com/img/adf7/14b6/6ccd9674ca6faef60973e79a718b0c98?Expires=1562544000&Signature=c0g5g90gAg3yZoWJ9du~lBihCYAxXyrcIsmxm7tjuRbmTpfZw~gJpnHyFCMqBSY6loAjQZCTOgov5npYhpEFk3EqMca54YPC1LorTlyMTeBKXDU-VmDItqgB1LP~usdmpG-wgrth2RSnYQz0s0B5LNNPu~l8SVTpc0GUZzbgpBedTad2OySJnmT~lMSJE011NgNbsBggQvHbJZ4vmdSaDDdEdQqnTxpcdwvYiihK8Tj28DLgGs01lmzRbMijIX9ZA~NUEEwTlu7jgmVQfju0Q0RnJl37J~qQrtFUp9EhcdgUhuSBXpn8D10W9pNvQvOw870h0Id2IqxmrRguAuJMjg__&Key-Pair-Id=APKAINTVSUGEWH5XD5UA"
+    }
+  }
+}

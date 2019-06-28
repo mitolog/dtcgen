@@ -2,24 +2,28 @@ import axios, { AxiosRequestConfig, AxiosPromise, AxiosResponse } from 'axios';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as _ from 'lodash';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { IFigmaRepository } from './IFigmaRepository';
-import { FigmaConfig } from '../entities/FigmaConfig';
 import { PathManager, OutputType } from '../../utilities/Utilities';
 import { isString } from 'util';
 import { SliceConfig, AssetFormat } from '../../domain/Entities';
+import { IFigmaConfig } from '../entities/IFigmaConfig';
+import { TYPES } from '../../types';
 
 @injectable()
 export class FigmaRepository implements IFigmaRepository {
-  figmaConfig: FigmaConfig;
+  figmaConfig: IFigmaConfig;
 
-  constructor() {
-    this.figmaConfig = new FigmaConfig();
+  constructor(@inject(TYPES.IFigmaConfig) config: IFigmaConfig) {
+    this.figmaConfig = config;
     this.figmaConfig.init();
   }
 
   async extractSlices(sliceConfig: SliceConfig): Promise<void> {
-    this.figmaConfig.sliceConfig = sliceConfig;
+    if (!sliceConfig) {
+      throw new Error('no `sliceConfig` parameter is set.');
+    }
+    this.figmaConfig.setSliceConfig(sliceConfig);
 
     const pathManager = new PathManager(sliceConfig.outputDir);
     const keywords = sliceConfig.keywords || null;
@@ -88,9 +92,9 @@ export class FigmaRepository implements IFigmaRepository {
         continue;
       }
 
-      const destPath = this.createDirIfNeeded(outputDir, name);
-      const ext = sliceConfig.extension || AssetFormat.PDF;
-      fs.writeFileSync(destPath + '.' + ext.toLowerCase(), res.data);
+      const destPath = await this.createDirIfNeeded(outputDir, name);
+      const ext = sliceConfig.extension;
+      await fs.writeFile(destPath + '.' + ext.toLowerCase(), res.data);
     }
 
     if (errors.length > 0) {
@@ -100,6 +104,9 @@ export class FigmaRepository implements IFigmaRepository {
 
   /// even if config.extension is pdf/svf, `extractImages` extract png, cause it's not vector data.
   async extractImages(config: SliceConfig): Promise<void> {
+    if (!config) {
+      throw new Error('no `sliceConfig` parameter is set.');
+    }
     var imageFillsResult: AxiosResponse<any> = null;
     try {
       imageFillsResult = await axios(this.figmaConfig.imageFillsConfig());
@@ -135,9 +142,9 @@ export class FigmaRepository implements IFigmaRepository {
         errorImageUrls.push(url);
         continue;
       }
-      const destPath = this.createDirIfNeeded(outputDir, name);
+      const destPath = await this.createDirIfNeeded(outputDir, name);
       try {
-        fs.writeFileSync(
+        await fs.writeFile(
           destPath + '.' + AssetFormat.PNG.toLowerCase(),
           res.data,
           { encoding: 'binary' },
@@ -154,18 +161,18 @@ export class FigmaRepository implements IFigmaRepository {
     }
   }
 
-  private createDirIfNeeded(dirPath: string, name: string) {
+  private async createDirIfNeeded(dirPath: string, name: string) {
     var destDir: string = dirPath;
-    var lastComponentName: string = name.removeAllWhiteSpaces();
+    var lastComponentName: string = name.replace(/\s+/g, ''); //.removeAllWhiteSpaces();
     // need-to-test: check if both dir version and not dir version
     const dirMatches: RegExpMatchArray = name.match(/\//g);
     if (dirMatches && dirMatches.length > 0) {
-      const newDir = name.removeAllWhiteSpaces();
+      const newDir = name.replace(/\s+/g, ''); //.removeAllWhiteSpaces();
       destDir = path.join(dirPath, path.dirname(newDir));
-      fs.ensureDirSync(destDir);
+      await fs.ensureDir(destDir);
       lastComponentName = name
         .split('/')
-        [dirMatches.length].removeAllWhiteSpaces();
+        [dirMatches.length].replace(/\s+/g, ''); //.removeAllWhiteSpaces();
     }
     return path.join(destDir, lastComponentName);
   }
@@ -202,7 +209,7 @@ export class FigmaRepository implements IFigmaRepository {
     const filePath = pathManager.getOutputPath(OutputType.figmaTree, true);
 
     var fileData: Object;
-    if (fs.existsSync(filePath)) {
+    if (await fs.pathExists(filePath)) {
       fileData = pathManager.getJson(OutputType.figmaTree);
       return fileData;
     }
@@ -219,7 +226,7 @@ export class FigmaRepository implements IFigmaRepository {
       throw new Error('no figma files found.');
     }
 
-    fs.writeFileSync(filePath, JSON.stringify(fileData));
+    await fs.writeFile(filePath, JSON.stringify(fileData));
     return fileData;
   }
 }
