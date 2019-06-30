@@ -6,7 +6,7 @@ By following specific naming rules on design prototyping tool, this tool will tu
 
 This repository aims to be a tool set that generates iOS/Android app source code and related assets from design prototyping tools like Sketch, Figma, and so on.
 
-The base concept is that _"let's automate process turning designs into source codes as possible as we can"_ so that both designers and developers can concentrate on more higher level of the product creation.
+The base concept is that _"let's make it automatic that is painful for human"_ so that both designers and developers can concentrate on more higher level of the product creation.
 
 ## tools
 
@@ -14,12 +14,11 @@ we prepared cli tools as below:
 
 ### currently implemented
 
-- (Sketch -> iOS) convert image slices into xcassets files
+- (Sketch/Figma -> iOS) convert image slices into xcassets files
 
 ### to be added
 
 - (Sketch -> iOS) convert color palette into xcassets files
-- (Figma -> iOS) convert image slices and color palette into xcassets files
 - (Sketch -> iOS) convert static view layouts into SwiftUI layout
 
 Android version to be added...
@@ -36,18 +35,21 @@ Android version to be added...
 
 ## how to use
 
-1. check if environment variables on `.env` file are all set properly
+1. check if environment variables on `.env` file are all set properly (you can copy .env.default)
 2. dtcgen <command> <options>
 
 ### (Sketch -> iOS) To convert image slices into xcassets files
 
 `dtcgen slice --input "./sample.sketch" --platform ios`
 
-### (Sketch -> iOS) convert color palette into xcassets files
-
-to be added...
-
 ### (Figma -> iOS) convert image slices and color palette into xcassets files
+
+```
+# you need to set constants on .env file beforehand
+dtcgen slice --tool "figma" --platform ios
+```
+
+### (Sketch -> iOS) convert color palette into xcassets files
 
 to be added...
 
@@ -68,13 +70,13 @@ to be added...
 1. make sure that you did finished `tsc` and have directory `dist` on root dir which has transpiled sourcecodes.
 2. `npm link` on project root dir which make symlink to global npm node_modules
 3. now you can execute like `dtcgen slice --input "./sample.sketch"`.
-4. if you want to use on another node project, you can type `npm link dtcgen` on root dir of that project.
+4. if you want to use this cli on another node project, you can type `npm link dtcgen` on root dir of that project.
 
 ** To remove symlink, you can execute `npm install` on dtcgen project. **
 
-### how to make PR
+### contribution
 
-welcome
+welcome.
 
 ## thanks to
 
