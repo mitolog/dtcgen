@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { injectable } from 'inversify';
 import { AssetFormat, SliceConfig } from '../../domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
 import { IFigmaConfig } from './IFigmaConfig';
@@ -8,6 +9,7 @@ if (dotenv.error) {
   throw dotenv.error;
 }
 
+@injectable()
 export class FigmaConfig implements IFigmaConfig {
   fileKey?: string;
   token?: string;
