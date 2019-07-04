@@ -7,7 +7,7 @@ describe('tests for SketchRepository', () => {
   const testContainer = new Container();
   var repository: SketchPlatform.ISketchRepository;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     testContainer
       .bind<SketchPlatform.ISketchRepository>(TYPES.ISketchRepository)
       .to(SketchPlatform.SketchRepository);
@@ -19,18 +19,18 @@ describe('tests for SketchRepository', () => {
 
   describe('check extractSlices paramenter', () => {
     expect.assertions(1);
-    it('if `inputPath` parameter is null, it raises an exeption.', () => {
-      return expect(() => {
-        repository.extractSlices(null);
-      }).toThrow();
+    test('if `config` parameter is null, it raises an exeption.', () => {
+      return repository.extractSlices(null).catch(e => {
+        expect(e).toBeDefined();
+      });
     });
   });
 
   describe('check extractImages paramenter', () => {
     expect.assertions(1);
-    it('if `inputPath` parameter is null, it raises an exeption.', () => {
-      repository.extractImages(null).catch(e => {
-        expect(e).toBeDefined;
+    test('if `config` parameter is null, it raises an exeption.', () => {
+      return repository.extractImages(null).catch(e => {
+        expect(e).toBeDefined();
       });
     });
   });

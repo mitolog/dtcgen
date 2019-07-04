@@ -32,6 +32,7 @@ cli-app/*.json
 
 # Misc
 .DS_Store
+.env
 
 ##############################
 # sketch plugin related below
