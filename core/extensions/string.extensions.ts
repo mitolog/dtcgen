@@ -4,6 +4,7 @@ declare global {
   interface String {
     toLowerCamelCase(splitter?: string): string;
     toUpperCamelCase(splitter?: string): string;
+    removeAllWhiteSpaces(): string;
   }
 }
 
@@ -57,4 +58,8 @@ String.prototype.toUpperCamelCase = function(splitter?: string) {
       ? tmpStr.slice(0, 1).toUpperCase() + tmpStr.slice(1)
       : tmpStr.toUpperCase(); // if it's only one letter, capitalize it.
   }
+};
+
+String.prototype.removeAllWhiteSpaces = function() {
+  return this.replace(/\s+/g, '');
 };

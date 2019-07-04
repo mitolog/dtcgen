@@ -75,5 +75,12 @@
         "maxLength": 50
       }
     }
+  },
+  "figma": {
+    "slice": {
+      "caseSensitive": true,
+      "keywords": ["Icons"],
+      "format": "PDF"
+    }
   }
 }

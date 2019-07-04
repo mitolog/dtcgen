@@ -2,12 +2,18 @@ import * as fs from 'fs-extra';
 import * as ns from 'node-sketch';
 import * as _ from 'lodash';
 import * as dotenv from 'dotenv';
-import * as cp from 'child_process';
+import * as execa from 'execa';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
 import { injectable } from 'inversify';
 
-import { Rect, TreeElement, DynamicClass } from '../../domain/Entities';
+import {
+  Rect,
+  TreeElement,
+  DynamicClass,
+  SliceConfig,
+  DesignToolType,
+} from '../../domain/Entities';
 import {
   SketchView,
   SketchLayerType,
@@ -185,7 +191,8 @@ export class SketchRepository implements ISketchRepository {
     // extract all artboards
     const artboards = await this.getAll(inputPath);
     const treeElements: [TreeElement?] = [];
-    const sketchConfig: Object = pathManager.getConfig();
+    const dtcConfig: Object = pathManager.getConfig();
+    const sketchConfig = dtcConfig['sketch'] || null;
     const sketchParser = new SketchParser(sketch, sketchConfig, outputDir);
     const dynamicClasses: DynamicClass[] = _.get(
       sketchConfig,
@@ -238,22 +245,31 @@ export class SketchRepository implements ISketchRepository {
 
     const treePath = pathManager.getOutputPath(OutputType.tree, true);
     fs.writeFileSync(treePath, JSON.stringify(treeElements));
+
+    const config = new SliceConfig();
+    config.initWithDtcConfig(DesignToolType.sketch);
+    config.inputPath = inputPath;
+    config.outputDir = outputDir;
+    await this.extractSlices(config);
   }
 
-  async extractImages(inputPath: string, outputDir?: string): Promise<void> {
-    const sketch = await this.getTargetSketch(inputPath);
-    const pathManager = new PathManager(outputDir);
+  async extractImages(config: SliceConfig): Promise<void> {
+    const sketch = await this.getTargetSketch(config.inputPath);
+    const pathManager = new PathManager(config.outputDir);
 
     // extract all images within 'Pages'(not in 'Symbols')
     const imagesDirName = pathManager.getOutputPath(OutputType.images, true);
     sketch.use(new ns.plugins.ExportImages(imagesDirName));
   }
 
-  extractSlices(inputPath: string, outputDir?: string): Promise<void> {
-    const absoluteInputPath = this.absolutePath(inputPath);
-    const pathManager = new PathManager(outputDir);
+  async extractSlices(config: SliceConfig): Promise<void> {
+    if (!config) {
+      throw new Error('no `sliceConfig` parameter is set.');
+    }
+    const absoluteInputPath = this.absolutePath(config.inputPath);
+    const pathManager = new PathManager(config.outputDir);
     if (!absoluteInputPath) return;
-    const execSync = cp.execSync;
+
     const dirPath = pathManager.getOutputPath(OutputType.slices, true);
     let command = process.env.SKETCH_TOOL_PATH;
     if (!command || !isString(command)) {
@@ -265,7 +281,7 @@ export class SketchRepository implements ISketchRepository {
     // command += ' --scales=1,2,3';
     command += ' --output=' + dirPath;
 
-    execSync(command);
+    await execa.shell(command);
 
     // `export slices` command may make leading/trailing spaces, so remove these.
     pathManager.removeWhiteSpaces(dirPath);
