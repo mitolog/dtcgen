@@ -259,6 +259,9 @@ export class PathManager {
       : path.resolve(process.cwd(), targetPath);
 
     if (fs.existsSync(absolutePath)) {
+      // TODO: I've prepared interface `DtcConfig`
+      // so need to check type of parseed result with something like this:
+      // https://github.com/diontools/ts-json-checker
       return JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
     } else if (path.dirname(absolutePath) === '/') {
       throw new Error('no config file');

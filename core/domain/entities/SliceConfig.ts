@@ -20,6 +20,6 @@ export class SliceConfig {
     this.outputDir = defaults['outputDir'] || null;
     this.keywords = defaults['keywords'] || null;
     this.caseSensitive = defaults['caseSensitive'] || false;
-    this.extension = defaults['format'] || AssetFormat.PDF;
+    this.extension = defaults['extension'] || AssetFormat.PDF;
   }
 }
