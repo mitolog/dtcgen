@@ -6,8 +6,9 @@ import {
   Button,
   ButtonType,
   TextStyle,
+  SymbolElement,
 } from '../../../domain/Entities';
-import { BaseElementParser, SymbolElement } from './BaseElementParser';
+import { BaseElementParser } from './BaseElementParser';
 
 export class ButtonParser extends BaseElementParser {
   parse(node: any, button: Button) {
