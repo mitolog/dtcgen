@@ -51,7 +51,7 @@ describe('tests for sliceImageUseCase on Sketch', () => {
   });
 
   afterAll(async () => {
-    return await execa.shell(`rm -rf ${outputDir}`);
+    return await execa(`rm -rf ${outputDir}`, { shell: true });
   });
 
   describe('required parameter check', () => {

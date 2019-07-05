@@ -42,7 +42,7 @@ describe('tests for sliceImageUseCase on Figma', () => {
   });
 
   afterAll(async () => {
-    return await execa.shell(`rm -rf ${outputDir}`);
+    return await execa(`rm -rf ${outputDir}`, { shell: true });
   });
 
   beforeEach(() => {
