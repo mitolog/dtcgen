@@ -74,13 +74,18 @@
         "unique": true,
         "maxLength": 50
       }
+    },
+    "slice": {
+      "caseSensitive": true,
+      "keywords": ["Icons"],
+      "extension": "PDF"
     }
   },
   "figma": {
     "slice": {
       "caseSensitive": true,
       "keywords": ["Icons"],
-      "format": "PDF"
+      "extension": "PDF"
     }
   }
 }
