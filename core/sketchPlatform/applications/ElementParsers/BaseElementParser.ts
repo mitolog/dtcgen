@@ -15,10 +15,10 @@ import {
   TextStyle,
   DynamicClass,
   ElementType,
+  SymbolElement,
 } from '../../../domain/Entities';
 import { isFillType, isDynamicClass } from '../../../typeGuards';
 
-export type SymbolElement<T> = { key: T };
 export abstract class BaseElementParser implements IElementParser {
   public sketch: Object;
   public config: Object;
