@@ -281,7 +281,7 @@ export class SketchRepository implements ISketchRepository {
     // command += ' --scales=1,2,3';
     command += ' --output=' + dirPath;
 
-    await execa.shell(command);
+    await execa(command, { shell: true });
 
     // `export slices` command may make leading/trailing spaces, so remove these.
     pathManager.removeWhiteSpaces(dirPath);

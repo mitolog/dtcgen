@@ -1,6 +1,6 @@
 {
   "name": "dtcgen",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "design to code generator",
   "engineStrict": true,
   "engines": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:podder-ai/design-to-code.git"
+    "url": "git@github.com:Innovatube/dtcgen.git"
   },
   "bin": {
     "dtcgen": "./bin/cli"
@@ -19,7 +19,6 @@
     "@types/jest": "^24.0.0",
     "@types/lodash": "^4.14.134",
     "@types/node": "^8.10.49",
-    "execa": "^1.0.0",
     "jest": "~24.8.0",
     "madge": "^3.4.4",
     "prettier": "1.14.3",
@@ -31,13 +30,10 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
-    "clean": "rimraf coverage build tmp",
     "build": "tsc",
     "build:watch": "tsc -w",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
-    "pretest": "tsc",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch --rootDir \"./core\""
+    "test": "jest --coverage"
   },
   "author": "mito-san <yuhei.miyazato@nexusfrontier.tech>",
   "license": "Apache-2.0",
@@ -45,6 +41,7 @@
     "axios": "^0.19.0",
     "cac": "^6.5.2",
     "dotenv": "^6.2.0",
+    "execa": "^2.0.3",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.1.2",
     "handlebars-helpers": "^0.10.0",
