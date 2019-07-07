@@ -209,10 +209,11 @@ export class FigmaRepository implements IFigmaRepository {
     const filePath = pathManager.getOutputPath(OutputType.figmaTree, true);
 
     var fileData: Object;
-    if (await fs.pathExists(filePath)) {
-      fileData = pathManager.getJson(OutputType.figmaTree);
-      return fileData;
-    }
+    // TBD: read from cache
+    // if (await fs.pathExists(filePath)) {
+    //   fileData = pathManager.getJson(OutputType.figmaTree);
+    //   return fileData;
+    // }
 
     // if not exist, retrieve via figma API.
     try {
