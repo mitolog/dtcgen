@@ -3,9 +3,11 @@ import * as path from 'path';
 import * as handlebars from 'handlebars';
 import * as helpers from 'handlebars-helpers';
 import { PathManager } from './Utilities';
+import { OSType } from '../domain/Entities';
 
 export class HandlebarsHelpers {
   private pathManager: PathManager;
+  private templatePath: string;
 
   static handlebars(): any {
     handlebars.registerHelper('eq', helpers().eq);
@@ -21,6 +23,35 @@ export class HandlebarsHelpers {
 
   constructor(pathManager: PathManager) {
     this.pathManager = pathManager;
+
+    const envTemplateDir = process.env.TEMPLATE_DIR;
+    if (!envTemplateDir) {
+      const defaultTemplateDestDir = path.resolve(process.cwd(), './templates');
+      this.templatePath = defaultTemplateDestDir;
+    } else {
+      this.templatePath = path.isAbsolute(envTemplateDir)
+        ? process.env.TEMPLATE_DIR
+        : path.resolve(process.cwd(), envTemplateDir);
+    }
+
+    if (!fs.existsSync(this.templatePath)) {
+      fs.ensureDirSync(this.templatePath);
+
+      const originalTemplatePath = path.join(__dirname, '../../../templates');
+      if (!fs.existsSync(originalTemplatePath)) {
+        throw new Error('original templates path is not exists.');
+      }
+
+      fs.copySync(originalTemplatePath, this.templatePath);
+    }
+  }
+
+  templatePathFor(osType: OSType, subDir?: string): string {
+    const targetPath = path.join(this.templatePath, osType, subDir);
+    if (!targetPath || !fs.existsSync(targetPath)) {
+      throw new Error(`${subDir} seems not exist under ${this.templatePath}`);
+    }
+    return targetPath;
   }
 
   /**
