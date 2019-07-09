@@ -174,16 +174,20 @@ export class AssetGenerator {
 
     /* deal with file pathes below */
     const parsed = path.parse(originPath);
-    const imageSetDir = path.join(destDirOrPath, parsed.name + '.imageset');
+    const assetName = parsed.name.replace(/\s+/g, '');
+    const imageSetDir = path.join(destDirOrPath, assetName + '.imageset');
     // create imageSetDir directory if needed
     fs.ensureDirSync(imageSetDir);
 
     // create last directory json
-    const lastJsonStr = lastJsonTemplate({ filename: parsed.base });
+    const lastJsonStr = lastJsonTemplate({
+      filename: parsed.base.replace(/\s+/g, ''),
+    });
     fs.writeFileSync(path.join(imageSetDir, 'Contents.json'), lastJsonStr);
 
     // copy asset data itself
-    fs.copyFileSync(originPath, path.join(imageSetDir, parsed.base));
+    const assetNameWithExt = assetName + parsed.ext;
+    fs.copyFileSync(originPath, path.join(imageSetDir, assetNameWithExt));
   }
 
   private getAssetJsonTemplatePaths(): XcAssetJsonPaths {
