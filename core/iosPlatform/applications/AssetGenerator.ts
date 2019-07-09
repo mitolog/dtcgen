@@ -27,16 +27,14 @@ export class AssetGenerator {
   constructor(outputDir?: string) {
     this.pathManager = new PathManager(outputDir);
     this.templateHelpers = new HandlebarsHelpers(this.pathManager);
-    const templatePath = path.isAbsolute(process.env.TEMPLATE_DIR)
-      ? process.env.TEMPLATE_DIR
-      : path.resolve(process.cwd(), process.env.TEMPLATE_DIR);
-    this.projectTemplateRootDir = path.join(
-      templatePath,
+
+    const projTmplRootDir = this.templateHelpers.templatePathFor(
       OSType.ios,
       'XcodeProjectTemplate',
     );
-    const partialTemplateRootDir = path.join(
-      templatePath,
+    this.projectTemplateRootDir = projTmplRootDir;
+
+    const partialTemplateRootDir = this.templateHelpers.templatePathFor(
       OSType.ios,
       'partials',
     );
