@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { OSType } from '../../domain/Entities';
+import { OSType, GenerateConfig, SliceConfig } from '../../domain/Entities';
 import {
   PathManager,
   OutputType,
@@ -23,8 +23,10 @@ export class AssetGenerator {
   private pathManager: PathManager;
   private projectTemplateRootDir: string;
   private templateHelpers: HandlebarsHelpers;
+  private config: GenerateConfig;
 
-  constructor(outputDir?: string) {
+  constructor(config: GenerateConfig, outputDir?: string) {
+    this.config = config;
     this.pathManager = new PathManager(outputDir);
     this.templateHelpers = new HandlebarsHelpers(this.pathManager);
 
@@ -122,6 +124,9 @@ export class AssetGenerator {
     // images/Contents.json
     // images/1e02fxxxxxxxxxxxxx.imageset/Contents.json
     // images/1e02fxxxxxxxxxxxxx.imageset/1e02fxxxxxxxxxxxxx.png
+    const sliceConfig: SliceConfig = this.config.sliceConfig || null;
+    if (!sliceConfig || !sliceConfig.sliceAllImages) return;
+
     const imagesDir = this.pathManager.getOutputPath(
       OutputType.images,
       false,

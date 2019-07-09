@@ -61,3 +61,5 @@ export {
   SymbolElement,
   SketchExtraction,
 } from './entities/DtcConfig';
+
+export { GenerateConfig } from './entities/GenerateConfig';

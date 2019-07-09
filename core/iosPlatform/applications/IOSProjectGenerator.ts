@@ -1,7 +1,12 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { OSType, ElementType, TreeElement } from '../../domain/Entities';
+import {
+  OSType,
+  ElementType,
+  TreeElement,
+  GenerateConfig,
+} from '../../domain/Entities';
 import {
   PathManager,
   OutputType,
@@ -41,7 +46,7 @@ export class IOSProjectGenerator {
     HandlebarsPartials.registerPartials(partialTemplateRootDir);
   }
 
-  generate(projectName: string): void {
+  generate(projectName: string, config: GenerateConfig): void {
     if (
       !projectName ||
       projectName.length <= 0 ||
@@ -86,7 +91,7 @@ export class IOSProjectGenerator {
     );
 
     // deal with assets
-    let assetGenerator = new AssetGenerator(this.pathManager.outputDir);
+    let assetGenerator = new AssetGenerator(config, this.pathManager.outputDir);
     assetGenerator.generateAssets(templateDestDir);
 
     // deal with sourcecodes
