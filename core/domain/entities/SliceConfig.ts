@@ -9,6 +9,7 @@ export class SliceConfig {
   extension: AssetFormat;
   inputPath?: string;
   outputDir?: string;
+  sliceAllImages?: boolean;
 
   initWithDtcConfig(designToolType: DesignToolType) {
     const pathManager = new PathManager(designToolType);
@@ -21,5 +22,6 @@ export class SliceConfig {
     this.keywords = defaults['keywords'] || null;
     this.caseSensitive = defaults['caseSensitive'] || false;
     this.extension = defaults['extension'] || AssetFormat.PDF;
+    this.sliceAllImages = defaults['sliceAllImages'] || false;
   }
 }

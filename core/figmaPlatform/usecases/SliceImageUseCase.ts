@@ -13,7 +13,9 @@ export class SliceImageUseCase implements ISliceImageUseCase {
   }
 
   async handle(config: SliceConfig): Promise<void> {
-    await this.repository.extractImages(config);
+    if (config.sliceAllImages) {
+      await this.repository.extractImages(config);
+    }
     await this.repository.extractSlices(config);
   }
 }

@@ -1,13 +1,14 @@
 import { injectable } from 'inversify';
 import { IGenerateAssetUseCase } from '../../domain/Domain';
 import { AssetGenerator } from '../applications/AssetGenerator';
+import { GenerateConfig } from '../../domain/Entities';
 
 @injectable()
 export class GenerateAssetUseCase implements IGenerateAssetUseCase {
   constructor() {}
 
-  async handle(outputDir?: string): Promise<void> {
-    const generator = new AssetGenerator(outputDir);
+  async handle(config: GenerateConfig, outputDir?: string): Promise<void> {
+    const generator = new AssetGenerator(config, outputDir);
     generator.generate();
   }
 }

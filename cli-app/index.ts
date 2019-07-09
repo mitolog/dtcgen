@@ -13,6 +13,7 @@ import {
   DesignToolType,
   DesignToolTypeValues,
   SliceConfig,
+  GenerateConfig,
 } from '../internal';
 
 const cli = cac();
@@ -118,15 +119,15 @@ cli
     'slice',
     'extract image slices and turn them into ready-to-use assets.',
   )
-  .action((input, _) => {
-    const inputPath = input.input;
-    const outputDir = input.output;
+  .action((args, _) => {
+    const inputPath = args.input;
+    const outputDir = args.output;
 
     const toolType: string =
-      DesignToolTypeValues.find(type => type === input.tool) ||
+      DesignToolTypeValues.find(type => type === args.tool) ||
       DesignToolType.sketch;
     const platform =
-      OSTypeValues.find(type => type === input.platform) || OSType.ios;
+      OSTypeValues.find(type => type === args.platform) || OSType.ios;
 
     if (toolType == DesignToolType.sketch && !inputPath) {
       console.log(
@@ -139,6 +140,9 @@ cli
     sliceConfig.initWithDtcConfig(toolType as DesignToolType);
     sliceConfig.inputPath = inputPath;
     sliceConfig.outputDir = outputDir;
+
+    const generateConfig: GenerateConfig = new GenerateConfig();
+    generateConfig.sliceConfig = sliceConfig;
 
     const extractContainer = new DIContainer(<DesignToolType>(
       toolType
@@ -155,7 +159,7 @@ cli
       .handle(sliceConfig)
       .then(() => {
         console.log(`asset extracted`);
-        return generateAssetUseCase.handle(outputDir);
+        return generateAssetUseCase.handle(generateConfig, outputDir);
       })
       .then(() => {
         console.log(`asset generated`);
@@ -164,16 +168,13 @@ cli
         console.log(error);
       });
   })
-  .option(
-    'input [relative/absolute path]',
-    'input file path. required for sketch, optional for figma.',
-  )
-  .option('tool [designTool]', 'optional. `sketch` as a default.')
-  .option('platform [osType]', 'optional. currently `ios` only.');
+  .option('input <file path>', 'required for sketch.')
+  .option('tool <designTool>', '`sketch` as default.')
+  .option('platform <osType>', '`ios` as default.');
 
 cli.option(
-  'output [relative/absolute dir]',
-  'optional. but MUST BE SAME BETWEEN COMMANDS. Default dir is set on .env file.',
+  'output <dir>',
+  'MUST BE SAME BETWEEN COMMANDS. default value is set on .env file.',
 );
 
 cli.version('0.0.0');
