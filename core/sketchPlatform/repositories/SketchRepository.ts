@@ -13,6 +13,7 @@ import {
   DynamicClass,
   SliceConfig,
   DesignToolType,
+  AssetFormat,
 } from '../../domain/Entities';
 import {
   SketchView,
@@ -266,6 +267,25 @@ export class SketchRepository implements ISketchRepository {
     if (!config) {
       throw new Error('no `sliceConfig` parameter is set.');
     }
+
+    const matchOption: string = config.caseSensitive ? 'i' : '';
+    const keywords = config.keywords || null;
+    if (!keywords || keywords.length <= 0) return;
+
+    const sketch = await this.getTargetSketch(config.inputPath);
+    const symbolsPage = sketch['symbolsPage'];
+    const targetSymbols = symbolsPage.getAll('symbolMaster');
+
+    const matchedSymbols = targetSymbols.filter(symbol => {
+      const matched = keywords.filter(keyword => {
+        return symbol.name.match(new RegExp(keyword, matchOption));
+      });
+      return matched && matched.length;
+    });
+
+    if (!matchedSymbols || matchedSymbols.length <= 0) return;
+    const targetIds = matchedSymbols.map(symbol => symbol.do_objectID);
+
     const absoluteInputPath = this.absolutePath(config.inputPath);
     const pathManager = new PathManager(config.outputDir);
     if (!absoluteInputPath) return;
@@ -277,8 +297,12 @@ export class SketchRepository implements ISketchRepository {
     }
     command += ' export slices ';
     command += absoluteInputPath;
-    command += ' --formats=pdf'; //png,svg
-    // command += ' --scales=1,2,3';
+    command += ` --items=${targetIds.join(',')}`;
+    command += ` --formats=${config.extension.toLowerCase()}`;
+    // need to change `Contents.json` also.
+    // if (config.extension != AssetFormat.PDF) {
+    //   command += ' --scales=1,2,3';
+    // }
     command += ' --output=' + dirPath;
 
     await execa(command, { shell: true });

@@ -163,16 +163,16 @@ export class FigmaRepository implements IFigmaRepository {
 
   private async createDirIfNeeded(dirPath: string, name: string) {
     var destDir: string = dirPath;
-    var lastComponentName: string = name.replace(/\s+/g, ''); //.removeAllWhiteSpaces();
+    var lastComponentName: string = name.replace(/\s+/g, '');
     // need-to-test: check if both dir version and not dir version
     const dirMatches: RegExpMatchArray = name.match(/\//g);
     if (dirMatches && dirMatches.length > 0) {
-      const newDir = name.replace(/\s+/g, ''); //.removeAllWhiteSpaces();
+      const newDir = name.replace(/\s+/g, '');
       destDir = path.join(dirPath, path.dirname(newDir));
       await fs.ensureDir(destDir);
       lastComponentName = name
         .split('/')
-        [dirMatches.length].replace(/\s+/g, ''); //.removeAllWhiteSpaces();
+        [dirMatches.length].replace(/\s+/g, '');
     }
     return path.join(destDir, lastComponentName);
   }
