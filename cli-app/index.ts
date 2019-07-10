@@ -21,103 +21,103 @@ const cli = cac();
 /**
  * lint
  */
-cli.command('lint', 'lint design resource file').action((_, flag) => {
-  const inputPath = flag.input;
-  if (!inputPath) {
-    console.log('required option is not detected. see `generate --help`.');
-    return;
-  }
-  console.log("now start linting...");
-  // TODO: maintenance after implementing the other commands
-  // prettier-ignore
-  // const lintNamingUseCase = cliContainer.get<ILintNamingUseCase>(TYPES.ILintNamingUseCase);
-  // lintNamingUseCase
-  //   .handle(inputPath)
-  //   .then(layers => {
-  //     console.log("finished linting.");
-  //     console.log("--------------------");
-  //     console.log(layers);
-  //   })
-  //   .catch(error => {
-  //     console.log(error);
-  //   });
-});
+// cli.command('lint', 'lint design resource file').action((_, flag) => {
+//   const inputPath = flag.input;
+//   if (!inputPath) {
+//     console.log('required option is not detected. see `generate --help`.');
+//     return;
+//   }
+//   console.log("now start linting...");
+//   // TODO: maintenance after implementing the other commands
+//   // prettier-ignore
+//   // const lintNamingUseCase = cliContainer.get<ILintNamingUseCase>(TYPES.ILintNamingUseCase);
+//   // lintNamingUseCase
+//   //   .handle(inputPath)
+//   //   .then(layers => {
+//   //     console.log("finished linting.");
+//   //     console.log("--------------------");
+//   //     console.log(layers);
+//   //   })
+//   //   .catch(error => {
+//   //     console.log(error);
+//   //   });
+// });
 
 /**
  * extract
  */
-cli
-  .command(
-    'extract',
-    'extract semantic elements for layout file auto generation.',
-  )
-  .action((input, _) => {
-    const inputPath = input.input;
-    const outputDir = input.output;
-    if (!inputPath) {
-      console.log('input option is not detected. see `extract --help`.');
-      return;
-    }
+// cli
+//   .command(
+//     'extract',
+//     'extract semantic elements for layout file auto generation.',
+//   )
+//   .action((input, _) => {
+//     const inputPath = input.input;
+//     const outputDir = input.output;
+//     if (!inputPath) {
+//       console.log('input option is not detected. see `extract --help`.');
+//       return;
+//     }
 
-    const toolType =
-      DesignToolTypeValues.find(type => type === input.tool) ||
-      DesignToolType.sketch;
+//     const toolType =
+//       DesignToolTypeValues.find(type => type === input.tool) ||
+//       DesignToolType.sketch;
 
-    const cliContainer = new DIContainer(<DesignToolType>(
-      toolType
-    )).getContainer();
-    const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(
-      TYPES.IExtractElementUseCase,
-    );
-    extractElementUseCase
-      .handle(inputPath, outputDir)
-      .then(() => {
-        console.log(`file extracted`);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  })
-  .option('tool [designTool]', 'optional. `sketch` as a default.');
+//     const cliContainer = new DIContainer(<DesignToolType>(
+//       toolType
+//     )).getContainer();
+//     const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(
+//       TYPES.IExtractElementUseCase,
+//     );
+//     extractElementUseCase
+//       .handle(inputPath, outputDir)
+//       .then(() => {
+//         console.log(`file extracted`);
+//       })
+//       .catch(error => {
+//         console.log(error);
+//       });
+//   })
+//   .option('tool [designTool]', 'optional. `sketch` as a default.');
 
 /**
  * generate source code
  */
-cli
-  .command('generate', 'generate source code from extracted semantic data.')
-  .action((input, _) => {
-    const platform =
-      OSTypeValues.find(type => type === input.platform) || OSType.ios;
-    const outputDir = input.output;
-    const projectName = input.project;
-    if (!projectName) {
-      console.log('`--project` option is not detected. see `extract --help`.');
-      return;
-    }
+// cli
+//   .command('generate', 'generate source code from extracted semantic data.')
+//   .action((input, _) => {
+//     const platform =
+//       OSTypeValues.find(type => type === input.platform) || OSType.ios;
+//     const outputDir = input.output;
+//     const projectName = input.project;
+//     if (!projectName) {
+//       console.log('`--project` option is not detected. see `extract --help`.');
+//       return;
+//     }
 
-    const cliContainer = new DIContainer(<OSType>platform).getContainer();
-    const generateProjectUseCase = cliContainer.get<IGenerateProjectUseCase>(
-      TYPES.IGenerateProjectUseCase,
-    );
-    generateProjectUseCase
-      .handle(projectName, outputDir)
-      .then(() => {
-        console.log(`code generated`);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  })
-  .option('platform [osType]', 'optional. currently `ios` only.')
-  .option('project [name]', 'required. specify the name for the project.');
+//     const cliContainer = new DIContainer(<OSType>platform).getContainer();
+//     const generateProjectUseCase = cliContainer.get<IGenerateProjectUseCase>(
+//       TYPES.IGenerateProjectUseCase,
+//     );
+//     generateProjectUseCase
+//       .handle(projectName, outputDir)
+//       .then(() => {
+//         console.log(`code generated`);
+//       })
+//       .catch(error => {
+//         console.log(error);
+//       });
+//   })
+//   .option('platform [osType]', 'optional. currently `ios` only.')
+//   .option('project [name]', 'required. specify the name for the project.');
 
 /**
- * extract image slices and convert them into ready to use assets on each platform.
+ * extract symbols/components and convert them into ready-to-use assets.
  */
 cli
   .command(
     'slice',
-    'extract image slices and turn them into ready-to-use assets.',
+    'extract symbols/components and turn them into ready-to-use assets.',
   )
   .action((args, _) => {
     const inputPath = args.input;
@@ -177,7 +177,7 @@ cli.option(
   'MUST BE SAME BETWEEN COMMANDS. default value is set on .env file.',
 );
 
-cli.version('0.0.0');
+cli.version('0.1.0');
 cli.help();
 
 export { cli };

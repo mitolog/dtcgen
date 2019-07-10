@@ -10,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "types": ["node", "reflect-metadata", "jest"],
     "outDir": "./dist",
-    "removeComments": false,
+    "removeComments": true,
     "sourceMap": false,
     "target": "es6"
   },
