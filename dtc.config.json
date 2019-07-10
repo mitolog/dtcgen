@@ -78,14 +78,16 @@
     "slice": {
       "caseSensitive": true,
       "keywords": ["Icons"],
-      "extension": "PDF"
+      "extension": "PDF",
+      "sliceAllImages": true
     }
   },
   "figma": {
     "slice": {
       "caseSensitive": true,
       "keywords": ["Icons"],
-      "extension": "PDF"
+      "extension": "PDF",
+      "sliceAllImages": false
     }
   }
 }
