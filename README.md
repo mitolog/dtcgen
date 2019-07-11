@@ -2,6 +2,8 @@
 
 This is a cli tool where you can extract Symbols or Components, on Sketch and Figma, that contains any keywords set on config file. Then you can turn them into asset catalog(Asset.xcassets) with one command.
 
+[readme in Japanese](https://github.com/Innovatube/dtcgen/wiki/readmeJp).
+
 If you set `sliceAllImages` in config file, you can also extract all images within Sketch/Figma as png.
 
 Currently yarn and npm package is prepared.
