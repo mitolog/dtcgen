@@ -216,6 +216,7 @@ You can change for each design tool. Parameters are as below：
 
 ## regarding other functions
 
+- color palette extraction / generation
 - layout related source code generation with swiftUI
 
 # Contribution
