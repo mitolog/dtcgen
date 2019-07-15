@@ -4,9 +4,9 @@ This is a cli tool where you can extract Symbols or Components, on Sketch and Fi
 
 [readme in Japanese](https://github.com/Innovatube/dtcgen/wiki/readmeJp).
 
-If you set `sliceAllImages` in config file, you can also extract all images within Sketch/Figma as png.
+If you set `sliceAllImages` flag in config file, you can also extract all images within Sketch/Figma as png.
 
-Currently yarn and npm package is prepared.
+Currently yarn/npm package is prepared.
 
 This turned into...
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_icons_on_figma.png)
@@ -14,7 +14,7 @@ This turned into...
 This asset catalog.
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_icons_on_xcode.png)
 
-Because dtcgen set `Provides Namespace` as default, so you can write source code like this:
+Because dtcgen set [`Provides Namespace`](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/FolderStructure.html#//apple_ref/doc/uid/TP40015170-CH33-SW4) as default, so you can write source code like this:
 
 ```swift
 // without R.swift
@@ -30,9 +30,9 @@ FYI: [R.swift](https://github.com/mac-cain13/R.swift)
 
 # Install
 
-```bash
-# Create any favorable directory and move there (let's use `project root` for further documents)
-# We create this directory to put setting files into it.
+```zsh
+# Create favorable directory and cd there (let's use `project-root` for further documents)
+# We put some setting files here.
 $ mkdir trydtcgen && cd ./trydtcgen
 
 # check if node.js is higher than v8.9.0
@@ -69,11 +69,11 @@ dtcgen slice --help
 dtcgen -v
 ```
 
-※ If you installed locally, prepend `npx` on each command.
+※ If you installed locally, prepend `npx` on each commands.
 
 # Preparation
 
-## Check if design file fulfills some conditions
+## Check if design file fulfills conditions
 
 ### Sketch
 
@@ -90,13 +90,13 @@ Materials you want to extract shuold be:
 
 ### Include keywords within Symbol/Component name
 
-Let's say you want to extract icon files, you can prepend keyword `Icons /` for each symbols/components to make it like `Icons / Search`.
+Let's say you want to extract icon files, you can prepend keyword `Icons /` for each symbols/components. so it looks like `Icons / Search`.
 
-If there are spaces, it will be eliminated on generating asset catalog. Then, `/` is treated as folder separator.
+If there are spaces in a name, it will be eliminated on generating asset catalog i.e.)`Icons/Search`. Then, `/` is treated as folder on generation.
 
 ## Create and set .env file
 
-On your project root that you create at first step of installation, create `.env` file, then confirm and set environmental variable properly.
+On your project-root that you create at first step of installation, create `.env` file, then confirm and set environmental variable properly.
 
 1. You can create `.env` file with 2 ways：
 
@@ -138,16 +138,16 @@ FIGMA_ACCESS_TOKEN="ACCESS_TOKEN_HERE"
 ### CONFIG_PATH
 
 `CONFIG_PATH` is a path to the config file.
-The Path can be relative path from project root, or can be absolute path.
+The Path can be relative path from project-root, or can be absolute path.
 Then, file type should be json.
 
 ### TEMPLATE_DIR
 
-If a directory set as `TEMPLATE_DIR` exists, dtcgen uses that directory. If it's empty, it raises an error.
+If a directory set for `TEMPLATE_DIR` exists, dtcgen uses that directory. If it's empty, it raises an error.
 
-If a directory set as `TEMPLATE_DIR` doesn't exist, dtcgen copies default templates into that directory.
+If a directory set for `TEMPLATE_DIR` doesn't exist, dtcgen copies default templates into that directory.
 
-This can be also set as relative path from project root, or can be absolute path.
+This can be also relative path from project-root, or can be absolute path.
 
 ### OUTPUT_PATH
 
@@ -159,22 +159,22 @@ If the directory doesn't exist, dtcgen create it.
 ### Sketch
 
 You need to [insatll Sketch.app](https://www.sketch.com/get/) beforehand.
-We need `sketchtool` command to use dtcgen.
+[`sketchtool`](https://developer.sketchapp.com/guides/sketchtool/) cli included within Sketch.app is required to use `dtcgen`.
 
 Even if it's not activated(or lisence expired), it would work.
-If it seems not working, please let us know.
+If something wrong, please let us know or your help will be very appreciated.
 
 Set absolute path to the `sketchtool` as **SKETCH_TOOL_PATH** on `.env` file.
 As default, **SKETCH_TOOL_PATH** is set assuming you placed Sketch.app just under `Application` directory.
 
 ### Figma
 
-- **FIGMA_FILE_KEY**: `https://www.figma.com/file/{{FILE_KEY}}/sample_for_test` use key corresponding `{{FILE_KEY}}`
-- **FIGMA_ACCESS_TOKEN**: You can get one via setting view from Figma web. Detailed info is on [Official document](https://www.figma.com/developers/docs#authentication).
+- **FIGMA_FILE_KEY**: `https://www.figma.com/file/{{FILE_KEY}}/sample_for_test` use key corresponding to `{{FILE_KEY}}`
+- **FIGMA_ACCESS_TOKEN**: You can get one via account setting. More Detail is on [Official document](https://www.figma.com/developers/docs#authentication).
 
 ## Create and set `dtc.config.json`
 
-Create `dtc.config.json` under project root.
+Create `dtc.config.json` under the project-root.
 (You can change the name or directory on `.env` file)
 
 ```json:dtc.config.json
@@ -198,7 +198,7 @@ Create `dtc.config.json` under project root.
 }
 ```
 
-You can change for each design tool. Parameters are as below：
+You can set parameters to each design tool. Settable Parameters are as below：
 
 - caseSensitive: boolean set true if you want keyword to be case sensitive
 - keywords: string[] you can set multiple keywords within symbols'/components' name
@@ -209,7 +209,8 @@ You can change for each design tool. Parameters are as below：
 
 ## regarding dtcgen slice
 
-- issues/requests from users
+- run test on PR with travis CI
+- need to fix issues/requests
 - scale setting for png extraction
 - output command execution status with console.log
 - CI integration(When using Sketch, runnning machine should be macOS)
@@ -223,7 +224,7 @@ You can change for each design tool. Parameters are as below：
 
 # Contribution
 
-If any questions or issues araise, feel free to [put an new issue](https://github.com/Innovatube/dtcgen/issues).
+If any questions or issues araise, feel free to [add new issue](https://github.com/Innovatube/dtcgen/issues).
 
 ## LICENSE
 
