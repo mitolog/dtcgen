@@ -58,7 +58,8 @@
     "node-sketch": "^0.10.0",
     "pluralize": "^8.0.0",
     "reflect-metadata": "^0.1.13",
-    "tslib": "~1.9.3"
+    "tslib": "~1.9.3",
+    "uuid": "^3.3.2"
   },
   "files": [
     "bin",
