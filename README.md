@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Innovatube/dtcgen.svg?branch=master)](https://travis-ci.org/Innovatube/dtcgen)
+
 # What is it
 
 This is a cli tool where you can extract Symbols or Components, on Sketch and Figma, that contains any keywords set on config file. Then you can turn them into asset catalog(Asset.xcassets) with one command.
