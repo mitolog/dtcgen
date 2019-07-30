@@ -27,7 +27,9 @@ export class FigmaRepository implements IFigmaRepository {
 
     const pathManager = new PathManager(sliceConfig.outputDir);
     const keywords = sliceConfig.keywords || null;
-    if (!keywords) return;
+    let scales = sliceConfig.scales || null;
+    const format = sliceConfig.extension;
+    if (!keywords || !scales) return;
 
     const outputDir = pathManager.getOutputPath(OutputType.slices, true);
 
@@ -55,44 +57,59 @@ export class FigmaRepository implements IFigmaRepository {
     }
     if (!targets || Object.keys(targets).length <= 0) return;
 
-    var imageUrlsResult: AxiosResponse<any> = null;
+    var imageUrlsResults: AxiosResponse<any>[] = [];
     try {
-      imageUrlsResult = await axios(
-        this.figmaConfig.imagesConfig(Object.keys(targets)),
-      );
+      if (format.toLowerCase() !== AssetFormat.PNG) {
+        scales = [1]; // other than png don't need scales, because it's vector data.
+      }
+      for (const scale of scales) {
+        const imageUrlsResult = await axios(
+          this.figmaConfig.imagesConfig(Object.keys(targets), scale),
+        );
+        imageUrlsResults.push(imageUrlsResult);
+      }
     } catch (error) {
       throw new Error(error);
     }
 
-    if (!imageUrlsResult) {
+    if (!imageUrlsResults) {
       throw new Error('something wrong with retrieving images urls.');
     }
 
     // targetsに格納されたidで axis.getしてjsonを取得
-    const images = await this.downloadImages(
-      imageUrlsResult,
-      'data.images',
-      true,
-      sliceConfig.extension,
-    );
-    if (!images) {
-      throw new Error('something wrong with donwloading images.');
+    const allScaleImages: AxiosResponse<any>[] = [];
+    for (const imageUrlsResult of imageUrlsResults) {
+      const images: AxiosResponse<any>[] | null = await this.downloadImages(
+        imageUrlsResult,
+        'data.images',
+        true,
+        sliceConfig.extension,
+      );
+      if (!images) {
+        throw new Error('something wrong with donwloading images.');
+      }
+      allScaleImages.push(...images);
     }
 
     const errors: string[] = [];
-    for (const res of images) {
+    for (const res of allScaleImages) {
       // confirm if requested image is attained correctly.
       const imageId = res.config.params['id'];
       if (!imageId) {
         throw new Error('some download seems to be failed.');
       }
-      const name: string = targets[imageId];
+      let name: string = targets[imageId];
+      const scale = res.config.params['scale'];
       if (!name) {
         errors.push(imageId);
         continue;
       }
 
-      const destPath = await this.createDirIfNeeded(outputDir, name);
+      // we use iOS notation here. you should change name if you want
+      // on each platform (for example, within `AssetGenerator.ts`)
+      name += '@' + scale + 'x';
+
+      let destPath = await this.createDirIfNeeded(outputDir, name);
       const ext = sliceConfig.extension;
       await fs.writeFile(destPath + '.' + ext.toLowerCase(), res.data);
     }
@@ -180,17 +197,19 @@ export class FigmaRepository implements IFigmaRepository {
   private async downloadImages(
     response: AxiosResponse<any>,
     keyPathToImages: string,
-    addIdParam: boolean,
+    addParams: boolean,
     ext: AssetFormat,
   ): Promise<AxiosResponse<any>[] | null> {
     const imageUrlsObj: Object = _.get(response, keyPathToImages, null);
     if (!imageUrlsObj) return null;
 
+    const scale = response.config.params['scale'];
+
     const getS3Promises: AxiosPromise[] = [];
     for (const id of Object.keys(imageUrlsObj)) {
       const url = imageUrlsObj[id];
-      const config = addIdParam
-        ? this.figmaConfig.getS3Image(url, ext, id)
+      const config = addParams
+        ? this.figmaConfig.getS3Image(url, ext, { id: id, scale: scale })
         : this.figmaConfig.getS3Image(url, ext);
       getS3Promises.push(axios(config));
     }

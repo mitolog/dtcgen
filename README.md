@@ -211,7 +211,7 @@ You can set parameters to each design tool. Settable Parameters are as below：
 
 ## regarding dtcgen slice
 
-- run test on PR with travis CI
+- ~~run test on PR with travis CI~~
 - need to fix issues/requests
 - scale setting for png extraction
 - output command execution status with console.log

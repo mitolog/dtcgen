@@ -1,13 +1,22 @@
 import * as fs from 'fs-extra';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { OSType, GenerateConfig, SliceConfig } from '../../domain/Entities';
+import {
+  OSType,
+  GenerateConfig,
+  SliceConfig,
+  AssetFormat,
+} from '../../domain/Entities';
 import {
   PathManager,
   OutputType,
   HandlebarsHelpers,
   HandlebarsPartials,
 } from '../../utilities/Utilities';
+import {
+  LastDirContent,
+  LastDirImageContent,
+} from '../entities/AssetGeneratorTypes';
 
 dotenv.config();
 if (dotenv.error) {
@@ -101,7 +110,7 @@ export class AssetGenerator {
     );
 
     /*
-     * Copy icons(slices) 
+     * Copy slices
      */
     const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
 
@@ -180,14 +189,33 @@ export class AssetGenerator {
     /* deal with file pathes below */
     const parsed = path.parse(originPath);
     const assetName = parsed.name.replace(/\s+/g, '');
-    const imageSetDir = path.join(destDirOrPath, assetName + '.imageset');
+    // consider scale(like @2x) suffix here
+    const suffixRemoved = assetName.replace(/@[1-9]x$/gi, '');
+    const imageSetDir = path.join(destDirOrPath, suffixRemoved + '.imageset');
     // create imageSetDir directory if needed
     fs.ensureDirSync(imageSetDir);
 
     // create last directory json
-    const lastJsonStr = lastJsonTemplate({
-      filename: parsed.base.replace(/\s+/g, ''),
-    });
+    const scales = this.config.sliceConfig.scales;
+    const isSingleScale =
+      this.config.sliceConfig.extension.toLowerCase() !== AssetFormat.PNG;
+    const images: LastDirImageContent[] = [];
+    if (isSingleScale) {
+      images.push({ fileName: parsed.base.replace(/\s+/g, '') });
+    } else {
+      for (const scale of scales) {
+        const scaleSuffix = '@' + scale + 'x';
+        const fileName =
+          assetName.replace(/@[1-9]x$/gi, scaleSuffix) + parsed.ext;
+        images.push({ fileName: fileName, scale: scale + 'x' });
+      }
+    }
+
+    const lastDirContent: LastDirContent = {
+      images: images,
+      isSingleScale: isSingleScale,
+    };
+    const lastJsonStr = lastJsonTemplate(lastDirContent);
     fs.writeFileSync(path.join(imageSetDir, 'Contents.json'), lastJsonStr);
 
     // copy asset data itself

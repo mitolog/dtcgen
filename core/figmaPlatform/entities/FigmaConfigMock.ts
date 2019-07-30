@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { injectable } from 'inversify';
 import { AssetFormat, SliceConfig } from '../../Domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
-import { IFigmaConfig } from '../FigmaPlatform';
+import { IFigmaConfig, GetS3ImageParams } from '../FigmaPlatform';
 import { FigmaMockAdapter } from './figmaMockAdapter';
 
 dotenv.config();
@@ -80,7 +80,11 @@ export class FigmaConfigMock implements IFigmaConfig {
     };
   }
 
-  getS3Image(url: string, ext: AssetFormat, id?: string): AxiosRequestConfig {
+  getS3Image(
+    url: string,
+    ext: AssetFormat,
+    params?: GetS3ImageParams,
+  ): AxiosRequestConfig {
     const config = {
       url: url,
       method: 'get' as Method,
@@ -105,8 +109,8 @@ export class FigmaConfigMock implements IFigmaConfig {
     }
     config['responseType'] = responseType;
     config['headers'] = headers;
-    if (id) {
-      config['params'] = { id: id };
+    if (params) {
+      config['params'] = params;
     }
     return config;
   }

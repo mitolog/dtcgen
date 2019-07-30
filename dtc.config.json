@@ -86,8 +86,9 @@
     "slice": {
       "caseSensitive": true,
       "keywords": ["Icons"],
-      "extension": "PDF",
-      "sliceAllImages": false
+      "extension": "PNG",
+      "sliceAllImages": false,
+      "scales": [1, 2, 3]
     }
   }
 }
