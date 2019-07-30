@@ -50,12 +50,19 @@ export class FigmaConfigMock implements IFigmaConfig {
   }
 
   // curl -H 'X-FIGMA-TOKEN: xxxx' 'https://api.figma.com/v1/images/S63Ch0fsfmOUJjjdz53QrZm3?ids=0:331,0:332&format=pdf&svg_include_id=true'
-  imagesConfig(ids: string[]): AxiosRequestConfig {
+  imagesConfig(ids: string[], scale: number): AxiosRequestConfig {
+    const isSingleScale =
+      this.sliceConfig.extension.toLowerCase() !== AssetFormat.PNG;
+    const adapterFileName = isSingleScale
+      ? 'figmaImages_pdf.json'
+      : 'figmaImages_png.json';
+
     return {
       url: `/images/${this.fileKey}`,
       method: 'get',
       params: {
         ids: ids.join(','),
+        scale: scale,
         format: this.sliceConfig.extension.toLowerCase(),
         svg_include_id: true,
       },
@@ -63,7 +70,7 @@ export class FigmaConfigMock implements IFigmaConfig {
       headers: {
         'X-FIGMA-TOKEN': this.token,
       },
-      adapter: this.adapter.configAdapterOK('figmaImages.json'),
+      adapter: this.adapter.configAdapterOK(adapterFileName),
     };
   }
 

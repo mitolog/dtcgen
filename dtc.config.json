@@ -79,7 +79,8 @@
       "caseSensitive": true,
       "keywords": ["Icons"],
       "extension": "PDF",
-      "sliceAllImages": true
+      "sliceAllImages": true,
+      "scales": [1, 2, 3]
     }
   },
   "figma": {

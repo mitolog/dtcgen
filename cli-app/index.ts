@@ -143,6 +143,7 @@ cli
 
     const generateConfig: GenerateConfig = new GenerateConfig();
     generateConfig.sliceConfig = sliceConfig;
+    generateConfig.toolType = toolType as DesignToolType;
 
     const extractContainer = new DIContainer(<DesignToolType>(
       toolType
