@@ -10,6 +10,7 @@ export class SliceConfig {
   inputPath?: string;
   outputDir?: string;
   sliceAllImages?: boolean;
+  scales?: number[];
 
   initWithDtcConfig(designToolType: DesignToolType) {
     const pathManager = new PathManager(designToolType);
@@ -23,5 +24,6 @@ export class SliceConfig {
     this.caseSensitive = defaults['caseSensitive'] || false;
     this.extension = defaults['extension'] || AssetFormat.PDF;
     this.sliceAllImages = defaults['sliceAllImages'] || false;
+    this.scales = defaults['scales'] || [1];
   }
 }
