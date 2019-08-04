@@ -210,6 +210,12 @@ You can set parameters to each design tool. Settable Parameters are as below：
 - sliceAllImages: boolean set true if yoou want to extract all images within design file.
 - scales: number[] set scales you want to extract. but it's valid only on 'png' extension.
 
+numbers that you can specify to scales are as below：
+| | scales |
+| --- | --- |
+| figma | 0.1 - 4 |
+| sketch | 1 - x |
+
 # further plans
 
 ## regarding dtcgen slice
