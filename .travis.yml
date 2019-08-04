@@ -1,0 +1,18 @@
+# https://docs.travis-ci.com/user/languages/javascript-with-nodejs/
+os: osx
+language: node_js
+node_js:
+  - 10.16.0
+before_install:
+  - scripts/install_sketch.sh
+before_script:
+  - npm run build
+cache: yarn
+env:
+  global:
+    - CONFIG_PATH="./dtc.config.json"
+    - TEMPLATE_DIR="./templates"
+    - OUTPUT_PATH="./outputs"
+    - SKETCH_TOOL_PATH="/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool"
+    - FIGMA_FILE_KEY="RL6HzoX6UeVaQw4OmSsqxr"
+    - secure: QvDfPO6Z3IQxY03r+flJj+hv2ajcq/364gkFiEAvI38yw9d0r5Rg3eCl4Whwa8ciBRrESZvA5mvbnpPyPxZ62vpumT4hMPZ5dFSA3ctkN85KUX0sn5RdEsXy24xX2KzKX9pIanrMiIIxXIW2TY78p7sGEdzVSwD+QfmZzLrefElu9vA61dS8IsVZjvTZySxYqaHLKyTaMg91BrO+LCqDKJMrSy0IIWGKmuKK8sGKopTsE/aB6upOZeTo2spWOFomSqrk4LexzWxPVvwm3Sg+K5sD5+nKP8G0gYVoavQpdbVlEq9eWN+ETQ9QGr4/Xo+0dFGaDigB/3M4XJY3ErNLep6Puvf7r50sI+Q/cmatHzyjhQqiFOkPbC28SkfP0r/hyDY5pGxZO9mzZT7Qul4lLNVc87suJQXdydZHB/uFNBDNcm5VFBRc7fd/aKQKN/Cui3YrTPuR78sQnv7Cc4ZQS+uqNHzsJG8u2C57t1OyiFLEEshRaAephWv6jnBH6x+KflQh0dzC981exdunaQ5+0FwzjhAs4eCMLU9ftxKMqaZ/UBvyp4l2LRJVGRWo6r1C0CKb14byl1cQembtVbBzfm8gQyDYV2PMnPEr3Pcupm3+gzPW92bnfTH3Zt2TaPcJmjBZtPg+o34BzrHG95COeuZgJ5rmtzAAzWmTgGZnaIE=
