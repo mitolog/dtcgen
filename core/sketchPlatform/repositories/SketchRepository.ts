@@ -300,9 +300,10 @@ export class SketchRepository implements ISketchRepository {
     command += ` --items=${targetIds.join(',')}`;
     command += ` --formats=${config.extension.toLowerCase()}`;
     // need to change `Contents.json` also.
-    // if (config.extension != AssetFormat.PDF) {
-    //   command += ' --scales=1,2,3';
-    // }
+    if (config.extension.toLowerCase() != AssetFormat.PDF && config.scales) {
+      const scales = config.scales.join(',');
+      command += ` --scales=${scales}`;
+    }
     command += ' --output=' + dirPath;
 
     await execa(command, { shell: true });

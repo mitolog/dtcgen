@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { injectable } from 'inversify';
 import { AssetFormat, SliceConfig } from '../../domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
-import { IFigmaConfig } from './IFigmaConfig';
+import { IFigmaConfig, GetS3ImageParams } from './IFigmaConfig';
 
 dotenv.config();
 if (dotenv.error) {
@@ -43,12 +43,13 @@ export class FigmaConfig implements IFigmaConfig {
     };
   }
 
-  imagesConfig(ids: string[]): AxiosRequestConfig {
+  imagesConfig(ids: string[], scale: number): AxiosRequestConfig {
     return {
       url: `/images/${this.fileKey}`,
       method: 'get',
       params: {
         ids: ids.join(','),
+        scale: scale,
         format: this.sliceConfig.extension.toLowerCase(),
         svg_include_id: true,
       },
@@ -70,7 +71,11 @@ export class FigmaConfig implements IFigmaConfig {
     };
   }
 
-  getS3Image(url: string, ext: AssetFormat, id?: string): AxiosRequestConfig {
+  getS3Image(
+    url: string,
+    ext: AssetFormat,
+    params?: GetS3ImageParams,
+  ): AxiosRequestConfig {
     const config = {
       url: url,
       method: 'get' as Method,
@@ -94,8 +99,8 @@ export class FigmaConfig implements IFigmaConfig {
     }
     config['responseType'] = responseType;
     config['headers'] = headers;
-    if (id) {
-      config['params'] = { id: id };
+    if (params) {
+      config['params'] = params;
     }
     return config;
   }

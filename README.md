@@ -186,15 +186,17 @@ Create `dtc.config.json` under the project-root.
       "caseSensitive": true,
       "keywords": ["Icons"],
       "extension": "PDF",
-      "sliceAllImages": true
+      "sliceAllImages": true,
+      "scales": [1, 2, 3]
     }
   },
   "figma": {
     "slice": {
       "caseSensitive": true,
       "keywords": ["Icons"],
-      "extension": "PDF",
-      "sliceAllImages": true
+      "extension": "PNG",
+      "sliceAllImages": true,
+      "scales": [1, 2, 3]
     }
   }
 }
@@ -206,14 +208,15 @@ You can set parameters to each design tool. Settable Parameters are as below：
 - keywords: string[] you can set multiple keywords within symbols'/components' name
 - extension: string file extension that you can extract. currently supporting [pdf/svg/png].
 - sliceAllImages: boolean set true if yoou want to extract all images within design file.
+- scales: number[] set scales you want to extract. but it's valid only on 'png' extension.
 
 # further plans
 
 ## regarding dtcgen slice
 
-- run test on PR with travis CI
+- ~~run test on PR with travis CI~~
 - need to fix issues/requests
-- scale setting for png extraction
+- ~~scale setting for png extraction~~
 - output command execution status with console.log
 - CI integration(When using Sketch, runnning machine should be macOS)
 - make this command as figma plugin

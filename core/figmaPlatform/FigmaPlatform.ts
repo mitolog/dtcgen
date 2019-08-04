@@ -1,7 +1,7 @@
 export { IFigmaRepository } from './repositories/IFigmaRepository';
 export { FigmaRepository } from './repositories/FigmaRepository';
 
-export { IFigmaConfig } from './entities/IFigmaConfig';
+export { IFigmaConfig, GetS3ImageParams } from './entities/IFigmaConfig';
 export { FigmaConfig } from './entities/FigmaConfig';
 export { FigmaConfigMock } from './entities/FigmaConfigMock';
 
