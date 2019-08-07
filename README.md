@@ -1,22 +1,22 @@
 [![Build Status](https://travis-ci.org/Innovatube/dtcgen.svg?branch=master)](https://travis-ci.org/Innovatube/dtcgen)
 
-# What is it
+<h1 align="center">Dtcgen</h1>
 
-This is a cli tool where you can extract Symbols or Components, on Sketch and Figma, that contains any keywords set on config file. Then you can turn them into asset catalog(Asset.xcassets) with one command.
+A CLI tool where you can generate asset catalog(Asset.xcassets) for iOS project from Sketch and Figma.
+
+![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/cli_screenshot.png)
 
 [readme in Japanese](https://github.com/Innovatube/dtcgen/wiki/readmeJp).
 
-If you set `sliceAllImages` flag in config file, you can also extract all images within Sketch/Figma as png.
-
-Currently yarn/npm package is prepared.
-
-This turned into...
+For example, these icons will be like...
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_icons_on_figma.png)
 
-This asset catalog.
+this asset catalog.
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_icons_on_xcode.png)
 
-Because dtcgen set [`Provides Namespace`](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/FolderStructure.html#//apple_ref/doc/uid/TP40015170-CH33-SW4) as default, so you can write source code like this:
+If you set `sliceAllImages` flag in config file, you can also extract all images within Sketch/Figma as `png` file.
+
+`dtcgen` uses [Namespace](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/FolderStructure.html#//apple_ref/doc/uid/TP40015170-CH33-SW4) as default, so you can retrieve assets in your source code like this:
 
 ```swift
 // without R.swift
@@ -33,26 +33,16 @@ FYI: [R.swift](https://github.com/mac-cain13/R.swift)
 # Install
 
 ```zsh
-# Create favorable directory and cd there (let's use `project-root` for further documents)
-# We put some setting files here.
-$ mkdir trydtcgen && cd ./trydtcgen
+# Create favorable directory and cd there (so called `project-root`)
+$ mkdir yourDir && cd ./yourDir
 
-# check if node.js is higher than v8.9.0
+# Check if node.js is higher than v8.9.0. If not, update it.
+# nodenv will be better.
 $ node -v
 
-# yarn
-# global install
 yarn global add dtcgen
-
-# local install
-yarn add --dev dtcgen
-
-# npm
-# global install
+# or
 npm install -g dtcgen
-
-# local install
-npm install --save-dev dtcgen
 ```
 
 # How to use
@@ -71,7 +61,7 @@ dtcgen slice --help
 dtcgen -v
 ```
 
-※ If you installed locally, prepend `npx` on each commands.
+※ If you have installed locally, prepend `npx` before `dtcgen`.
 
 # Preparation
 
@@ -82,7 +72,7 @@ dtcgen -v
 Materials you want to extract shuold be:
 
 - Symbol
-- sliced with [slice tool](https://www.sketch.com/docs/exporting/slices/)
+- Sliced with [slice tool](https://www.sketch.com/docs/exporting/slices/)
 
 ### Figma
 
@@ -94,7 +84,9 @@ Materials you want to extract shuold be:
 
 Let's say you want to extract icon files, you can prepend keyword `Icons /` for each symbols/components. so it looks like `Icons / Search`.
 
-If there are spaces in a name, it will be eliminated on generating asset catalog i.e.)`Icons/Search`. Then, `/` is treated as folder on generation.
+Spaces will be eliminated on generating assets like this: `Icons/Search`.
+
+Then, **`/` is treated as folder on generation.**
 
 ## Create and set .env file
 
@@ -109,11 +101,11 @@ On your project-root that you create at first step of installation, create `.env
    - For Sketch：`SKETCH_TOOL_PATH` is required
    - For Figma：`FIGMA_FILE_KEY` and `FIGMA_ACCESS_TOKEN` are required
 
-As default, `.env` file looks like：
+As a default, `.env` file looks like：
 
 ```bash
 #### settings in common ####
-# relative path from where the command executed or absolute path. if not found, lookup upper dir upto '/'.
+# relative path from where the command executed or absolute path. if not found, lookup upper dir upto top directry of your file system.
 CONFIG_PATH="./dtc.config.json"
 
 # relative path from where the command executed or absolute path
@@ -216,26 +208,27 @@ numbers that you can specify to scales are as below：
 | figma | 0.1 - 4 |
 | sketch | 1 - x |
 
-# further plans
+# todos
 
-## regarding dtcgen slice
+## dtcgen slice
 
-- ~~run test on PR with travis CI~~
-- need to fix issues/requests
-- ~~scale setting for png extraction~~
-- output command execution status with console.log
-- CI integration(When using Sketch, runnning machine should be macOS)
-- make this command as figma plugin
-- android version
+- [x] run test on PR with travis CI
+- [x] scale setting for png extraction
+- [ ] output command execution status with console.log
+- [ ] CI integration(When using Sketch, runnning machine should be macOS)
+- [ ] make this command as figma plugin
+- [ ] android version
 
-## regarding other functions
+## other todos/future plan
 
-- color palette extraction / generation
-- layout related source code generation with swiftUI
+- [ ] prepare `dtcgen init` command for initializing `.env`, `dtc.config.json`.
+- [ ] bump up to eslint from tslint
+- [ ] color palette extraction / generation
+- [ ] layout related source code generation with swiftUI
 
 # Contribution
 
-If any questions or issues araise, feel free to [add new issue](https://github.com/Innovatube/dtcgen/issues).
+If any questions or issues araises, feel free to [add new issue](https://github.com/Innovatube/dtcgen/issues).
 
 ## LICENSE
 
