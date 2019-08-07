@@ -203,10 +203,11 @@ You can set parameters to each design tool. Settable Parameters are as below：
 - scales: number[] set scales you want to extract. but it's valid only on 'png' extension.
 
 numbers that you can specify to scales are as below：
-| | scales |
-| --- | --- |
-| figma | 0.1 - 4 |
-| sketch | 1 - x |
+
+|        | scales  |
+| ------ | ------- |
+| figma  | 0.1 - 4 |
+| sketch | 1 - x   |
 
 # todos
 
