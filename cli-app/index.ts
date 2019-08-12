@@ -117,7 +117,7 @@ const cli = cac();
 cli
   .command(
     'slice',
-    'extract symbols/components and turn them into ready-to-use assets.',
+    'extract symbols/components and turn them into ready-to-use asset files for iOS.',
   )
   .action((args, _) => {
     const inputPath = args.input;
@@ -169,16 +169,19 @@ cli
         console.log(error);
       });
   })
-  .option('input <file path>', 'required for sketch.')
-  .option('tool <designTool>', '`sketch` as default.')
-  .option('platform <osType>', '`ios` as default.');
+  .option(
+    '-i, --input <file path>',
+    'Required for sketch. Both relative/absolute path is acceptable.',
+  )
+  .option('-t, --tool <designTool>', '`sketch`(default) or `figma`.');
+//.option('-p, --platform <osType>', 'Currently `ios` only.');
 
 cli.option(
-  'output <dir>',
-  'MUST BE SAME BETWEEN COMMANDS. default value is set on .env file.',
+  '-o, --output <dir>',
+  'Default value can be set on `.env` file. Both relative/absolute path is acceptable.',
 );
 
-cli.version('0.1.0');
+cli.version('0.1.2');
 cli.help();
 
 export { cli };
