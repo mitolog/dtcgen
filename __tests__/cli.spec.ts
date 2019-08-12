@@ -43,12 +43,14 @@ describe('tests for cli commands', () => {
       expect(result.stdout).toBe('asset extracted\nasset generated');
     });
 
-    test('even if `platform` option is other than enum value, it will succsess with default value.', async () => {
-      const result = await execa(
-        `bin/cli slice --input "./sample.sketch" --platform "hoge" --output "${testOutputPath}"`,
-        { shell: true },
-      );
-      expect(result.stdout).toBe('asset extracted\nasset generated');
-    });
+    // Let'ts comment out if you added new platforms. currently we only support `iOS`,
+    // so we're now opted out `platform` option.
+    // test('even if `platform` option is other than enum value, it will succsess with default value.', async () => {
+    //   const result = await execa(
+    //     `bin/cli slice --input "./sample.sketch" --platform "hoge" --output "${testOutputPath}"`,
+    //     { shell: true },
+    //   );
+    //   expect(result.stdout).toBe('asset extracted\nasset generated');
+    // });
   });
 });
