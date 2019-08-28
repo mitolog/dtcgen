@@ -35,7 +35,7 @@ export class PathManager {
       !isString(absoluteOrRelativeOutDir) ||
       absoluteOrRelativeOutDir.length <= 0
     ) {
-      throw new Error('output directory shuold be set.');
+      return;
     }
     this.outputDir = path.isAbsolute(absoluteOrRelativeOutDir)
       ? absoluteOrRelativeOutDir
@@ -54,6 +54,10 @@ export class PathManager {
     osType?: OSType,
     fileName?: string,
   ): string {
+    if (!this.outputDir) {
+      throw new Error('output directory shuold be set.');
+    }
+
     let outputPath = '';
     switch (pathType) {
       case OutputType.metadata:

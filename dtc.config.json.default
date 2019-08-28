@@ -1,0 +1,20 @@
+{
+  "sketch": {
+    "slice": {
+      "caseSensitive": true,
+      "keywords": ["Icons"],
+      "extension": "PDF",
+      "sliceAllImages": true,
+      "scales": []
+    }
+  },
+  "figma": {
+    "slice": {
+      "caseSensitive": false,
+      "keywords": ["Icons"],
+      "extension": "PNG",
+      "sliceAllImages": false,
+      "scales": [1, 2, 3]
+    }
+  }
+}

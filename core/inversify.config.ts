@@ -8,17 +8,21 @@ import * as Domain from './domain/Domain';
 import * as SketchPlatform from './sketchPlatform/SketchPlatform';
 import * as FigmaPlatform from './figmaPlatform/FigmaPlatform';
 import * as IOSPlatform from './iosPlatform/IOSPlatform';
+import * as GenericPlatform from './genericPlatform/GenericPlatform';
 
 export class DIContainer {
   private container: Container;
 
-  constructor(type: DesignToolType | OSType) {
+  constructor(type?: DesignToolType | OSType) {
     const container = new Container();
 
     // todo: type is union type. you need to distinct which type is it.
     // currently its primitive type cannot be same between DesignToolType and OSType
 
-    if (DesignToolTypeValues.find(toolType => toolType === type)) {
+    if (!type) {
+      // default container
+      this.injectGeneric(container);
+    } else if (DesignToolTypeValues.find(toolType => toolType === type)) {
       switch (type) {
         case DesignToolType.sketch:
           this.injectSketch(container);
@@ -29,9 +33,7 @@ export class DIContainer {
         default:
           break;
       }
-    }
-
-    if (OSTypeValues.find(osType => osType === type)) {
+    } else if (OSTypeValues.find(osType => osType === type)) {
       switch (type) {
         case OSType.ios:
           this.injectIos(container);
@@ -46,6 +48,16 @@ export class DIContainer {
 
   getContainer() {
     return this.container;
+  }
+
+  injectGeneric(container: Container) {
+    container
+      .bind<GenericPlatform.IGenericRepository>(TYPES.IGenericRepository)
+      .to(GenericPlatform.GenericRepository);
+
+    container
+      .bind<Domain.IGenericUseCase>(TYPES.IGenericUseCase)
+      .to(GenericPlatform.GenericUseCase);
   }
 
   injectSketch(container: Container) {

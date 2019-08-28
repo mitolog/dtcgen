@@ -5,4 +5,5 @@ export { ISliceImageUseCase } from './usecases/ISliceImageUseCase';
 export { IGenerateCodeUseCase } from './usecases/IGenerateCodeUseCase';
 export { IGenerateAssetUseCase } from './usecases/IGenerateAssetUseCase';
 export { IGenerateProjectUseCase } from './usecases/IGenerateProjectUseCase';
+export { IGenericUseCase } from './usecases/IGenericUseCase';
 export { LayerName } from './entities/LayerName';
