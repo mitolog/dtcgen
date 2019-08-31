@@ -100,6 +100,11 @@ export class DIContainer {
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
       .to(FigmaPlatform.SliceImageUseCase);
+
+    // style use case
+    container
+      .bind<Domain.IStyleUseCase>(TYPES.IStyleUseCase)
+      .to(FigmaPlatform.StyleUseCase);
   }
 
   injectIos(container: Container) {

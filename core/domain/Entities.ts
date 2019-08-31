@@ -63,3 +63,4 @@ export {
 } from './entities/DtcConfig';
 
 export { GenerateConfig } from './entities/GenerateConfig';
+export { StyleConfig } from './entities/StyleConfig';

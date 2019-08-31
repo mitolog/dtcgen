@@ -6,3 +6,4 @@ export { FigmaConfig } from './entities/FigmaConfig';
 export { FigmaConfigMock } from './entities/FigmaConfigMock';
 
 export { SliceImageUseCase } from './usecases/SliceImageUseCase';
+export { StyleUseCase } from './usecases/StyleUseCase';

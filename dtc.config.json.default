@@ -15,6 +15,9 @@
       "extension": "PNG",
       "sliceAllImages": false,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": true
     }
   }
 }

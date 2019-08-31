@@ -6,6 +6,12 @@ export type GetS3ImageParams = {
   scale: number;
 };
 
+export type GetNodesParams = {
+  fileKey: string;
+  nodeId: string;
+  name: string;
+};
+
 export interface IFigmaConfig {
   setSliceConfig(config: SliceConfig): void;
   init(sliceConfig?: SliceConfig): void;
@@ -17,4 +23,6 @@ export interface IFigmaConfig {
     ext: AssetFormat,
     params?: GetS3ImageParams,
   ): AxiosRequestConfig;
+  stylesConfig(teamId: string): AxiosRequestConfig;
+  nodesConfig(params: GetNodesParams[]): AxiosRequestConfig;
 }

@@ -6,8 +6,13 @@ import { injectable, inject } from 'inversify';
 import { IFigmaRepository } from './IFigmaRepository';
 import { PathManager, OutputType } from '../../utilities/Utilities';
 import { isString } from 'util';
-import { SliceConfig, AssetFormat } from '../../domain/Entities';
-import { IFigmaConfig } from '../entities/IFigmaConfig';
+import {
+  SliceConfig,
+  AssetFormat,
+  StyleConfig,
+  OSType,
+} from '../../domain/Entities';
+import { IFigmaConfig, GetNodesParams } from '../entities/IFigmaConfig';
 import { TYPES } from '../../types';
 
 @injectable()
@@ -175,6 +180,50 @@ export class FigmaRepository implements IFigmaRepository {
       throw new Error(
         `some images are not correctly output: ${errorImageUrls.join(',')}`,
       );
+    }
+  }
+
+  async extractStyles(config: StyleConfig): Promise<void> {
+    const sharedStylesResult = await axios(
+      this.figmaConfig.stylesConfig(config.teamId),
+    );
+    const styles = _.get(sharedStylesResult, 'data.meta.styles', null);
+    if (!styles || !config.styles) {
+      return;
+    }
+
+    const styleMap: { [s: string]: GetNodesParams[] } = {};
+    styles.forEach(element => {
+      const param: GetNodesParams = {
+        fileKey: element['file_key'],
+        nodeId: element['node_id'],
+        name: element['name'],
+      };
+      const fileKey = param.fileKey;
+      const params = styleMap[fileKey];
+      if (!params) {
+        styleMap[fileKey] = [param];
+      } else {
+        styleMap[fileKey].push(param);
+      }
+    });
+
+    const pathManager = new PathManager(config.outputDir);
+
+    // Get nodes per file
+    for (const fileKey of Object.keys(styleMap)) {
+      const params: GetNodesParams[] = styleMap[fileKey];
+      const nodesResult = await axios(this.figmaConfig.nodesConfig(params));
+      const jsonData = nodesResult.data || null;
+      if (!jsonData) continue;
+      const fileName = jsonData['name'] || null;
+      const filePath = pathManager.getOutputPath(
+        OutputType.figmaLibraries,
+        true,
+        OSType.ios,
+        fileName,
+      );
+      await fs.writeFile(filePath, JSON.stringify(jsonData));
     }
   }
 

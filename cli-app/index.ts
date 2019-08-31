@@ -5,6 +5,7 @@ import {
   ILintNamingUseCase,
   IExtractElementUseCase,
   ISliceImageUseCase,
+  IStyleUseCase,
   IGenerateProjectUseCase,
   IGenerateAssetUseCase,
   IGenericUseCase,
@@ -15,6 +16,7 @@ import {
   DesignToolTypeValues,
   SliceConfig,
   GenerateConfig,
+  StyleConfig,
 } from '../internal';
 
 const cli = cac();
@@ -193,6 +195,66 @@ cli
   )
   .option('-t, --tool <designTool>', '`sketch`(default) or `figma`.');
 //.option('-p, --platform <osType>', 'Currently `ios` only.');
+
+/**
+ * extract styles and turn them into ready-to-use assets for ios.
+ */
+cli
+  .command(
+    'style',
+    'extract shared styles and turn them into ready-to-use assets for ios.',
+  )
+  .action((args, _) => {
+    const inputPath = args.input;
+    const outputDir = args.output;
+
+    const toolType: string =
+      DesignToolTypeValues.find(type => type === args.tool) ||
+      DesignToolType.sketch;
+    const platform =
+      OSTypeValues.find(type => type === args.platform) || OSType.ios;
+
+    if (toolType == DesignToolType.sketch && !inputPath) {
+      console.log(
+        '`input` option on sketch is required. see `dtcgen slice --help`.',
+      );
+      return;
+    }
+
+    const styleConfig: StyleConfig = new StyleConfig();
+    styleConfig.initWithDtcConfig(toolType as DesignToolType);
+    styleConfig.inputPath = inputPath;
+    styleConfig.outputDir = outputDir;
+    console.log(styleConfig);
+    // const generateConfig: GenerateConfig = new GenerateConfig();
+    // generateConfig.sliceConfig = sliceConfig;
+    // generateConfig.toolType = toolType as DesignToolType;
+
+    const container = new DIContainer(<DesignToolType>toolType).getContainer();
+    const styleUseCase = container.get<IStyleUseCase>(TYPES.IStyleUseCase);
+    // const generateContainer = new DIContainer(<OSType>platform).getContainer();
+    // const generateAssetUseCase = generateContainer.get<IGenerateAssetUseCase>(
+    //   TYPES.IGenerateAssetUseCase,
+    // );
+
+    styleUseCase
+      .handle(styleConfig)
+      .then(() => {
+        console.log(`asset extracted`);
+        //return generateAssetUseCase.handle(generateConfig, outputDir);
+      })
+      // .then(() => {
+      //   console.log(`asset generated`);
+      // })
+      .catch(error => {
+        console.log(error);
+      });
+  })
+  .option(
+    '-i, --input <file path>',
+    'Required for sketch. Both relative/absolute path is acceptable.',
+  )
+  .option('-t, --tool <designTool>', '`sketch`(default) or `figma`.');
 
 cli.option(
   '-o, --output <dir>',

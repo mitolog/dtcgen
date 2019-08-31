@@ -9,6 +9,7 @@ const TYPES = {
   ILintNamingUseCase: Symbol.for('ILintNamingUseCase'),
   IExtractElementUseCase: Symbol.for('IExtractElementUseCase'),
   ISliceImageUseCase: Symbol.for('ISliceImageUseCase'),
+  IStyleUseCase: Symbol.for('IStyleUseCase'),
   IGenerateCodeUseCase: Symbol.for('IGenerateCodeUseCase'),
   IGenerateAssetUseCase: Symbol.for('IGenerateAssetUseCase'),
   IGenerateProjectUseCase: Symbol.for('IGenerateProjectUseCase'),

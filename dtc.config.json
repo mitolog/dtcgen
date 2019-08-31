@@ -81,6 +81,9 @@
       "extension": "PDF",
       "sliceAllImages": true,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": true
     }
   },
   "figma": {
@@ -90,6 +93,9 @@
       "extension": "PNG",
       "sliceAllImages": false,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": true
     }
   }
 }
