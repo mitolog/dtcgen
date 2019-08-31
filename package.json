@@ -66,6 +66,7 @@
     "dist",
     "templates",
     "dtc.config.json",
-    ".env.default"
+    ".env.default",
+    "dtc.config.json.default"
   ]
 }

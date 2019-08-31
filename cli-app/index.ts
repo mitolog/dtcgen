@@ -7,6 +7,7 @@ import {
   ISliceImageUseCase,
   IGenerateProjectUseCase,
   IGenerateAssetUseCase,
+  IGenericUseCase,
   TYPES,
   OSType,
   OSTypeValues,
@@ -110,6 +111,23 @@ const cli = cac();
 //   })
 //   .option('platform [osType]', 'optional. currently `ios` only.')
 //   .option('project [name]', 'required. specify the name for the project.');
+
+cli
+  .command('init', 'create setting files with default values.')
+  .action((action, _) => {
+    const genericContainer = new DIContainer().getContainer();
+    const genericUseCase = genericContainer.get<IGenericUseCase>(
+      TYPES.IGenericUseCase,
+    );
+    genericUseCase
+      .handle()
+      .then(() => {
+        console.log(`default files are created.`);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  });
 
 /**
  * extract symbols/components and convert them into ready-to-use assets.
