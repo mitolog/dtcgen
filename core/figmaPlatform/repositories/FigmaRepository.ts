@@ -183,11 +183,12 @@ export class FigmaRepository implements IFigmaRepository {
     }
   }
 
-  async extractStyles(config: StyleConfig): Promise<void> {
-    const sharedStylesResult = await axios(
+  async extractStyles(config: StyleConfig): Promise<object[]> {
+    // retreave all styles
+    const stylesResult = await axios(
       this.figmaConfig.stylesConfig(config.teamId),
     );
-    const styles = _.get(sharedStylesResult, 'data.meta.styles', null);
+    const styles = _.get(stylesResult, 'data.meta.styles', null);
     if (!styles || !config.styles) {
       return;
     }
@@ -211,6 +212,7 @@ export class FigmaRepository implements IFigmaRepository {
     const pathManager = new PathManager(config.outputDir);
 
     // Get nodes per file
+    const files: object[] = [];
     for (const fileKey of Object.keys(styleMap)) {
       const params: GetNodesParams[] = styleMap[fileKey];
       const nodesResult = await axios(this.figmaConfig.nodesConfig(params));
@@ -223,8 +225,10 @@ export class FigmaRepository implements IFigmaRepository {
         OSType.ios,
         fileName,
       );
+      files.push(jsonData);
       await fs.writeFile(filePath, JSON.stringify(jsonData));
     }
+    return files;
   }
 
   private async createDirIfNeeded(dirPath: string, name: string) {

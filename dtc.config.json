@@ -95,7 +95,11 @@
       "scales": [1, 2, 3]
     },
     "style": {
-      "color": true
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Color"]
+      }
     }
   }
 }

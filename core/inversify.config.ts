@@ -96,6 +96,10 @@ export class DIContainer {
       .bind<FigmaPlatform.IFigmaRepository>(TYPES.IFigmaRepository)
       .to(FigmaPlatform.FigmaRepository);
 
+    container
+      .bind<FigmaPlatform.IFigmaPresenter>(TYPES.IFigmaPresenter)
+      .to(FigmaPlatform.FigmaPresenter);
+
     // slice use case
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)

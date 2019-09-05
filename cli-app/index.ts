@@ -239,8 +239,8 @@ cli
 
     styleUseCase
       .handle(styleConfig)
-      .then(() => {
-        console.log(`asset extracted`);
+      .then(styles => {
+        // [{ color: [ColorComponent], name: "aaa" }, ...]
         //return generateAssetUseCase.handle(generateConfig, outputDir);
       })
       // .then(() => {
