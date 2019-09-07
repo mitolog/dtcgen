@@ -225,27 +225,26 @@ cli
     styleConfig.initWithDtcConfig(toolType as DesignToolType);
     styleConfig.inputPath = inputPath;
     styleConfig.outputDir = outputDir;
-    console.log(styleConfig);
-    // const generateConfig: GenerateConfig = new GenerateConfig();
-    // generateConfig.sliceConfig = sliceConfig;
-    // generateConfig.toolType = toolType as DesignToolType;
+    const generateConfig: GenerateConfig = new GenerateConfig();
+    generateConfig.styleConfig = styleConfig;
+    generateConfig.toolType = toolType as DesignToolType;
 
     const container = new DIContainer(<DesignToolType>toolType).getContainer();
     const styleUseCase = container.get<IStyleUseCase>(TYPES.IStyleUseCase);
-    // const generateContainer = new DIContainer(<OSType>platform).getContainer();
-    // const generateAssetUseCase = generateContainer.get<IGenerateAssetUseCase>(
-    //   TYPES.IGenerateAssetUseCase,
-    // );
+    const generateContainer = new DIContainer(<OSType>platform).getContainer();
+    const generateAssetUseCase = generateContainer.get<IGenerateAssetUseCase>(
+      TYPES.IGenerateAssetUseCase,
+    );
 
     styleUseCase
       .handle(styleConfig)
       .then(styles => {
-        // [{ color: [ColorComponent], name: "aaa" }, ...]
-        //return generateAssetUseCase.handle(generateConfig, outputDir);
+        generateConfig.styleConfig.outputStyles = styles;
+        return generateAssetUseCase.handle(generateConfig, outputDir);
       })
-      // .then(() => {
-      //   console.log(`asset generated`);
-      // })
+      .then(() => {
+        console.log(`asset generated`);
+      })
       .catch(error => {
         console.log(error);
       });

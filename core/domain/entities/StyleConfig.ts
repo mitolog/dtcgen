@@ -4,6 +4,7 @@ import { StyleType } from './StyleType';
 import { PathManager } from '../../utilities/PathManager';
 import { DesignToolType } from './DesignToolType';
 import { ColorStyleConfig } from './ColorStyleConfig';
+import { Styles } from './Styles';
 
 dotenv.config();
 if (dotenv.error) {
@@ -16,6 +17,7 @@ export class StyleConfig {
   inputPath?: string;
   outputDir?: string;
   colorStyleConfig?: ColorStyleConfig;
+  outputStyles?: Styles;
 
   initWithDtcConfig(designToolType: DesignToolType) {
     const pathManager = new PathManager(designToolType);
