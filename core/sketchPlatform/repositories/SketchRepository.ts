@@ -14,6 +14,7 @@ import {
   SliceConfig,
   DesignToolType,
   AssetFormat,
+  StyleConfig,
 } from '../../domain/Entities';
 import {
   SketchView,
@@ -310,5 +311,14 @@ export class SketchRepository implements ISketchRepository {
 
     // `export slices` command may make leading/trailing spaces, so remove these.
     pathManager.removeWhiteSpaces(dirPath);
+  }
+
+  async extractStyles(config: StyleConfig): Promise<object[]> {
+    const sketch = await this.getTargetSketch(config.inputPath);
+    // If you want to extract external library also,
+    // you need to use sketch['foreignLayerStyles'] too.
+    const layerStyles = sketch['layerStyles'];
+    if (!layerStyles || layerStyles.length <= 0) return [];
+    return layerStyles;
   }
 }

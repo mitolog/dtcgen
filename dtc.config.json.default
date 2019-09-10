@@ -6,6 +6,13 @@
       "extension": "PDF",
       "sliceAllImages": true,
       "scales": []
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   },
   "figma": {
@@ -17,7 +24,11 @@
       "scales": [1, 2, 3]
     },
     "style": {
-      "color": true
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   }
 }

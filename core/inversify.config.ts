@@ -86,6 +86,11 @@ export class DIContainer {
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
       .to(SketchPlatform.SliceImageUseCase);
+
+    // style use case
+    container
+      .bind<Domain.IStyleUseCase>(TYPES.IStyleUseCase)
+      .to(SketchPlatform.StyleUseCase);
   }
 
   injectFigma(container: Container) {
