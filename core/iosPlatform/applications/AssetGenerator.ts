@@ -186,7 +186,7 @@ export class AssetGenerator {
     );
 
     // color.nameがパス構造なら folder構造にする
-    const colorsRootDir = path.join(destDir, 'Colors');
+    const colorsRootDir = destDir;
     for (const color of colors) {
       const name = color.name.replace(/\s+/g, ''); // remove spaces
       if (!name.split('/')) {
