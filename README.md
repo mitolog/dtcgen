@@ -6,8 +6,6 @@ A CLI tool where you can generate asset catalog(Asset.xcassets) for iOS project 
 
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/cli_screenshot.png)
 
-[readme in Japanese](https://github.com/Innovatube/dtcgen/wiki/readmeJp).
-
 ## Commands
 
 ### Slice
