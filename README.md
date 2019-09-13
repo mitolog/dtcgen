@@ -6,6 +6,11 @@ A CLI tool where you can generate asset catalog(Asset.xcassets) for iOS project 
 
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/cli_screenshot.png)
 
+## Changelog
+
+If you update from previous version, better to take a look at changelog.
+https://github.com/Innovatube/dtcgen/blob/master/Changelog.md
+
 ## Commands
 
 ### Slice
@@ -72,6 +77,9 @@ npm install -g dtcgen
 
 # How to use
 
+- If you have previous version of dtcgen, check [Changelog](https://github.com/Innovatube/dtcgen/Changelog.md)
+- If you have installed locally, prepend `npx` before `dtcgen`.
+
 ```zsh
 # create config files on top directory
 dtcgen init
@@ -91,8 +99,6 @@ dtcgen [slice|style] --help
 # version
 dtcgen -v
 ```
-
-※ If you have installed locally, prepend `npx` before `dtcgen`.
 
 # Preparation
 
