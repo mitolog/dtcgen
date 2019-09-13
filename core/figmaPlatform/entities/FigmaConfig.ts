@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { injectable } from 'inversify';
 import { AssetFormat, SliceConfig } from '../../domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
-import { IFigmaConfig, GetS3ImageParams } from './IFigmaConfig';
+import { IFigmaConfig, GetS3ImageParams, GetNodesParams } from './IFigmaConfig';
 
 dotenv.config();
 if (dotenv.error) {
@@ -103,5 +103,31 @@ export class FigmaConfig implements IFigmaConfig {
       config['params'] = params;
     }
     return config;
+  }
+
+  stylesConfig(teamId: string): AxiosRequestConfig {
+    return {
+      url: `/teams/${teamId}/styles`,
+      method: 'get',
+      baseURL: 'https://api.figma.com/v1/',
+      headers: {
+        'X-FIGMA-TOKEN': this.token,
+      },
+    };
+  }
+
+  nodesConfig(params: GetNodesParams[]): AxiosRequestConfig {
+    const key = params[0].fileKey;
+    return {
+      url: `/files/${key}/nodes`,
+      method: 'get',
+      baseURL: 'https://api.figma.com/v1/',
+      headers: {
+        'X-FIGMA-TOKEN': this.token,
+      },
+      params: {
+        ids: params.map(param => param.nodeId).join(','),
+      },
+    };
   }
 }

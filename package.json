@@ -1,6 +1,6 @@
 {
   "name": "dtcgen",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "design to code generator",
   "engineStrict": true,
   "engines": {
@@ -66,6 +66,7 @@
     "dist",
     "templates",
     "dtc.config.json",
-    ".env.default"
+    ".env.default",
+    "dtc.config.json.default"
   ]
 }

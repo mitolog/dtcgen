@@ -81,6 +81,13 @@
       "extension": "PDF",
       "sliceAllImages": true,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   },
   "figma": {
@@ -90,6 +97,13 @@
       "extension": "PNG",
       "sliceAllImages": false,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   }
 }

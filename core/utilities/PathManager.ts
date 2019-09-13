@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as uuidv4 from 'uuid/v4';
 import { OSType } from '../domain/entities/OSType';
 import { isString } from 'util';
 
@@ -23,6 +24,7 @@ export enum OutputType {
   sourcecodes,
   project,
   figmaTree,
+  figmaLibraries,
 }
 
 export class PathManager {
@@ -35,7 +37,7 @@ export class PathManager {
       !isString(absoluteOrRelativeOutDir) ||
       absoluteOrRelativeOutDir.length <= 0
     ) {
-      throw new Error('output directory shuold be set.');
+      return;
     }
     this.outputDir = path.isAbsolute(absoluteOrRelativeOutDir)
       ? absoluteOrRelativeOutDir
@@ -54,6 +56,10 @@ export class PathManager {
     osType?: OSType,
     fileName?: string,
   ): string {
+    if (!this.outputDir) {
+      throw new Error('output directory shuold be set.');
+    }
+
     let outputPath = '';
     switch (pathType) {
       case OutputType.metadata:
@@ -78,6 +84,21 @@ export class PathManager {
           fs.ensureDirSync(treeDirName);
         }
         outputPath = path.join(treeDirName, 'tree.json');
+        break;
+
+      case OutputType.figmaLibraries:
+        const figmaLibDirName = path.join(
+          this.outputDir,
+          OutputMidDirName.extracted,
+          'metadata/figmaLibs',
+        );
+        if (shouldCreateMidDir) {
+          fs.ensureDirSync(figmaLibDirName);
+        }
+        // space removed fileName or uuidv4
+        let fileNameWithExt = fileName.replace(/\s+/g, '') || uuidv4();
+        fileNameWithExt += '.json';
+        outputPath = path.join(figmaLibDirName, fileNameWithExt);
         break;
 
       case OutputType.figmaTree:

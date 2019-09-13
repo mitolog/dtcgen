@@ -1,0 +1,34 @@
+{
+  "sketch": {
+    "slice": {
+      "caseSensitive": true,
+      "keywords": ["Icons"],
+      "extension": "PDF",
+      "sliceAllImages": true,
+      "scales": []
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
+    }
+  },
+  "figma": {
+    "slice": {
+      "caseSensitive": false,
+      "keywords": ["Icons"],
+      "extension": "PNG",
+      "sliceAllImages": false,
+      "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
+    }
+  }
+}
