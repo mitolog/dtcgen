@@ -2,13 +2,17 @@
 
 <h1 align="center">Dtcgen</h1>
 
-A CLI tool where you can generate asset catalog(Asset.xcassets) for iOS project from Sketch and Figma.
+A CLI tool where you can generate asset catalog(Asset.xcassets) for iOS project from both [Sketch](https://www.sketch.com/) and [Figma](https://www.figma.com).
 
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/cli_screenshot.png)
 
-[readme in Japanese](https://github.com/Innovatube/dtcgen/wiki/readmeJp).
+## Commands
 
-For example, these icons will be like...
+### Slice
+
+Extract symbols/components as pdf/png/svg and adopt them to asset catalog for iOS project.
+
+these icons will be like...
 ![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_icons_on_figma.png)
 
 this asset catalog.
@@ -16,16 +20,37 @@ this asset catalog.
 
 If you set `sliceAllImages` flag in config file, you can also extract all images within Sketch/Figma as `png` file.
 
+### Style
+
+Extract shared styles and turn them into asset catalog for iOS project.
+Currently only shared color is implemented.
+
+these colors
+![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_colors_on_sketch.png)
+
+will be like this asset catalog.
+![](https://raw.githubusercontent.com/wiki/Innovatube/dtcgen/images/readme_colors_on_xcode.png)
+
+※ Xcode version 9 and over is required.
+
+### init
+
+Just copy config files of `dtcgen` to your project root directory.
+
+## How can you use in your code
+
 `dtcgen` uses [Namespace](https://developer.apple.com/library/archive/documentation/Xcode/Reference/xcode_ref-Asset_Catalog_Format/FolderStructure.html#//apple_ref/doc/uid/TP40015170-CH33-SW4) as default, so you can retrieve assets in your source code like this:
 
 ```swift
 // without R.swift
 let hotelIcon = UIImage(named: "DtcGenerated/Icons/Hotel")
-let hotelImage = UIIMage(named: "DtcGenerated/Images/Hotel")
+let hotelImage = UIImage(named: "DtcGenerated/Images/Hotel")
+let black = UIColor(named: "DtcGenerated/Colors/Black")
 
 // with R.swift
 let hotelIcon: UIImage? = R.image.dtcGenerated.icons.hotel()
 let hotelImage: UIImage? = R.image.dtcGenerated.images.hotel()
+let black = R.color.dtcGenerated.colors.black()
 ```
 
 FYI: [R.swift](https://github.com/mac-cain13/R.swift)
@@ -48,14 +73,20 @@ npm install -g dtcgen
 # How to use
 
 ```zsh
+# create config files on top directory
+dtcgen init
+
 # For Sketch (`--input` option is required)
-dtcgen slice --tool sketch --input "./sample.sketch"
+dtcgen [slice|style] --tool sketch --input "./sample.sketch"
 
 # For Figma
-dtcgen slice --tool figma
+dtcgen [slice|style] --tool figma
 
-# help
-dtcgen slice --help
+# command help
+dtcgen --help
+
+# help for each commands
+dtcgen [slice|style] --help
 
 # version
 dtcgen -v
@@ -69,48 +100,69 @@ dtcgen -v
 
 ### Sketch
 
-Materials you want to extract shuold be:
+Materials you want to extract shuold be
+
+[Common rule]
 
 - Symbol
+
+[For `slice` command]
+
 - Sliced with [slice tool](https://www.sketch.com/docs/exporting/slices/)
+
+[For `style` command]
+
+- local [shared style](https://www.sketch.com/docs/styling/shared-styles/) (not Library's).
 
 ### Figma
 
 Materials you want to extract shuold be:
 
+[Common rules]
+
 - Component
+
+[For `style` command]
+
+- published as [Team Library](https://help.figma.com/article/29-team-library)
 
 ### Include keywords within Symbol/Component name
 
-Let's say you want to extract icon files, you can prepend keyword `Icons /` for each symbols/components. so it looks like `Icons / Search`.
+Assuming you want to extract icon files, you can just prepend keyword like `Icons /` to each name of symbols or components, which will be shown like `Icons / Search`.
 
-Spaces will be eliminated on generating assets like this: `Icons/Search`.
+The keyword should be same as one specified within `dtc.config.json` file.
 
-Then, **`/` is treated as folder on generation.**
+Once you put these keywords within names, these symbols or components are extracted.
 
-## Create and set .env file
+By the way, Spaces in between will be eliminated on generating assets. **`/` is treated as folder on generation.**
 
-On your project-root that you create at first step of installation, create `.env` file, then confirm and set environmental variable properly.
+All notation about keywords above is also applied to `style` command.
 
-1. You can create `.env` file with 2 ways：
+## Run `dtcgen init` and fill in required info
 
-- Copy `.env.default` from dtcgen package
-- Copy from [github repository](https://github.com/Innovatube/dtcgen/blob/master/.env.default)
-
-2. Set some variables within `.env` file. How to get these are explained later.
+1. Run `dtcgen init` on your project-root, so `.env` and `dtc.config.json` files are craeted.
+2. Set some variables within `.env` file. For detail, please take a look `.env` example below.
    - For Sketch：`SKETCH_TOOL_PATH` is required
-   - For Figma：`FIGMA_FILE_KEY` and `FIGMA_ACCESS_TOKEN` are required
+   - For Figma：
+     - `FIGMA_FILE_KEY` and `FIGMA_ACCESS_TOKEN` are required for any command
+     - `FIGMA_TEAM_ID` is required for `style` command
+3. Set config within `dtc.config.json` file.
 
 As a default, `.env` file looks like：
 
 ```bash
 #### settings in common ####
-# relative path from where the command executed or absolute path. if not found, lookup upper dir upto top directry of your file system.
+# relative path from which the command executed or absolute path. if it's not found, lookup upper directory upto top directory of your file system. The file must be json format.
 CONFIG_PATH="./dtc.config.json"
 
+# If a directory set for `TEMPLATE_DIR` doesn't exist, `dtcgen` copies default templates into that directory
+# so that you can customize freely. `dtcgen` uses handlebars and handlebars-helpers.
+# This can be also relative path from project-root, or can be absolute path.
 # relative path from where the command executed or absolute path
 TEMPLATE_DIR="./templates"
 
+# This is a directory where you want to output all extracted/generated files.
+# If the directory doesn't exist, automatically created.
 # relative path from where the command executed or absolute path
 OUTPUT_PATH="./outputs"
 
@@ -127,49 +179,25 @@ FIGMA_FILE_KEY="FILE_KEY_HERE"
 # access token for the file above, refer link below
 # https://www.figma.com/developers/docs#authentication
 FIGMA_ACCESS_TOKEN="ACCESS_TOKEN_HERE"
+
+# To use `Style` command, you need to specify this.
+# you need to create https://help.figma.com/article/15-creating-your-team at first
+# then select "team" from left column, so you will get url like `https://www.figma.com/files/team/{team_id}/{team_name}`
+FIGMA_TEAM_ID="TEAM_ID_HERE"
 ```
 
-### CONFIG_PATH
-
-`CONFIG_PATH` is a path to the config file.
-The Path can be relative path from project-root, or can be absolute path.
-Then, file type should be json.
-
-### TEMPLATE_DIR
-
-If a directory set for `TEMPLATE_DIR` exists, dtcgen uses that directory. If it's empty, it raises an error.
-
-If a directory set for `TEMPLATE_DIR` doesn't exist, dtcgen copies default templates into that directory.
-
-This can be also relative path from project-root, or can be absolute path.
-
-### OUTPUT_PATH
-
-This is a directory where you want to output all extracted/generated files.
-If the directory doesn't exist, dtcgen create it.
-
-## Prepare needed info to access design files
-
-### Sketch
+### Additional Note to use Sketch
 
 You need to [insatll Sketch.app](https://www.sketch.com/get/) beforehand.
 [`sketchtool`](https://developer.sketchapp.com/guides/sketchtool/) cli included within Sketch.app is required to use `dtcgen`.
 
 Even if it's not activated(or lisence expired), it would work.
-If something wrong, please let us know or your help will be very appreciated.
+If something wrong, please [let us know](https://github.com/Innovatube/dtcgen/issues) or your help will be very appreciated.
 
-Set absolute path to the `sketchtool` as **SKETCH_TOOL_PATH** on `.env` file.
-As default, **SKETCH_TOOL_PATH** is set assuming you placed Sketch.app just under `Application` directory.
+Set absolute path for `sketchtool` to **SKETCH_TOOL_PATH** on `.env` file.
+As a default, **SKETCH_TOOL_PATH** is set assuming you placed Sketch.app just under `/Applications` directory of macOS.
 
-### Figma
-
-- **FIGMA_FILE_KEY**: `https://www.figma.com/file/{{FILE_KEY}}/sample_for_test` use key corresponding to `{{FILE_KEY}}`
-- **FIGMA_ACCESS_TOKEN**: You can get one via account setting. More Detail is on [Official document](https://www.figma.com/developers/docs#authentication).
-
-## Create and set `dtc.config.json`
-
-Create `dtc.config.json` under the project-root.
-(You can change the name or directory on `.env` file)
+## Set `dtc.config.json`
 
 ```json:dtc.config.json
 {
@@ -180,6 +208,13 @@ Create `dtc.config.json` under the project-root.
       "extension": "PDF",
       "sliceAllImages": true,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   },
   "figma": {
@@ -189,12 +224,21 @@ Create `dtc.config.json` under the project-root.
       "extension": "PNG",
       "sliceAllImages": true,
       "scales": [1, 2, 3]
+    },
+    "style": {
+      "color": {
+        "isEnabled": true,
+        "caseSensitive": true,
+        "keywords": ["Colors"]
+      }
     }
   }
 }
 ```
 
 You can set parameters to each design tool. Settable Parameters are as below：
+
+[for `slice` command]
 
 - caseSensitive: boolean set true if you want keyword to be case sensitive
 - keywords: string[] you can set multiple keywords within symbols'/components' name
@@ -209,6 +253,12 @@ numbers that you can specify to scales are as below：
 | figma  | 0.1 - 4 |
 | sketch | 1 - x   |
 
+[for `style` command]
+
+- caseSensitive: boolean set true if you want keyword to be case sensitive
+- keywords: string[] you can set multiple keywords within symbols'/components' name
+- isEnabled: if true, the style extraction/generation is executed
+
 # todos
 
 ## dtcgen slice
@@ -216,20 +266,22 @@ numbers that you can specify to scales are as below：
 - [x] run test on PR with travis CI
 - [x] scale setting for png extraction
 - [ ] output command execution status with console.log
-- [ ] CI integration(When using Sketch, runnning machine should be macOS)
-- [ ] make this command as figma plugin
-- [ ] android version
+- ~~[ ] CI integration(When using Sketch, runnning machine should be macOS)~~
+- ~~[ ] make this command as figma plugin~~
 
 ## other todos/future plan
 
-- [ ] prepare `dtcgen init` command for initializing `.env`, `dtc.config.json`.
+- [x] prepare `dtcgen init` command for initializing `.env`, `dtc.config.json`.
 - [ ] bump up to eslint from tslint
-- [ ] color palette extraction / generation
+- [x] color shared style extraction / generation
+- [ ] text shared style extraction / generation
+- [ ] localized string extraction / generation
 - [ ] layout related source code generation with swiftUI
+- [ ] android version
 
 # Contribution
 
-If any questions or issues araises, feel free to [add new issue](https://github.com/Innovatube/dtcgen/issues).
+If any questions or issues, feel free to [add new issue](https://github.com/Innovatube/dtcgen/issues).
 
 ## LICENSE
 

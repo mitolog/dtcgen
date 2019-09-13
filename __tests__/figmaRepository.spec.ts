@@ -1,19 +1,22 @@
 import { Container } from 'inversify';
 import 'reflect-metadata';
 import { TYPES } from '../core/types';
-import * as SketchPlatform from '../core/sketchPlatform/SketchPlatform';
+import * as FigmaPlatform from '../core/figmaPlatform/FigmaPlatform';
 
-describe('tests for SketchRepository', () => {
+describe('tests for FigmaRepository', () => {
   const testContainer = new Container();
-  var repository: SketchPlatform.ISketchRepository;
+  var repository: FigmaPlatform.IFigmaRepository;
 
   beforeAll(() => {
     testContainer
-      .bind<SketchPlatform.ISketchRepository>(TYPES.ISketchRepository)
-      .to(SketchPlatform.SketchRepository);
+      .bind<FigmaPlatform.IFigmaConfig>(TYPES.IFigmaConfig)
+      .to(FigmaPlatform.FigmaConfigMock);
+    testContainer
+      .bind<FigmaPlatform.IFigmaRepository>(TYPES.IFigmaRepository)
+      .to(FigmaPlatform.FigmaRepository);
 
-    repository = testContainer.get<SketchPlatform.ISketchRepository>(
-      TYPES.ISketchRepository,
+    repository = testContainer.get<FigmaPlatform.IFigmaRepository>(
+      TYPES.IFigmaRepository,
     );
   });
 

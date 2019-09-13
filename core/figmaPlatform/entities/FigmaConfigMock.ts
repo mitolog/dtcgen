@@ -4,6 +4,7 @@ import { AssetFormat, SliceConfig } from '../../Domain/Entities';
 import { AxiosRequestConfig, Method, ResponseType } from 'axios';
 import { IFigmaConfig, GetS3ImageParams } from '../FigmaPlatform';
 import { FigmaMockAdapter } from './figmaMockAdapter';
+import { GetNodesParams } from './IFigmaConfig';
 
 dotenv.config();
 if (dotenv.error) {
@@ -120,5 +121,34 @@ export class FigmaConfigMock implements IFigmaConfig {
       config['params'] = params;
     }
     return config;
+  }
+
+  // curl -H 'X-FIGMA-TOKEN: xxxxx' 'https://api.figma.com/v1/teams/748971045105836585/styles' > figmaStyles.json
+  stylesConfig(teamId: string): AxiosRequestConfig {
+    return {
+      url: `/teams/${teamId}/styles`,
+      method: 'get',
+      baseURL: 'https://api.figma.com/v1/',
+      headers: {
+        'X-FIGMA-TOKEN': this.token,
+      },
+      adapter: this.adapter.configAdapterOK('figmaStyles.json'),
+    };
+  }
+
+  nodesConfig(params: GetNodesParams[]): AxiosRequestConfig {
+    const key = params[0].fileKey;
+    return {
+      url: `/files/${key}/nodes`,
+      method: 'get',
+      baseURL: 'https://api.figma.com/v1/',
+      headers: {
+        'X-FIGMA-TOKEN': this.token,
+      },
+      params: {
+        ids: params.map(param => param.nodeId).join(','),
+      },
+      adapter: this.adapter.configAdapterOK('figmaNodeIds.json'),
+    };
   }
 }

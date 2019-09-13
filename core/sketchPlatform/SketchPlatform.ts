@@ -10,3 +10,4 @@ export { SketchNamingLinter } from './applications/SketchNamingLinter';
 export { LintNamingUseCase } from './usecases/LintNamingUseCase';
 export { ExtractElementUseCase } from './usecases/ExtractElementUseCase';
 export { SliceImageUseCase } from './usecases/SliceImageUseCase';
+export { StyleUseCase } from './usecases/StyleUseCase';

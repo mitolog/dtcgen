@@ -18,6 +18,7 @@ export class HandlebarsHelpers {
     handlebars.registerHelper('capitalize', helpers().capitalize);
     handlebars.registerHelper('length', helpers().length);
     handlebars.registerHelper('compare', helpers().compare);
+    handlebars.registerHelper('toFixed', helpers().toFixed);
     return handlebars;
   }
 

@@ -86,6 +86,11 @@ export class DIContainer {
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
       .to(SketchPlatform.SliceImageUseCase);
+
+    // style use case
+    container
+      .bind<Domain.IStyleUseCase>(TYPES.IStyleUseCase)
+      .to(SketchPlatform.StyleUseCase);
   }
 
   injectFigma(container: Container) {
@@ -96,10 +101,19 @@ export class DIContainer {
       .bind<FigmaPlatform.IFigmaRepository>(TYPES.IFigmaRepository)
       .to(FigmaPlatform.FigmaRepository);
 
+    container
+      .bind<FigmaPlatform.IFigmaPresenter>(TYPES.IFigmaPresenter)
+      .to(FigmaPlatform.FigmaPresenter);
+
     // slice use case
     container
       .bind<Domain.ISliceImageUseCase>(TYPES.ISliceImageUseCase)
       .to(FigmaPlatform.SliceImageUseCase);
+
+    // style use case
+    container
+      .bind<Domain.IStyleUseCase>(TYPES.IStyleUseCase)
+      .to(FigmaPlatform.StyleUseCase);
   }
 
   injectIos(container: Container) {

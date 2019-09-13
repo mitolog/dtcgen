@@ -7,6 +7,7 @@ import {
   SliceConfig,
   AssetFormat,
   DesignToolType,
+  Color,
 } from '../../domain/Entities';
 import {
   PathManager,
@@ -24,9 +25,14 @@ if (dotenv.error) {
   throw dotenv.error;
 }
 
+export enum XcAssetType {
+  image,
+  color,
+}
 export class XcAssetJsonPaths {
   intermediate: string;
   last: string;
+  assetType: XcAssetType;
 }
 
 export class AssetGenerator {
@@ -87,7 +93,9 @@ export class AssetGenerator {
     if (!PathManager.isDir(searchDir)) return;
 
     // Prepare needed paths/directories
-    const jsonTemplatePaths: XcAssetJsonPaths = this.getAssetJsonTemplatePaths();
+    const imageTemplatePaths: XcAssetJsonPaths = this.getAssetJsonTemplatePaths(
+      XcAssetType.image,
+    );
     const destDirs = this.pathManager.searchDirsOrFiles(
       searchDir,
       `xcassets$`,
@@ -106,56 +114,122 @@ export class AssetGenerator {
      * Place inermediate json on top of assets generated directory
      */
     fs.copyFileSync(
-      jsonTemplatePaths.intermediate,
+      imageTemplatePaths.intermediate,
       path.join(destDir, 'Contents.json'),
     );
 
-    /*
-     * Copy slices
-     */
-    const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
-
-    const slices: string[] = fs.readdirSync(slicesDir);
-    if (!slices || slices.length <= 0) {
-      return;
-    }
-    slices.forEach(basename => {
-      this.generateXcAssets(
-        path.join(slicesDir, basename),
-        destDir,
-        jsonTemplatePaths,
-      );
-    });
-
-    /* 
-     * Copy images
-     */
-    // will be generated like below:
-    // images/Contents.json
-    // images/1e02fxxxxxxxxxxxxx.imageset/Contents.json
-    // images/1e02fxxxxxxxxxxxxx.imageset/1e02fxxxxxxxxxxxxx.png
     const sliceConfig: SliceConfig = this.config.sliceConfig || null;
-    if (!sliceConfig || !sliceConfig.sliceAllImages) return;
+    if (sliceConfig) {
+      /*
+      * Copy slices
+      */
+      const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
 
-    const imagesDir = this.pathManager.getOutputPath(
-      OutputType.images,
-      false,
-      OSType.ios,
-    );
-    this.generateXcAssets(imagesDir, destDir, jsonTemplatePaths);
+      const slices: string[] = fs.readdirSync(slicesDir);
+      if (slices && slices.length > 0) {
+        slices.forEach(basename => {
+          this.generateAssetsFromFiles(
+            path.join(slicesDir, basename),
+            destDir,
+            imageTemplatePaths,
+          );
+        });
+      }
+
+      /* 
+      * Copy images
+      */
+      if (sliceConfig.sliceAllImages) {
+        const imagesDir = this.pathManager.getOutputPath(
+          OutputType.images,
+          false,
+          OSType.ios,
+        );
+        this.generateAssetsFromFiles(imagesDir, destDir, imageTemplatePaths);
+      }
+    }
+
+    /**
+     * Generate styles
+     */
+    if (this.config.styleConfig) {
+      this.generateStyles(destDir);
+    }
   }
 
-  private generateXcAssets(
-    originPath: string,
-    destDirOrPath: string,
+  private generateStyles(destDir: string) {
+    const styles = this.config.styleConfig.outputStyles;
+    if (!styles) return;
+
+    // color style
+    this.generateColorStyle(styles.colors, destDir);
+  }
+
+  private createMidJsonIfNeeded(
+    dirPath: string,
+    rootDir: string,
+    templatePaths: XcAssetJsonPaths,
+  ) {
+    fs.copyFileSync(
+      templatePaths.intermediate,
+      path.join(dirPath, 'Contents.json'),
+    );
+
+    const upDir = path.join(dirPath, '../').replace(/\/$/, '');
+    if (upDir === rootDir.replace(/\/$/, '')) return;
+    this.createMidJsonIfNeeded(upDir, rootDir, templatePaths);
+  }
+
+  private generateColorStyle(colors: Color[], destDir: string) {
+    const templatePaths: XcAssetJsonPaths = this.getAssetJsonTemplatePaths(
+      XcAssetType.color,
+    );
+
+    // color.nameがパス構造なら folder構造にする
+    const colorsRootDir = destDir;
+    for (const color of colors) {
+      const name = color.name.replace(/\s+/g, ''); // remove spaces
+      if (!name.split('/')) {
+        throw new Error('name should not be empty.');
+      }
+      const lastDirPath = path.join(
+        colorsRootDir,
+        name.replace(/\/$/, '') + '.colorset',
+      );
+      // create last dir and intermediate dir if needed
+      fs.ensureDirSync(lastDirPath);
+
+      const lastJsonTemplate = this.templateHelpers.compiledTemplate(
+        templatePaths.last,
+      );
+      const lastJsonStr = lastJsonTemplate(color);
+      fs.writeFileSync(path.join(lastDirPath, 'Contents.json'), lastJsonStr);
+
+      this.createMidJsonIfNeeded(
+        path.join(lastDirPath, '../'),
+        destDir,
+        templatePaths,
+      );
+    }
+  }
+
+  /**
+   * generate ios asset catalog compatible files from extracted files
+   * @param srcPath {string} source path, can be filepath or directory path
+   * @param destPath {string} normally directory path to output
+   * @param templatePaths {XcAssetJsonPaths}
+   */
+  private generateAssetsFromFiles(
+    srcPath: string,
+    destPath: string,
     templatePaths: XcAssetJsonPaths,
   ): void {
     /*
-      filepath の場合、以下を作成:
+      If srcPath is file path, create below:
         filename.imageset/Contents.json
         filename.imageset/filename.ext
 
-      directory path の場合、以下を作成:
+      If srcPath is directory path, create below:
         dirname/
         dirname/Contents.json (namespace記載のやつ)
     */
@@ -164,11 +238,8 @@ export class AssetGenerator {
     );
 
     /* deal with directory pathes below */
-    if (PathManager.isDir(originPath)) {
-      const intermediateDirPath = path.join(
-        destDirOrPath,
-        path.basename(originPath),
-      );
+    if (PathManager.isDir(srcPath)) {
+      const intermediateDirPath = path.join(destPath, path.basename(srcPath));
       // create intermediate directory if needed
       fs.ensureDirSync(intermediateDirPath);
 
@@ -179,20 +250,24 @@ export class AssetGenerator {
       );
       fs.copyFileSync(templatePaths.intermediate, intermediateJsonPath);
 
-      const components: string[] = fs.readdirSync(originPath);
+      const components: string[] = fs.readdirSync(srcPath);
       components.forEach(component => {
-        const newOrigPath = path.join(originPath, component);
-        this.generateXcAssets(newOrigPath, intermediateDirPath, templatePaths);
+        const newOrigPath = path.join(srcPath, component);
+        this.generateAssetsFromFiles(
+          newOrigPath,
+          intermediateDirPath,
+          templatePaths,
+        );
       });
       return;
     }
 
     /* deal with file pathes below */
-    const parsed = path.parse(originPath);
+    const parsed = path.parse(srcPath);
     const assetName = parsed.name.replace(/\s+/g, '');
     // consider scale(like @2x) suffix here
     const suffixRemoved = assetName.replace(/@[1-9]x$/gi, '');
-    const imageSetDir = path.join(destDirOrPath, suffixRemoved + '.imageset');
+    const imageSetDir = path.join(destPath, suffixRemoved + '.imageset');
     // create imageSetDir directory if needed
     fs.ensureDirSync(imageSetDir);
 
@@ -224,10 +299,10 @@ export class AssetGenerator {
 
     // copy asset data itself
     const assetNameWithExt = assetName + parsed.ext;
-    fs.copyFileSync(originPath, path.join(imageSetDir, assetNameWithExt));
+    fs.copyFileSync(srcPath, path.join(imageSetDir, assetNameWithExt));
   }
 
-  private getAssetJsonTemplatePaths(): XcAssetJsonPaths {
+  private getAssetJsonTemplatePaths(assetType: XcAssetType): XcAssetJsonPaths {
     const assetsDir = this.pathManager.searchDirsOrFiles(
       this.projectTemplateRootDir,
       'xcassets$',
@@ -243,11 +318,20 @@ export class AssetGenerator {
       'intermediateDirectory',
       'midDirContents.json',
     );
+
+    let lastPath = '';
+    switch (assetType) {
+      case XcAssetType.image:
+        lastPath = 'iconName.imageset/lastDirContents.json.hbs';
+        break;
+      case XcAssetType.color:
+        lastPath = 'colorName.colorset/lastDirContents.json.hbs';
+        break;
+    }
     const lastJsonPath = path.join(
       assetsDir[0],
       'intermediateDirectory',
-      'iconName.imageset',
-      'lastDirContents.json.hbs',
+      lastPath,
     );
     templatePaths.intermediate = interMediateJsonPath;
     templatePaths.last = lastJsonPath;
