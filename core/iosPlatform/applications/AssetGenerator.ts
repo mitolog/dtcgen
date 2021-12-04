@@ -77,10 +77,7 @@ export class AssetGenerator {
       throw new Error('no xcassets directory within template.');
     }
 
-    // remove all files on destination directory first
-    fs.removeSync(templateDestDir);
-
-    // copy directory to geenerated
+    // copy directory to generated
     const assetName = path.basename(templateOriginDirs[0]);
     const dest = path.join(templateDestDir, assetName);
     fs.copySync(templateOriginDirs[0], dest);
@@ -102,35 +99,40 @@ export class AssetGenerator {
       true,
     );
     if (!destDirs || destDirs.length <= 0) {
-      throw new Error('no xcassets directory within template.');
+      throw new Error('no xcassets directory within a template.');
     }
     const destDir = path.join(destDirs[0], 'DtcGenerated');
     fs.ensureDirSync(destDir);
 
-    // remove unneeded directories
-    fs.removeSync(path.join(destDirs[0], 'intermediateDirectory'));
-
-    /**
-     * Place inermediate json on top of assets generated directory
-     */
     fs.copyFileSync(
       imageTemplatePaths.intermediate,
       path.join(destDir, 'Contents.json'),
     );
 
+    // remove unneeded directories
+    fs.removeSync(path.join(destDirs[0], 'intermediateDirectory'));
+
     const sliceConfig: SliceConfig = this.config.sliceConfig || null;
     if (sliceConfig) {
+
+      const slicesDestDir = path.join(destDir, 'slices');
+      fs.removeSync(slicesDestDir);
+      fs.ensureDirSync(slicesDestDir);
+      fs.copyFileSync(
+        imageTemplatePaths.intermediate,
+        path.join(slicesDestDir, 'Contents.json'),
+      );
+
       /*
       * Copy slices
       */
       const slicesDir = this.pathManager.getOutputPath(OutputType.slices);
-
       const slices: string[] = fs.readdirSync(slicesDir);
       if (slices && slices.length > 0) {
         slices.forEach(basename => {
           this.generateAssetsFromFiles(
             path.join(slicesDir, basename),
-            destDir,
+            slicesDestDir,
             imageTemplatePaths,
           );
         });
@@ -145,7 +147,7 @@ export class AssetGenerator {
           false,
           OSType.ios,
         );
-        this.generateAssetsFromFiles(imagesDir, destDir, imageTemplatePaths);
+        this.generateAssetsFromFiles(imagesDir, slicesDestDir, imageTemplatePaths);
       }
     }
 
