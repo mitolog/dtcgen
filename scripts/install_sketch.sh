@@ -6,8 +6,8 @@
 
 set -xeu
 
-[[ -x /Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool ]] && exit 0
+[[ -x /Applications/Sketch.app/Contents/MacOS/sketchtool ]] && exit 0
 
-curl -L -o sketch.zip http://www.sketchapp.com/static/download/sketch.zip
+curl -L -o sketch.zip https://download.sketch.com/sketch-80.1-134476.zip
 unzip -qo sketch.zip
 mv Sketch.app /Applications/Sketch.app
