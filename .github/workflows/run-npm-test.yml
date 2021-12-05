@@ -38,4 +38,6 @@ jobs:
       - name: Build project
         run: npm run build
       - name: Run test
+        env:
+          FIGMA_ACCESS_TOKEN: ${{secrets.FIGMA_ACCESS_TOKEN}}
         run: npm run test
