@@ -138,7 +138,7 @@ export class AssetGenerator {
         });
       }
 
-      /* 
+      /*
       * Copy images
       */
       if (sliceConfig.sliceAllImages) {
@@ -172,6 +172,8 @@ export class AssetGenerator {
     rootDir: string,
     templatePaths: XcAssetJsonPaths,
   ) {
+    if (dirPath.replace(/\/$/, '') === rootDir.replace(/\/$/, '')) return;
+
     fs.copyFileSync(
       templatePaths.intermediate,
       path.join(dirPath, 'Contents.json'),
@@ -187,7 +189,6 @@ export class AssetGenerator {
       XcAssetType.color,
     );
 
-    // color.nameがパス構造なら folder構造にする
     const colorsRootDir = destDir;
     for (const color of colors) {
       const name = color.name.replace(/\s+/g, ''); // remove spaces

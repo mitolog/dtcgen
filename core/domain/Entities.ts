@@ -66,3 +66,4 @@ export { GenerateConfig } from './entities/GenerateConfig';
 export { StyleConfig } from './entities/StyleConfig';
 export { ColorStyleConfig } from './entities/ColorStyleConfig';
 export { Styles } from './entities/Styles';
+export { StyleType } from './entities/StyleType';
