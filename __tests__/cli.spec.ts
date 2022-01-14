@@ -30,9 +30,7 @@ describe('tests for cli commands', () => {
   describe('slice', () => {
     test('`input` option should be exists', async () => {
       const result = await execa('bin/cli slice', { shell: true });
-      expect(result.stdout).toBe(
-        '`input` option on sketch is required. see `dtcgen slice --help`.',
-      );
+      expect(result.stdout).toBe('asset extracted\nasset generated');
     });
 
     test('even if `tool` option is other than enum value, it will succsess with default value.', async () => {
