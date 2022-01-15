@@ -59,7 +59,7 @@ export class AssetGenerator {
     HandlebarsPartials.registerPartials(partialTemplateRootDir);
   }
 
-  generate(): void {
+  generate(): string {
     const templateDestDir = this.pathManager.getOutputPath(
       OutputType.sourcecodes,
       true,
@@ -83,11 +83,15 @@ export class AssetGenerator {
     fs.copySync(templateOriginDirs[0], dest);
 
     // deal with assets
-    this.generateAssets(templateDestDir);
+    return this.generateAssets(templateDestDir);
   }
 
-  public generateAssets(searchDir: string): void {
-    if (!PathManager.isDir(searchDir)) return;
+  public generateAssets(searchDir: string): string {
+    if (!PathManager.isDir(searchDir)) {
+      throw new Error(`${searchDir} is not a directory.`)
+    };
+
+    var result = '';
 
     // Prepare needed paths/directories
     const imageTemplatePaths: XcAssetJsonPaths = this.getAssetJsonTemplatePaths(
@@ -136,6 +140,7 @@ export class AssetGenerator {
             imageTemplatePaths,
           );
         });
+        result = slicesDestDir;
       }
 
       /*
@@ -148,6 +153,7 @@ export class AssetGenerator {
           OSType.ios,
         );
         this.generateAssetsFromFiles(imagesDir, slicesDestDir, imageTemplatePaths);
+        result = slicesDestDir;
       }
     }
 
@@ -155,8 +161,17 @@ export class AssetGenerator {
      * Generate styles
      */
     if (this.config.styleConfig) {
-      this.generateStyles(destDir);
+      const styleDestDir = path.join(destDir, 'styles');
+      fs.removeSync(styleDestDir);
+      fs.ensureDirSync(styleDestDir);
+      fs.copyFileSync(
+        imageTemplatePaths.intermediate,
+        path.join(styleDestDir, 'Contents.json'),
+      );
+      this.generateStyles(styleDestDir);
+      result = styleDestDir;
     }
+    return result;
   }
 
   private generateStyles(destDir: string) {
