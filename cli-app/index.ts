@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { cac } from 'cac';
+import * as ora from 'ora';
 import {
   DIContainer,
   ILintNamingUseCase,
@@ -20,6 +21,9 @@ import {
 } from '../internal';
 
 const cli = cac();
+const spinner = ora({
+  spinner: 'line'
+});
 
 /**
  * lint
@@ -140,6 +144,7 @@ cli
     'extract symbols/components and turn them into ready-to-use asset files for iOS.',
   )
   .action((args, _) => {
+    spinner.start("extracting images...");
     const inputPath = args.input;
     const outputDir = args.output;
 
@@ -178,14 +183,15 @@ cli
     sliceImageUseCase
       .handle(sliceConfig)
       .then(() => {
-        console.log(`asset extracted`);
+        spinner.succeed("images are extracted.");
+        spinner.start("generating assets...");
         return generateAssetUseCase.handle(generateConfig, outputDir);
       })
-      .then(() => {
-        console.log(`asset generated`);
+      .then((destination) => {
+        spinner.succeed(`assets are generated under ${destination}`);
       })
       .catch(error => {
-        console.log(error);
+        spinner.fail(error.message);
       });
   })
   .option(
@@ -204,6 +210,8 @@ cli
     'extract shared styles and turn them into ready-to-use assets for ios.',
   )
   .action((args, _) => {
+    spinner.start("extracting styles...");
+
     const inputPath = args.input;
     const outputDir = args.output;
 
@@ -238,14 +246,16 @@ cli
     styleUseCase
       .handle(styleConfig)
       .then(styles => {
+        spinner.succeed("styles are extracted.");
+        spinner.start("generating assets...");
         generateConfig.styleConfig.outputStyles = styles;
         return generateAssetUseCase.handle(generateConfig, outputDir);
       })
-      .then(() => {
-        console.log(`asset generated`);
+      .then((destination) => {
+        spinner.succeed(`assets are generated under ${destination}`);
       })
       .catch(error => {
-        console.log(error);
+        spinner.fail(error.message);
       });
   })
   .option(

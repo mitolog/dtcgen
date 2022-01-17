@@ -7,8 +7,8 @@ import { GenerateConfig } from '../../domain/Entities';
 export class GenerateAssetUseCase implements IGenerateAssetUseCase {
   constructor() {}
 
-  async handle(config: GenerateConfig, outputDir?: string): Promise<void> {
+  async handle(config: GenerateConfig, outputDir?: string): Promise<string> {
     const generator = new AssetGenerator(config, outputDir);
-    generator.generate();
+    return generator.generate();
   }
 }
