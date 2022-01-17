@@ -41,7 +41,7 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "author": "mitolog <hkyhm5l@gmail.com>",
   "license": "Apache-2.0",

@@ -53,7 +53,6 @@ describe('tests for styleUseCase on Figma', () => {
   });
 
   afterEach(() => {
-    // await new Promise(resolve => setTimeout(resolve, 1000));
     process.env = OLD_ENV;
   });
 
