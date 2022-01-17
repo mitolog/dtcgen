@@ -28,9 +28,9 @@ describe('tests for cli commands', () => {
   });
 
   describe('slice', () => {
-    test('`input` option should be exists', async () => {
+    test('even if no options, it will succeed (default tool: figma)', async () => {
       const result = await execa('bin/cli slice', { shell: true });
-      expect(result.stdout).toBe('asset extracted\nasset generated');
+      expect(result.stderr).not.toMatch(/✖/);
     });
 
     test('even if `tool` option is other than enum value, it will succsess with default value.', async () => {
@@ -38,7 +38,8 @@ describe('tests for cli commands', () => {
         `bin/cli slice --input "./sample.sketch" --tool "hoge" --output "${testOutputPath}"`,
         { shell: true },
       );
-      expect(result.stdout).toBe('asset extracted\nasset generated');
+      console.log(result.stderr);
+      expect(result.stderr).not.toMatch(/✖/);
     });
 
     // Let'ts comment out if you added new platforms. currently we only support `iOS`,
