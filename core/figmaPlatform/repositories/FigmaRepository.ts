@@ -124,13 +124,13 @@ export class FigmaRepository implements IFigmaRepository {
     }
   }
 
-  /// even if config.extension is pdf/svf, `extractImages` extract png, cause it's not vector data.
   async extractImages(config: SliceConfig): Promise<void> {
     if (!config) {
       throw new Error('no `sliceConfig` parameter is set.');
     }
     var imageFillsResult: AxiosResponse<any> = null;
     try {
+      // retrieve all image resources within the figma file.
       imageFillsResult = await axios(this.figmaConfig.imageFillsConfig());
     } catch (error) {
       throw new Error(error);
@@ -269,7 +269,7 @@ export class FigmaRepository implements IFigmaRepository {
     const imageUrlsObj: Object = _.get(response, keyPathToImages, null);
     if (!imageUrlsObj) return null;
 
-    const scale = response.config.params['scale'];
+    const scale = _.get(response, 'config.params.scale', null);
 
     const getS3Promises: AxiosPromise[] = [];
     for (const id of Object.keys(imageUrlsObj)) {
