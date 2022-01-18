@@ -154,7 +154,7 @@ cli
       OSTypeValues.find(type => type === args.platform) || OSType.ios;
 
     if (toolType == DesignToolType.sketch && !inputPath) {
-      console.log(
+      spinner.fail(
         '`input` option on sketch is required. see `dtcgen slice --help`.',
       );
       return;
@@ -216,13 +216,12 @@ cli
     const outputDir = args.output;
 
     const toolType: string =
-      DesignToolTypeValues.find(type => type === args.tool) ||
-      DesignToolType.sketch;
+      DesignToolTypeValues.find(type => type === args.tool) || DesignToolType.figma;
     const platform =
       OSTypeValues.find(type => type === args.platform) || OSType.ios;
 
     if (toolType == DesignToolType.sketch && !inputPath) {
-      console.log(
+      spinner.fail(
         '`input` option on sketch is required. see `dtcgen slice --help`.',
       );
       return;
