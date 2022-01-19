@@ -34,10 +34,4 @@ cli-app/*.json
 .DS_Store
 .env
 
-##############################
-# sketch plugin related below
-##############################
-
-# build artifacts
-*.sketchplugin
 
