@@ -9,9 +9,7 @@
     },
     "style": {
       "color": {
-        "isEnabled": true,
-        "caseSensitive": true,
-        "keywords": ["Colors"]
+        "isEnabled": true
       }
     }
   }
