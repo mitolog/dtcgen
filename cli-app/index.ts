@@ -23,8 +23,9 @@ const spinner = ora({
 });
 
 cli
-  .command('init', 'create setting files with default values.')
+  .command('init', 'create required config files.')
   .action((action, _) => {
+    spinner.start("copying config files...");
     const genericContainer = new DIContainer().getContainer();
     const genericUseCase = genericContainer.get<IGenericUseCase>(
       TYPES.IGenericUseCase,
@@ -32,20 +33,17 @@ cli
     genericUseCase
       .handle()
       .then(() => {
-        console.log(`default files are created.`);
+        spinner.succeed("config files are created.");
       })
       .catch(error => {
-        console.log(error);
+        spinner.fail(error.message);
       });
   });
 
-/**
- * extract symbols/components and convert them into ready-to-use assets.
- */
 cli
   .command(
     'slice',
-    'extract symbols/components and turn them into ready-to-use assets for iOS.',
+    'extract keyword matched components and turn them into xcassets compatible files for iOS.',
   )
   .action((args, _) => {
     spinner.start("extracting images...");
@@ -94,13 +92,10 @@ cli
   .option('-t, --tool <designTool>', 'only `figma` is supported now.');
 //.option('-p, --platform <osType>', 'Currently `ios` only.');
 
-/**
- * extract styles and turn them into ready-to-use assets for ios.
- */
 cli
   .command(
     'style',
-    'extract shared styles and turn them into assets for iOS.',
+    'extract team shared style and turn them into xcassets compatible files for iOS.',
   )
   .action((args, _) => {
     spinner.start("extracting styles...");
