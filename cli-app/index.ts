@@ -145,7 +145,7 @@ cli.option(
   'Default value can be set on `.env` file. Both relative/absolute path is acceptable.',
 );
 
-cli.version('0.2.0');
+cli.version('1.0.0');
 cli.help();
 
 export { cli };
