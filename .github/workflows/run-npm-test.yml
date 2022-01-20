@@ -20,14 +20,11 @@ jobs:
       CONFIG_PATH: './dtc.config.json'
       TEMPLATE_DIR: './templates'
       OUTPUT_PATH: './outputs'
-      SKETCH_TOOL_PATH: '/Applications/Sketch.app/Contents/MacOS/sketchtool'
       # Use my figma file named `sample_for_test`
       FIGMA_FILE_KEY: 'RL6HzoX6UeVaQw4OmSsqxr'
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
-      - name: Install sketch
-        run: scripts/install_sketch.sh
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:

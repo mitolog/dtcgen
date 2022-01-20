@@ -3,11 +3,8 @@ import { cac } from 'cac';
 import * as ora from 'ora';
 import {
   DIContainer,
-  ILintNamingUseCase,
-  IExtractElementUseCase,
   ISliceImageUseCase,
   IStyleUseCase,
-  IGenerateProjectUseCase,
   IGenerateAssetUseCase,
   IGenericUseCase,
   TYPES,
@@ -24,99 +21,6 @@ const cli = cac();
 const spinner = ora({
   spinner: 'line'
 });
-
-/**
- * lint
- */
-// cli.command('lint', 'lint design resource file').action((_, flag) => {
-//   const inputPath = flag.input;
-//   if (!inputPath) {
-//     console.log('required option is not detected. see `generate --help`.');
-//     return;
-//   }
-//   console.log("now start linting...");
-//   // TODO: maintenance after implementing the other commands
-//   // prettier-ignore
-//   // const lintNamingUseCase = cliContainer.get<ILintNamingUseCase>(TYPES.ILintNamingUseCase);
-//   // lintNamingUseCase
-//   //   .handle(inputPath)
-//   //   .then(layers => {
-//   //     console.log("finished linting.");
-//   //     console.log("--------------------");
-//   //     console.log(layers);
-//   //   })
-//   //   .catch(error => {
-//   //     console.log(error);
-//   //   });
-// });
-
-/**
- * extract
- */
-// cli
-//   .command(
-//     'extract',
-//     'extract semantic elements for layout file auto generation.',
-//   )
-//   .action((input, _) => {
-//     const inputPath = input.input;
-//     const outputDir = input.output;
-//     if (!inputPath) {
-//       console.log('input option is not detected. see `extract --help`.');
-//       return;
-//     }
-
-//     const toolType =
-//       DesignToolTypeValues.find(type => type === input.tool) ||
-//       DesignToolType.sketch;
-
-//     const cliContainer = new DIContainer(<DesignToolType>(
-//       toolType
-//     )).getContainer();
-//     const extractElementUseCase = cliContainer.get<IExtractElementUseCase>(
-//       TYPES.IExtractElementUseCase,
-//     );
-//     extractElementUseCase
-//       .handle(inputPath, outputDir)
-//       .then(() => {
-//         console.log(`file extracted`);
-//       })
-//       .catch(error => {
-//         console.log(error);
-//       });
-//   })
-//   .option('tool [designTool]', 'optional. `sketch` as a default.');
-
-/**
- * generate source code
- */
-// cli
-//   .command('generate', 'generate source code from extracted semantic data.')
-//   .action((input, _) => {
-//     const platform =
-//       OSTypeValues.find(type => type === input.platform) || OSType.ios;
-//     const outputDir = input.output;
-//     const projectName = input.project;
-//     if (!projectName) {
-//       console.log('`--project` option is not detected. see `extract --help`.');
-//       return;
-//     }
-
-//     const cliContainer = new DIContainer(<OSType>platform).getContainer();
-//     const generateProjectUseCase = cliContainer.get<IGenerateProjectUseCase>(
-//       TYPES.IGenerateProjectUseCase,
-//     );
-//     generateProjectUseCase
-//       .handle(projectName, outputDir)
-//       .then(() => {
-//         console.log(`code generated`);
-//       })
-//       .catch(error => {
-//         console.log(error);
-//       });
-//   })
-//   .option('platform [osType]', 'optional. currently `ios` only.')
-//   .option('project [name]', 'required. specify the name for the project.');
 
 cli
   .command('init', 'create setting files with default values.')
@@ -141,7 +45,7 @@ cli
 cli
   .command(
     'slice',
-    'extract symbols/components and turn them into ready-to-use asset files for iOS.',
+    'extract symbols/components and turn them into ready-to-use assets for iOS.',
   )
   .action((args, _) => {
     spinner.start("extracting images...");
@@ -152,13 +56,6 @@ cli
       DesignToolTypeValues.find(type => type === args.tool) || DesignToolType.figma;
     const platform =
       OSTypeValues.find(type => type === args.platform) || OSType.ios;
-
-    if (toolType == DesignToolType.sketch && !inputPath) {
-      spinner.fail(
-        '`input` option on sketch is required. see `dtcgen slice --help`.',
-      );
-      return;
-    }
 
     const sliceConfig: SliceConfig = new SliceConfig();
     sliceConfig.initWithDtcConfig(toolType as DesignToolType);
@@ -194,11 +91,7 @@ cli
         spinner.fail(error.message);
       });
   })
-  .option(
-    '-i, --input <file path>',
-    'Required for sketch. Both relative/absolute path is acceptable.',
-  )
-  .option('-t, --tool <designTool>', '`sketch`(default) or `figma`.');
+  .option('-t, --tool <designTool>', 'only `figma` is supported now.');
 //.option('-p, --platform <osType>', 'Currently `ios` only.');
 
 /**
@@ -207,7 +100,7 @@ cli
 cli
   .command(
     'style',
-    'extract shared styles and turn them into ready-to-use assets for ios.',
+    'extract shared styles and turn them into assets for iOS.',
   )
   .action((args, _) => {
     spinner.start("extracting styles...");
@@ -219,13 +112,6 @@ cli
       DesignToolTypeValues.find(type => type === args.tool) || DesignToolType.figma;
     const platform =
       OSTypeValues.find(type => type === args.platform) || OSType.ios;
-
-    if (toolType == DesignToolType.sketch && !inputPath) {
-      spinner.fail(
-        '`input` option on sketch is required. see `dtcgen slice --help`.',
-      );
-      return;
-    }
 
     const styleConfig: StyleConfig = new StyleConfig();
     styleConfig.initWithDtcConfig(toolType as DesignToolType);
@@ -257,11 +143,7 @@ cli
         spinner.fail(error.message);
       });
   })
-  .option(
-    '-i, --input <file path>',
-    'Required for sketch. Both relative/absolute path is acceptable.',
-  )
-  .option('-t, --tool <designTool>', '`sketch`(default) or `figma`.');
+  .option('-t, --tool <designTool>', 'only `figma` is supported now.');
 
 cli.option(
   '-o, --output <dir>',

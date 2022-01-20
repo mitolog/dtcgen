@@ -1,20 +1,4 @@
 {
-  "sketch": {
-    "slice": {
-      "caseSensitive": true,
-      "keywords": ["Icons"],
-      "extension": "PDF",
-      "sliceAllImages": true,
-      "scales": []
-    },
-    "style": {
-      "color": {
-        "isEnabled": true,
-        "caseSensitive": true,
-        "keywords": ["Colors"]
-      }
-    }
-  },
   "figma": {
     "slice": {
       "caseSensitive": false,

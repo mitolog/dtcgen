@@ -271,7 +271,7 @@ export class PathManager {
    * recursively lookup config json from
    * command executed directory to upper directories.
    * @param jsonPath {string?} path to config json
-   * @return sketch {string?} sketch config object
+   * @return config {string?} config object
    */
   getConfig(jsonPath?: string): Object | null {
     const targetPath = jsonPath || process.env.CONFIG_PATH;
