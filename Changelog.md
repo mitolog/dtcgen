@@ -1,3 +1,14 @@
+## v1.0.0
+
+- upgrade yarn modules
+- add github actions on push `feature/**` branch to run unit tests
+- fix not to use keywords but use team style libraries on `style` command
+- add indicator while executing commands
+- fix some bugs
+- end sketch support, focus on Figma only
+- update minimum node version
+- update readme, comments, command descriptions
+
 ## v0.2.0
 
 - added `init` command, where you can create initial config files (`.env` and `dtc.config.json`) with latest format.

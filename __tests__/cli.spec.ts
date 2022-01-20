@@ -4,7 +4,7 @@ describe('tests for cli commands', () => {
   const testOutputPath = './testOutputs';
 
   beforeAll(() => {
-    jest.setTimeout(20000);
+    jest.setTimeout(40000);
   });
 
   afterAll(async () => {
@@ -28,29 +28,15 @@ describe('tests for cli commands', () => {
   });
 
   describe('slice', () => {
-    test('`input` option should be exists', async () => {
+    test('even if no options, `slice` will succeed (default tool: figma)', async () => {
       const result = await execa('bin/cli slice', { shell: true });
-      expect(result.stdout).toBe(
-        '`input` option on sketch is required. see `dtcgen slice --help`.',
-      );
+      expect(result.stderr).not.toMatch(/✖/);
     });
 
-    test('even if `tool` option is other than enum value, it will succsess with default value.', async () => {
-      const result = await execa(
-        `bin/cli slice --input "./sample.sketch" --tool "hoge" --output "${testOutputPath}"`,
-        { shell: true },
-      );
-      expect(result.stdout).toBe('asset extracted\nasset generated');
+    test('even if no options, `style` will succeed (default tool: figma)', async () => {
+      const result = await execa('bin/cli style', { shell: true });
+      expect(result.stderr).not.toMatch(/✖/);
     });
 
-    // Let'ts comment out if you added new platforms. currently we only support `iOS`,
-    // so we're now opted out `platform` option.
-    // test('even if `platform` option is other than enum value, it will succsess with default value.', async () => {
-    //   const result = await execa(
-    //     `bin/cli slice --input "./sample.sketch" --platform "hoge" --output "${testOutputPath}"`,
-    //     { shell: true },
-    //   );
-    //   expect(result.stdout).toBe('asset extracted\nasset generated');
-    // });
   });
 });

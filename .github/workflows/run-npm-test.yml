@@ -1,0 +1,41 @@
+name: Run unit tests on pushes to feature branches
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request towards the branch below
+  push:
+    branches:
+      - 'feature/**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  ? workflow_dispatch
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job
+  execute-unit-tests:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+    env:
+      CONFIG_PATH: './dtc.config.json'
+      TEMPLATE_DIR: './templates'
+      OUTPUT_PATH: './outputs'
+      # Use my figma file named `sample_for_test`
+      FIGMA_FILE_KEY: 'RL6HzoX6UeVaQw4OmSsqxr'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.15.4'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+      - name: Build project
+        run: npm run build
+      - name: Run test
+        env:
+          FIGMA_ACCESS_TOKEN: ${{secrets.FIGMA_ACCESS_TOKEN}}
+          FIGMA_TEAM_ID: ${{secrets.FIGMA_TEAM_ID}}
+        run: npm run test

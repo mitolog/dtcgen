@@ -7,10 +7,16 @@ import {
   ColorStyleConfig,
   Styles,
   ColorComponents,
+  StyleType
 } from '../../domain/Entities';
 
 export interface IFigmaPresenter {
   translateToStyle(nodes: object[], styleConfig: StyleConfig): Styles;
+}
+
+export enum FigmaColorType {
+  fill = 'SOLID',
+  image = 'IMAGE'
 }
 
 @injectable()
@@ -20,38 +26,31 @@ export class FigmaPresenter implements IFigmaPresenter {
 
     // translate colors
     const colorStyleConfig: ColorStyleConfig = styleConfig.colorStyleConfig;
-    if (colorStyleConfig) {
-      styles.colors = this.translateColor(nodes, colorStyleConfig);
+    if (colorStyleConfig != null && colorStyleConfig.isEnabled) {
+      styles.colors = this.translateColor(nodes);
     }
     return styles;
   }
 
-  private translateColor(
-    nodes: object[],
-    colorStyleConfig: ColorStyleConfig,
-  ): Color[] | null {
-    const keywords = colorStyleConfig.keywords || null;
-    if (!keywords || keywords.length <= 0) return null;
+  private translateColor(nodes: object[]): Color[] | null {
 
     const colorNodes = nodes.filter(node => {
-      const type = _.get(node, 'document.type', null);
-      const name = _.get(node, 'document.name', null);
+      const type = _.get(node, 'document.style_type', null);
+      const name = _.get(node, 'document.style_name', null);
       if (!type || !name) return false;
 
-      const matchOption: string = colorStyleConfig.caseSensitive ? 'i' : '';
-      const matches = keywords.filter(keyword => {
-        return name.match(new RegExp(keyword, matchOption));
-      });
-      return type === 'RECTANGLE' && matches && matches.length > 0;
+      const colorFill = _.get(node, 'document.fills[0]', null);
+      if (!colorFill || colorFill['type'] != FigmaColorType.fill) return false;
+
+      return type === StyleType.fill;
     });
 
     const colors: Color[] = colorNodes.map(node => {
       const figmaColor = _.get(node, 'document.fills[0].color', null);
-      const name = _.get(node, 'document.name', uuidv4());
+      const name = _.get(node, 'document.style_name', uuidv4());
       if (!figmaColor) {
         throw new Error('figma json structure may be changed?');
       }
-
       const fill = new ColorComponents({
         red: figmaColor['r'] || 0,
         blue: figmaColor['b'] || 0,

@@ -124,13 +124,13 @@ export class FigmaRepository implements IFigmaRepository {
     }
   }
 
-  /// even if config.extension is pdf/svf, `extractImages` extract png, cause it's not vector data.
   async extractImages(config: SliceConfig): Promise<void> {
     if (!config) {
       throw new Error('no `sliceConfig` parameter is set.');
     }
     var imageFillsResult: AxiosResponse<any> = null;
     try {
+      // retrieve all image resources within the figma file.
       imageFillsResult = await axios(this.figmaConfig.imageFillsConfig());
     } catch (error) {
       throw new Error(error);
@@ -184,21 +184,27 @@ export class FigmaRepository implements IFigmaRepository {
   }
 
   async extractStyles(config: StyleConfig): Promise<object[]> {
-    // retreave all styles
+    // retreave all team styles
     const stylesResult = await axios(
       this.figmaConfig.stylesConfig(config.teamId),
     );
     const styles = _.get(stylesResult, 'data.meta.styles', null);
-    if (!styles || !config.styles) {
-      return;
+    if (!styles) {
+      return [];
     }
 
+    return await this.extractFilesOfNodesByStyles(styles);
+  }
+
+  /// extract all files that consist of nodes that styles are originally defined
+  private async extractFilesOfNodesByStyles(styles: object[]): Promise<object[]> {
+
     const styleMap: { [s: string]: GetNodesParams[] } = {};
-    styles.forEach(element => {
+    styles.forEach(style => {
       const param: GetNodesParams = {
-        fileKey: element['file_key'],
-        nodeId: element['node_id'],
-        name: element['name'],
+        fileKey: style['file_key'],
+        nodeId: style['node_id'],
+        name: style['name'],
       };
       const fileKey = param.fileKey;
       const params = styleMap[fileKey];
@@ -209,8 +215,6 @@ export class FigmaRepository implements IFigmaRepository {
       }
     });
 
-    const pathManager = new PathManager(config.outputDir);
-
     // Get nodes per file
     const files: object[] = [];
     for (const fileKey of Object.keys(styleMap)) {
@@ -218,15 +222,24 @@ export class FigmaRepository implements IFigmaRepository {
       const nodesResult = await axios(this.figmaConfig.nodesConfig(params));
       const jsonData = nodesResult.data || null;
       if (!jsonData) continue;
-      const fileName = jsonData['name'] || null;
-      const filePath = pathManager.getOutputPath(
-        OutputType.figmaLibraries,
-        true,
-        OSType.ios,
-        fileName,
-      );
+
+      // combine style fields into original nodes here
+      const nodes = jsonData['nodes'];
+      if (!nodes) continue;
+      for (let [key, value] of Object.entries(nodes)) {
+        let node = value['document'];
+        if(!node) continue;
+        const matchedStyle = styles.find(style =>
+          style['file_key'] === fileKey && style['node_id'] === node['id']
+        );
+        if (matchedStyle) {
+          node['style_name'] = matchedStyle['name'];
+          node['style_type'] = matchedStyle['style_type'];
+          nodes[key]['document'] = node;
+        }
+      }
+
       files.push(jsonData);
-      await fs.writeFile(filePath, JSON.stringify(jsonData));
     }
     return files;
   }
@@ -256,7 +269,7 @@ export class FigmaRepository implements IFigmaRepository {
     const imageUrlsObj: Object = _.get(response, keyPathToImages, null);
     if (!imageUrlsObj) return null;
 
-    const scale = response.config.params['scale'];
+    const scale = _.get(response, 'config.params.scale', null);
 
     const getS3Promises: AxiosPromise[] = [];
     for (const id of Object.keys(imageUrlsObj)) {

@@ -1,7 +1,7 @@
 import { IFigmaRepository } from '../repositories/IFigmaRepository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types';
-import { StyleConfig, Styles } from '../../domain/Entities';
+import { StyleConfig, Styles, StyleType } from '../../domain/Entities';
 import { IStyleUseCase } from '../../domain/Domain';
 import { IFigmaPresenter } from '../presenters/FigmaPresenter';
 
@@ -19,10 +19,15 @@ export class StyleUseCase implements IStyleUseCase {
   }
 
   async handle(config: StyleConfig): Promise<Styles> {
-    // extract
-    const figmaFiles: object[] = await this.repository.extractStyles(config);
-    // translate
     const styles = new Styles();
+    if(!config.styles) return styles;
+
+    // You can retrieve a json that includes nodes used for each styles defined on team library.
+    // The style includes not only colors but also texts and effects.
+    // You can distinct style type by `style_type`
+    const figmaFiles: object[] = await this.repository.extractStyles(config);
+
+    // translate to color style if enabled
     for (const file of figmaFiles) {
       const nodes = file['nodes'];
       if (!nodes) continue;

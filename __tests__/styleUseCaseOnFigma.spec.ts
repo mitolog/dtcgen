@@ -53,7 +53,6 @@ describe('tests for styleUseCase on Figma', () => {
   });
 
   afterEach(() => {
-    // await new Promise(resolve => setTimeout(resolve, 1000));
     process.env = OLD_ENV;
   });
 
@@ -74,12 +73,11 @@ describe('tests for styleUseCase on Figma', () => {
       });
     });
 
-    test('if both OUTPUT_PATH and outputDir is not set properly, it shuold throw an error', () => {
+    test('even if both OUTPUT_PATH and outputDir are not set, no effect to StyleUseCase', () => {
       process.env.OUTPUT_PATH = '';
       styleConfig.outputDir = null;
-      expect.assertions(1);
-      return usecase.handle(styleConfig).catch(error => {
-        expect(error).not.toBeNull();
+      return usecase.handle(styleConfig).then(styles => {
+        expect(styles).not.toBeNull();
       });
     });
   });
