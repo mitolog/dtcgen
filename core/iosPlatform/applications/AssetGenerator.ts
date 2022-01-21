@@ -298,7 +298,7 @@ export class AssetGenerator {
       images.push({ fileName: parsed.base.replace(/\s+/g, '') });
     } else {
       for (const scale of scales) {
-        const scaleSuffix = scale === 1 ? '' : '@' + scale + 'x';
+        const scaleSuffix = '@' + scale + 'x';
         const fileName =
           assetName.replace(/@[1-9]x$/gi, scaleSuffix) + parsed.ext;
         images.push({ fileName: fileName, scale: scale + 'x' });
