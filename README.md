@@ -56,6 +56,26 @@ Assuming you want to retrieve icons as xcassets-ready files, and icons have defi
 | --------------- | ------- | ------------------------------------------------------------ |
 | color.isEnabled | boolean | set true if you want to extract and generate color xcassets. |
 
+## Templates
+
+All templates use `namespace` . You can modify templates as you like once you get your own templates folder created automatically after first command execution. You can specify your own template folder by `.env` file.
+
+### slice
+
+- [iconName.imageset](https://github.com/mitolog/dtcgen/blob/master/templates/ios/XcodeProjectTemplate/projectName/Assets.xcassets/intermediateDirectory/iconName.imageset)
+  - universal
+  - if `extension` is png, create multiple scaled images from 1x to 4x as specified by `scales` .
+  - if `extension` is svg or pdf, it will check `Preserve Vector Data` .
+
+\*) If something wrong, deleting `OUTPUT_PATH/extracted` folder would fix the issue ( `OUTPUT_PATH` is defined in `.env` ).
+
+### style
+
+- [colorName.colorset](https://github.com/mitolog/dtcgen/tree/master/templates/ios/XcodeProjectTemplate/projectName/Assets.xcassets/intermediateDirectory/colorName.colorset)
+  - universal
+  - use srgb
+  - support Any appearance / Dark mode
+
 ## Changelog
 
 https://github.com/mitolog/dtcgen/blob/master/Changelog.md
