@@ -1,3 +1,7 @@
+## v1.0.1
+
+- fix scale issue on `slice` command https://github.com/mitolog/dtcgen/issues/62
+
 ## v1.0.0
 
 - upgrade yarn modules
